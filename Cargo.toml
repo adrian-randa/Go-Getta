@@ -1,0 +1,11 @@
+[package]
+name = "go_getta"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+diesel = { version = "2.2.8", features = ["sqlite", "returning_clauses_for_sqlite_3_35"]}
+dotenvy = "0.15.7"
+tokio = "1.44.0"
+uuid = { version = "1.15.1", features = ["v4"]}
+warp = "0.3.7"
