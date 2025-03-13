@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link rel="stylesheet" href="style.css">
+    
+    <title>Go Getta</title>
+</head>
+<body>
+    <script>
+        function test() {
+            console.log("Hi")
+        }
+    </script>
+
+    <div class="sidebar left">
+        <div class="logoContainer">
+            <svg viewBox="0 0 53 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M26.2727 2L2.27273 15.0909V26V36.9091M26.2727 2L50.2727 15.0909V26V36.9091M26.2727 2V26M2.27273 36.9091L26.2727 50L50.2727 36.9091M2.27273 36.9091L26.2727 26M50.2727 36.9091L26.2727 26" stroke="var(--gray)" stroke-width="4" stroke-linejoin="round"/>
+                <path d="M38.2727 26H50.2727V36.9091L26.2727 50L2.27273 36.9091V15.0909L26.2727 2L38.2727 8.54545" stroke="var(--green)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+
+            <h1>G<span>o</span> G<span>etta</span></h1>
+        </div>
+
+        <separator></separator>
+    
+        <div class="feedSelector">
+            <button selected type="button" onclick="test()">Public Space</button>
+            <button type="button" onclick="test()">Following</button>
+        </div>
+
+        <separator></separator>
+
+        <div class="myRooms" id="myRooms">
+            <h5>My Rooms</h5>
+
+            <button style="--room-color: yellow;">
+                <strip></strip>
+                <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M1 11.5L8 15L15 11.5V4.5L8 1L1 4.5V11.5Z" stroke="var(--room-color)" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M1 11.5L8 8M8 8L15 11.5M8 8V1" stroke="var(--room-color)" stroke-opacity="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span>My Room #1 asd asd asda sdads asd asd asd asd </span>
+            </button>
+        </div>
+
+        <div class="searchContainer">
+            <div class="searchBar">
+                <svg viewBox="0 0 15 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M1 17L6.20984 9.70622M6.20984 9.70622C6.99614 10.2689 7.9594 10.6 9 10.6C11.651 10.6 13.8 8.45097 13.8 5.8C13.8 3.14903 11.651 1 9 1C6.34903 1 4.2 3.14903 4.2 5.8C4.2 7.41037 4.99302 8.83551 6.20984 9.70622Z" stroke="var(--gray)" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                
+                <input placeholder="Search..." type="text" name="searchTerm" id="searchBar">
+            </div>
+        </div>
+    </div>
+
+    <div class="sidebar right"></div>
+</body>
+</html>
