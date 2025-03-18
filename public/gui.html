@@ -58,6 +58,37 @@
         </div>
     </div>
 
-    <div class="sidebar right"></div>
+    <div class="sidebar right">
+        <a class="currentUser" href="#">
+            <svg viewBox="0 0 16 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M3.8 7.875V9.25L9.4 12L15 9.25V3.75L9.4 1L3.8 3.75V5.125M6.6 6.5H1M1 6.5L2.4 5.8125M1 6.5L2.4 7.1875" stroke="var(--red-50)" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <div class="textContainer">
+                <h2>User123456789</h2>
+                <p>Click to edit profile</p>
+            </div>
+            <div class="profilePicture" id="currentUserProfilePicture"></div>        
+        </a>
+
+        <div class="notifications">
+            <div class="titleBar">
+                <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M6.25 13.25V14.125L8 15L9.75 14.125V13.25M8 1L2.75 4.5L1 11.5H8H15L13.25 4.5L8 1Z" stroke="var(--gray)" stroke-linejoin="round"/>
+                </svg>
+                <h5>Notifications</h5>
+            </div>
+
+            <div class="notification">
+                <div class="topBar">
+                    <h6>2025/01/01 12:45</h6>
+                    <svg viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M1 1L5 5L9 9M9 1L1 9" stroke="var(--gray)" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+
+                <a href="#">User12345678 just liked your post!</a>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
