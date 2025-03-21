@@ -37,14 +37,16 @@
         <div class="myRooms" id="myRooms">
             <h5>My Rooms</h5>
 
-            <button style="--room-color: yellow;">
-                <strip></strip>
-                <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M1 11.5L8 15L15 11.5V4.5L8 1L1 4.5V11.5Z" stroke="var(--room-color)" stroke-linecap="round" stroke-linejoin="round"/>
-                    <path d="M1 11.5L8 8M8 8L15 11.5M8 8V1" stroke="var(--room-color)" stroke-opacity="0.25" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-                <span>My Room #1 asd asd asda sdads asd asd asd asd </span>
-            </button>
+            <template id="roomButtonTemplate">
+                <button style="--room-color: var(--white);">
+                    <strip></strip>
+                    <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M1 11.5L8 15L15 11.5V4.5L8 1L1 4.5V11.5Z" stroke="var(--room-color)" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M1 11.5L8 8M8 8L15 11.5M8 8V1" stroke="var(--room-color)" stroke-opacity="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>Room Name</span>
+                </button>
+            </template>
+
         </div>
 
         <div class="searchContainer">
@@ -78,91 +80,121 @@
                 <h5>Notifications</h5>
             </div>
 
-            <div class="notification">
-                <div class="topBar">
-                    <h6>2025/01/01 12:45</h6>
-                    <svg viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M1 1L5 5L9 9M9 1L1 9" stroke="var(--gray)" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
+            <template id="notificationTemplate">
+                <div class="notification">
+                    <div class="topBar">
+                        <h6>1900/01/01 00:00</h6>
+                        <svg viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M1 1L5 5L9 9M9 1L1 9" stroke="var(--gray)" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+    
+                    <a href="#">Notification text</a>
                 </div>
+            </template>
 
-                <a href="#">User12345678 just liked your post!</a>
-            </div>
         </div>
+
+        <button class="newRoom">
+            <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M1 11.5L8 15L15 11.5V4.5L8 1L1 4.5V11.5Z" stroke="#FCF7F8" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M1 11.5L8 8M8 8L15 11.5M8 8V1" stroke="#FCF7F8" stroke-opacity="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            New Room            
+        </button>
+    
+        <button class="newPost">
+            <svg viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M5 1V5M5 9V5M5 5H1M5 5H9" stroke="var(--white)" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            
+            New Post            
+        </button>
     </div>
 
-    <div class="mainContent">
-        <div class="post">
-            <div class="topBar">
-                <a class="userDisplay" href="#">
-                    <div class="profilePicture"></div>
-                    <div class="textContainer">
-                        <h4>User12345678</h4>
-                        <h5>@user12345678</h5>
+    <div class="mainContent" style="--room-color: #33fcda;">
+        <template id="postTemplate">
+            <div class="post">
+                <div class="topBar">
+                    <a class="userDisplay" href="#">
+                        <div class="profilePicture"></div>
+                        <div class="textContainer">
+                            <h4>User</h4>
+                            <h5>@user</h5>
+                        </div>
+                    </a>
+                    <div class="timestamp">
+                        <h5>1900/01/01</h5>
+                        <h5>00:00</h5>
                     </div>
-                </a>
-                <div class="timestamp">
-                    <h5>2025/01/01</h5>
-                    <h5>21:55</h5>
+                </div>
+                <div class="content">
+                    Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
+                </div>
+                <div class="appendages">
+                </div>
+                <div class="interactionBar">
+                    <div class="rating">
+                        <button>
+                            <svg viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M5 1L1 5V9L9 17L17 9V5L13 1L9 5L5 1Z" stroke="var(--green)" stroke-opacity="0.5" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>                        
+                        </button>
+                        <h5>0</h5>
+                        <button>
+                            <svg viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M13 1L9 5L5 1L1 5V9L3 11M17 5V9L9 17L7 15M2.33333 15.6667L17 1" stroke="var(--red)" stroke-opacity="0.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>                        
+                        </button>
+                    </div>
+                    <separator></separator>
+                    <button class="comment">
+                        <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M1 4.5V9.75L2.75 10.625L1 15L6.25 12.375L8 13.25L15 9.75V4.5L8 1L1 4.5Z" stroke="var(--gray)" stroke-linejoin="round"/>
+                        </svg>
+                        <h5>0</h5>                    
+                    </button>
+                    <separator></separator>
+                    <button class="share">
+                        <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M1 15V8L15 1M15 1H9.75M15 1L13.25 4.5" stroke="var(--gray)" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        <h5>0</h5>
+                    </button>
+                    <separator></separator>
+                    <button class="repost">
+                        <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M4.5 13.25L8 15L15 11.5V4.5L13.25 3.625M4.5 13.25V15M4.5 13.25L6.25 12.375M2.75 12.375L1 11.5V4.5L8 1L11.5 2.75M11.5 2.75V1M11.5 2.75L9.75 3.625" stroke="var(--gray)" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        <h5>0</h5>                    
+                    </button>
+                    <separator></separator>
+                    <button class="bookmark">
+                        <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M13.5 1L10 2.75V15L6.5 11.5L3 15V2.75L6.5 1" stroke="var(--gray)" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        <h5>0</h5>                    
+                    </button>
+                    <spacer></spacer>
+                    <button class="delete">
+                        <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M4.5 13.25L8 15L15 11.5V4.5L11.5 2.75M4.5 13.25L1 11.5V4.5L8 1L11.5 2.75M4.5 13.25L11.5 2.75" stroke="var(--red)" stroke-opacity="0.5"/>
+                        </svg>
+                        <h5>Delete</h5>               
+                    </button>
                 </div>
             </div>
-            <div class="content">
-                Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
+        </template>
+
+        <template id="roomHeadingTemplate">
+            <div class="roomHeading">
+                <img src="https://utopia.de/app/uploads/2022/09/roter-panda-cc0-pixabay-pexels-220910.jpg" alt="Room Banner">
+                <div class="gradient"></div>
+                <h1>Room Name</h1>
+                <h2>Lorem ipsum dolor sit amet consectetur adipisicing elit. Vel, quis.</h2>
             </div>
-            <div class="appendages">
-                <img src="https://www.zoo-berlin.de/fileadmin/_processed_/5/3/csm_Roter_Panda_-_Ruby_2__4ff3fc5b7a.jpg" alt="pic1">
-            </div>
-            <div class="interactionBar">
-                <div class="rating">
-                    <button>
-                        <svg viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M5 1L1 5V9L9 17L17 9V5L13 1L9 5L5 1Z" stroke="var(--green)" stroke-opacity="0.5" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>                        
-                    </button>
-                    <h5>123</h5>
-                    <button>
-                        <svg viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M13 1L9 5L5 1L1 5V9L3 11M17 5V9L9 17L7 15M2.33333 15.6667L17 1" stroke="var(--red)" stroke-opacity="0.5" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>                        
-                    </button>
-                </div>
-                <separator></separator>
-                <button class="comment">
-                    <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M1 4.5V9.75L2.75 10.625L1 15L6.25 12.375L8 13.25L15 9.75V4.5L8 1L1 4.5Z" stroke="var(--gray)" stroke-linejoin="round"/>
-                    </svg>
-                    <h5>123</h5>                    
-                </button>
-                <separator></separator>
-                <button class="share">
-                    <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M1 15V8L15 1M15 1H9.75M15 1L13.25 4.5" stroke="var(--gray)" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                    <h5>123</h5>
-                </button>
-                <separator></separator>
-                <button class="repost">
-                    <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M4.5 13.25L8 15L15 11.5V4.5L13.25 3.625M4.5 13.25V15M4.5 13.25L6.25 12.375M2.75 12.375L1 11.5V4.5L8 1L11.5 2.75M11.5 2.75V1M11.5 2.75L9.75 3.625" stroke="var(--gray)" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                    <h5>123</h5>                    
-                </button>
-                <separator></separator>
-                <button class="bookmark">
-                    <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M13.5 1L10 2.75V15L6.5 11.5L3 15V2.75L6.5 1" stroke="var(--gray)" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                    <h5>123</h5>                    
-                </button>
-                <spacer data-flex="1"></spacer>
-                <button class="delete">
-                    <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M4.5 13.25L8 15L15 11.5V4.5L11.5 2.75M4.5 13.25L1 11.5V4.5L8 1L11.5 2.75M4.5 13.25L11.5 2.75" stroke="var(--red)" stroke-opacity="0.5"/>
-                    </svg>
-                    <h5>Delete</h5>               
-                </button>
-            </div>
-        </div>
+        </template>
+
     </div>
 </body>
 </html>
