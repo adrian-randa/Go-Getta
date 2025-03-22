@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | Go Getta</title>
+
+    <link rel="stylesheet" href="login.css">
+</head>
+<body>
+    <form action="" method="" id="landingForm">
+        <div class="logoContainer">
+            <svg viewBox="0 0 53 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M26.2727 2L2.27273 15.0909V26V36.9091M26.2727 2L50.2727 15.0909V26V36.9091M26.2727 2V26M2.27273 36.9091L26.2727 50L50.2727 36.9091M2.27273 36.9091L26.2727 26M50.2727 36.9091L26.2727 26" stroke="var(--gray)" stroke-width="4" stroke-linejoin="round"/>
+                <path d="M38.2727 26H50.2727V36.9091L26.2727 50L2.27273 36.9091V15.0909L26.2727 2L38.2727 8.54545" stroke="var(--green)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+
+            <h1>G<span>o</span> G<span>etta</span></h1>
+        </div>
+        <separator></separator>
+        <div class="landingButtons">
+            <button class="highlighted">Create account with key</button>
+            or
+            <button>Login</button>
+        </div>
+    </form>
+
+    <form action="login" method="post" id="loginForm" style="display: none;">
+        <input type="text" name="username" id="loginUsername" placeholder="@username">
+        <input type="password" name="password" id="loginPassword" placeholder="password">
+
+        <button type="submit" class="highlighted weak">Login</button>
+
+        <button class="plain">Create account with key instead</button>
+    </form>
+
+    <form action="createAccount" method="post" id="createAccountForm" style="display: none;">
+        <input type="text" name="accountCreationKey" id="accountCreationKey" placeholder="Enter account creation key">
+        <input type="text" name="accountCreationUsername" id="accountCreationUsername" placeholder="@username">
+        <input type="password" name="accountCreationPassword" id="accountCreationPassword" placeholder="Password">
+        <input type="password" name="accountCreationRepeatPassword" id="accountCreationRepeatPassword" placeholder="Repeat password">
+
+        <button type="submit" class="highlighted weak">Create account</button>
+        <button class="plain">Login with existing account instead</button>
+    </form>
+</body>
+</html>
