@@ -1,0 +1,5 @@
+-- Your SQL goes here
+CREATE TABLE account_keys (
+    key VARCHAR(32) NOT NULL PRIMARY KEY,
+    used BOOLEAN NOT NULL DEFAULT FALSE
+)
