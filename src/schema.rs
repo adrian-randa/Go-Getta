@@ -11,7 +11,7 @@ diesel::table! {
     sessions (id) {
         id -> Text,
         username -> Text,
-        timestamp -> Nullable<Integer>,
+        timestamp -> Nullable<BigInt>,
     }
 }
 

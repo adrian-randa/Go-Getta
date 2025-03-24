@@ -1,4 +1,7 @@
+use std::time;
+
 use diesel::{prelude::*, sqlite};
+use uuid::Uuid;
 
 #[derive(Debug, Queryable, Selectable, Insertable)]
 #[diesel(table_name = crate::schema::account_keys)]
@@ -37,5 +40,17 @@ impl User {
 pub struct Session {
     id: String,
     username: String,
-    timestamp: Option<i32>
+    timestamp: Option<i64>
+}
+
+impl Session {
+
+    pub fn open_for_user(user: User, expires: bool) -> Self {
+        Self {
+            id: Uuid::new_v4().to_string(),
+            username: user.username,
+            timestamp: if expires {Some(time::UNIX_EPOCH.elapsed().unwrap().as_secs().try_into().unwrap())} else {None}
+        }
+    }
+    
 }
