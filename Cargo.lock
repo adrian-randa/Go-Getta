@@ -395,6 +395,7 @@ dependencies = [
  "diesel",
  "diesel_migrations",
  "dotenvy",
+ "serde",
  "tokio",
  "uuid",
  "warp",
