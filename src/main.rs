@@ -7,7 +7,7 @@ use uuid::*;
 
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 
-use go_getta::{create_account::create_account, db::{establish_connection, with_db_connection}, login::*, models::*, render::render};
+use go_getta::{create_account::create_account, db::{establish_connection, scan_for_keys, with_db_connection}, login::*, models::*, render::render};
 
 
 pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("./migrations/");
@@ -16,6 +16,8 @@ pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("./migrations/");
 async fn main() {
     let connection = establish_connection();
     connection.lock().await.run_pending_migrations(MIGRATIONS).unwrap();
+
+    scan_for_keys(connection.clone()).await;
 
     let public_route = warp::get()
         .and(warp::any())
@@ -44,7 +46,9 @@ async fn main() {
 
     
     let routes = public_route
-        .or(main_route);
+        .or(main_route)
+        .or(login_route)
+        .or(create_account_route);
 
     select! {
         _ = warp::serve(routes).run(([0, 0, 0, 0], 7500)) => (),
