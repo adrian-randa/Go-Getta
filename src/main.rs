@@ -2,12 +2,12 @@ use diesel::{associations::HasTable, prelude::*};
 use dotenvy::dotenv;
 use tokio::select;
 use warp::Filter;
-use std::{collections::HashMap, env, fs, sync::Arc};
+use std::{collections::HashMap, env, fs, ops::DerefMut, sync::Arc};
 use uuid::*;
 
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 
-use go_getta::{create_account::create_account, db::{establish_connection, scan_for_keys, with_db_connection}, login::*, models::*, pages::{with_page_store, PageStore}, render::render};
+use go_getta::{api::who_am_i, clean_database, create_account::create_account, db::{establish_connection, scan_for_keys, with_db_connection}, login::*, models::*, pages::{with_page_store, PageStore}, render::render, schema::sessions::{self, timestamp}};
 
 
 pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("./migrations/");
@@ -18,6 +18,7 @@ async fn main() {
     connection.lock().await.run_pending_migrations(MIGRATIONS).unwrap();
 
     scan_for_keys(connection.clone()).await;
+    clean_database(connection.clone()).await;
 
     let page_store = PageStore::init();
 
@@ -47,11 +48,27 @@ async fn main() {
         .and(with_db_connection(connection.clone()))
         .and_then(create_account);
 
+    let who_am_i_route = warp::get()
+        .and(warp::path("api"))
+        .and(warp::path("who_am_i"))
+        .and(warp::path::end())
+        .and(warp::header::headers_cloned())
+        .and(with_db_connection(connection.clone()))
+        .and_then(who_am_i);
+
+    dotenv().ok();
+
+    let storage_route = warp::get()
+        .and(warp::path("storage"))
+        .and(warp::fs::dir(env::var("STORAGE_URL").unwrap()));
+
     
     let routes = public_route
         .or(main_route)
         .or(login_route)
-        .or(create_account_route);
+        .or(create_account_route)
+        .or(who_am_i_route)
+        .or(storage_route);
 
     select! {
         _ = warp::serve(routes).run(([0, 0, 0, 0], 7500)) => (),

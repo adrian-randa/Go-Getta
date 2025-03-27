@@ -45,6 +45,18 @@ impl User {
     pub fn verify_password(&self, password: String) -> Result<bool, bcrypt::BcryptError> {
         bcrypt::verify(password, &self.password)
     }
+
+    pub fn get_username(&self) -> String {
+        self.username.clone()
+    }
+
+    pub fn get_public_name(&self) -> String {
+        self.public_name.clone()
+    }
+
+    pub fn get_biography(&self) -> String {
+        self.biography.clone()
+    }
 }
 
 #[derive(Debug, Queryable, Insertable, Selectable, Associations, Identifiable)]

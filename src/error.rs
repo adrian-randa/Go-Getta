@@ -15,3 +15,7 @@ impl Reject for InvalidPasswordError {}
 #[derive(Debug)]
 pub struct InternalServerError;
 impl Reject for InternalServerError {}
+
+#[derive(Debug)]
+pub struct InvalidSessionError;
+impl Reject for InvalidSessionError {}

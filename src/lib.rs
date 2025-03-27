@@ -16,6 +16,8 @@ pub mod db;
 pub mod login;
 pub mod create_account;
 
+pub mod api;
+
 
 pub async fn validate_session_from_headers(headers: &warp::http::HeaderMap, connection: DBConnection) -> Option<User> {
     let cookie_jar = headers.get("cookie")?.to_str().ok()?.to_string();
@@ -42,6 +44,10 @@ pub async fn validate_session_from_headers(headers: &warp::http::HeaderMap, conn
     }
 
     None
+}
+
+pub async fn clean_database(connection: DBConnection) {
+    diesel::delete(FilterDsl::filter(sessions::table, timestamp.is_not_null())).execute(connection.lock().await.deref_mut()).unwrap();
 }
 
 pub fn extract_cookie(cookie_jar: String, key: String) -> Option<String> {

@@ -14,7 +14,6 @@ pub struct AccountCreationCredentials {
 }
 
 pub async fn create_account(credentials: AccountCreationCredentials, connection: DBConnection) -> Result<impl warp::Reply, warp::Rejection> {
-
     // To avoid race conditions, we will lock the connection first and only release the lock at the very end
     let mut connection_lock = connection.lock().await;
     let connection_lock = connection_lock.deref_mut();
