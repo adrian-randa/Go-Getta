@@ -1,17 +1,18 @@
 use std::{ops::DerefMut, time};
 
 use db::DBConnection;
-use diesel::prelude::*;
+use diesel::{prelude::*, query_dsl::methods::FilterDsl};
 use models::{Session, User};
-use schema::{sessions, users};
+use schema::{sessions::{self, id, timestamp}, users};
 
 pub mod models;
 pub mod schema;
 
 pub mod error;
-
 pub mod render;
+pub mod pages;
 pub mod db;
+
 pub mod login;
 pub mod create_account;
 
@@ -30,6 +31,9 @@ pub async fn validate_session_from_headers(headers: &warp::http::HeaderMap, conn
         .first(connection_lock).ok()?;
 
     if session.get_timestamp().is_none_or(|t| now - t <= 600)  {
+        // Renew session timeout
+        let _ = diesel::update(FilterDsl::filter(sessions::table, id.eq(session.get_id()))).set(timestamp.eq(now));
+
         return Some(
             users::table
                 .find(session.get_username())

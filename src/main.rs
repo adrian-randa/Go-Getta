@@ -7,7 +7,7 @@ use uuid::*;
 
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 
-use go_getta::{create_account::create_account, db::{establish_connection, scan_for_keys, with_db_connection}, login::*, models::*, render::render};
+use go_getta::{create_account::create_account, db::{establish_connection, scan_for_keys, with_db_connection}, login::*, models::*, pages::{with_page_store, PageStore}, render::render};
 
 
 pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("./migrations/");
@@ -19,6 +19,8 @@ async fn main() {
 
     scan_for_keys(connection.clone()).await;
 
+    let page_store = PageStore::init();
+
     let public_route = warp::get()
         .and(warp::any())
         .and(warp::fs::dir("./public"));
@@ -27,6 +29,7 @@ async fn main() {
         .and(warp::path::end())
         .and(warp::header::headers_cloned())
         .and(warp::query::<HashMap<String, String>>())
+        .and(with_page_store(page_store.clone()))
         .and(with_db_connection(connection.clone()))
         .and_then(render);
 

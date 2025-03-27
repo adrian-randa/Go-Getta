@@ -6,6 +6,8 @@
     <title>Login | Go Getta</title>
 
     <link rel="stylesheet" href="login.css">
+
+    <script defer src="login.js"></script>
 </head>
 <body>
     <form action="" method="" id="landingForm">
@@ -28,17 +30,21 @@
     <form action="login" method="post" id="loginForm" style="display: none;">
         <input type="text" name="username" id="loginUsername" placeholder="@username">
         <input type="password" name="password" id="loginPassword" placeholder="password">
+        <div class="expiresButton">
+            <input type="checkbox" name="expires" id="loginExpires">
+            <label for="loginExpires">Remember Me</label>
+        </div>
 
         <button type="submit" class="highlighted weak">Login</button>
 
         <button class="plain">Create account with key instead</button>
     </form>
 
-    <form action="createAccount" method="post" id="createAccountForm" style="display: none;">
-        <input type="text" name="accountCreationKey" id="accountCreationKey" placeholder="Enter account creation key">
-        <input type="text" name="accountCreationUsername" id="accountCreationUsername" placeholder="@username">
-        <input type="password" name="accountCreationPassword" id="accountCreationPassword" placeholder="Password">
-        <input type="password" name="accountCreationRepeatPassword" id="accountCreationRepeatPassword" placeholder="Repeat password">
+    <form action="create_account" method="post" id="createAccountForm" style="display: none;">
+        <input type="text" name="key" id="accountCreationKey" placeholder="Enter account creation key">
+        <input type="text" name="username" id="accountCreationUsername" placeholder="@username">
+        <input type="password" name="password" id="accountCreationPassword" placeholder="Password">
+        <input type="password" name="repeat_password" id="accountCreationRepeatPassword" placeholder="Repeat password">
 
         <button type="submit" class="highlighted weak">Create account</button>
         <button class="plain">Login with existing account instead</button>

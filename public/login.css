@@ -166,6 +166,32 @@ form {
         color: var(--white);
         padding-left: 1rem;
     }
+
+    input:invalid {
+        border-bottom: 1px solid var(--red);
+        color: var(--red);
+    }
+
+    .expiresButton {
+        margin: 1rem;
+
+        width: calc(100% - 2rem);
+        height: 2rem;
+
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+
+        color: var(--gray);
+        
+        input[type=checkbox] {
+            margin: 0;
+            
+            width: auto;
+            height: 1rem;
+        }
+    }
+
 }
 
 form#loginForm, form#createAccountForm {
