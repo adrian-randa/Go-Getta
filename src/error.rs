@@ -19,3 +19,7 @@ impl Reject for InternalServerError {}
 #[derive(Debug)]
 pub struct InvalidSessionError;
 impl Reject for InvalidSessionError {}
+
+#[derive(Debug)]
+pub struct InvalidQueryError;
+impl Reject for InvalidQueryError {}

@@ -4,6 +4,7 @@ use warp::Filter;
 use crate::{db::{with_db_connection, DBConnection}, error::InvalidSessionError, models::User, validate_session_from_headers};
 
 pub mod post;
+pub mod public_space;
 
 #[derive(Debug, Serialize)]
 struct WhoAmIResponse {

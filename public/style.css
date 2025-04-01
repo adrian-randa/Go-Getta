@@ -376,7 +376,7 @@ button {
     border-left: 1px solid var(--gray-25);
 }
 
-.mainContent {
+#mainContent {
     padding-top: 4rem;
 
     width: 700px;
@@ -384,6 +384,10 @@ button {
 
     display: flex;
     flex-direction: column;
+
+    * {
+        background-color: transparent;
+    }
 }
 
 .post {
@@ -712,4 +716,5 @@ button {
     width: 100%;
     display: flex;
     flex-direction: column;
+    gap: 2rem;
 }

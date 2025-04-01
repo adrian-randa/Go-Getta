@@ -9,29 +9,99 @@ fetch("api/who_am_i").then((response) => {
     })
 })
 
+const mainContent = document.querySelector("#mainContent");
 const postScreen = document.querySelector("#postScreen");
 const postCreationScreen = document.querySelector("#postCreation");
+
+const noPaginator = () => {};
+let currentPaginator = noPaginator;
+document.addEventListener("scrolledToBottom", currentPaginator);
 
 function showPostCreationScreen() {
     postScreen.style.display = "none";
     postCreationScreen.style.display = "flex";
+
+    currentPaginator = noPaginator;
 }
 
 function showPostScreen() {
+    postScreen.innerHTML = "";
     postScreen.style.display = "flex";
     postCreationScreen.style.display = "none";
 }
 
 function showRoomCreationScreen() {
     //TODO
+
+    currentPaginator = noPaginator;
 }
 
 function showPublicSpaceScreen() {
     showPostScreen();
+    currentPaginator = initPublicSpacePaginator(mountPosts(postScreen));
+    currentPaginator();
     //TODO
 }
 
 function showFollowingScreen() {
     showPostScreen();
     //TODO
+}
+
+// Scroll to bottom event
+document.addEventListener("scrollend", (event) => {
+    const scrollPos = document.documentElement.scrollTop;
+    const maxScroll = mainContent.offsetHeight - document.documentElement.offsetHeight;
+
+    const tolerance = 50;
+
+    if (maxScroll - scrollPos <= tolerance) {
+        document.dispatchEvent(new CustomEvent("scrolledToBottom"));
+    }
+})
+
+const postTemplate = document.querySelector("#postTemplate");
+console.log(postTemplate)
+const mountPosts = (screen) => {
+    return (posts) => {
+        posts.forEach((post) => {
+            let node = postTemplate.content.cloneNode(true);
+
+            let creatorDisplay = node.querySelector(".userDisplay");
+            creatorDisplay.querySelector("h4").textContent = "User"; //TODO: QUERY PUBLIC NAME
+            creatorDisplay.querySelector("h5").textContent = post.creator;
+            creatorDisplay.querySelector(".profilePicture").style.backgroundImage = `url("/storage/profile_picture/${post.creator}")`
+
+            let timestamp = new Date(post.timestamp * 1000);
+            let [date, fullTime] = timestamp.toISOString().split("T");
+            let [hour, minute] = fullTime.split(":");
+
+            let timestampDisplay = node.querySelector(".timestamp");
+            let [dateDisplay, timeDisplay] = timestampDisplay.querySelectorAll("h5");
+            dateDisplay.textContent = date;
+            timeDisplay.textContent = `${hour}:${minute}`;
+
+
+            node.querySelector(".content").textContent = post.body;
+
+            let ratingDisplay = node.querySelector(".rating");
+            ratingDisplay.querySelector("h5").textContent = post.rating;
+
+            let commentButton = node.querySelector(".comment");
+            commentButton.querySelector("h5").textContent = post.comments;
+
+            let shareButton = node.querySelector(".share");
+            shareButton.querySelector("h5").textContent = post.shares;
+
+            let repostButton = node.querySelector(".repost");
+            repostButton.querySelector("h5").textContent = post.reposts;
+
+            let bookmarkButton = node.querySelector(".bookmark");
+            bookmarkButton.querySelector("h5").textContent = post.bookmarks;
+
+            //TODO: Interactivity
+
+            screen.appendChild(node);
+        })
+    }
 }

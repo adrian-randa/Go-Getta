@@ -1,6 +1,7 @@
 use std::time;
 
 use diesel::{prelude::*, sqlite};
+use serde::{Serialize, Deserialize};
 use uuid::Uuid;
 
 #[derive(Debug, Queryable, Selectable, Insertable)]
@@ -91,7 +92,7 @@ impl Session {
     }
 }
 
-#[derive(Debug, Queryable, Insertable, Selectable, Associations, Identifiable)]
+#[derive(Debug, Queryable, Insertable, Selectable, Associations, Identifiable, Serialize, Deserialize)]
 #[diesel(belongs_to(User, foreign_key = creator))]
 #[diesel(belongs_to(Room, foreign_key = room))]
 #[diesel(belongs_to(Post, foreign_key = parent))]
