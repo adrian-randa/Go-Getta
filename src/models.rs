@@ -61,6 +61,7 @@ impl User {
 
 #[derive(Debug, Queryable, Insertable, Selectable, Associations, Identifiable)]
 #[diesel(belongs_to(User, foreign_key = username))]
+#[diesel(primary_key(id))]
 #[diesel(table_name = crate::schema::sessions)]
 pub struct Session {
     id: String,
@@ -69,7 +70,6 @@ pub struct Session {
 }
 
 impl Session {
-
     pub fn open_for_user(user: User, expires: bool) -> Self {
         Self {
             id: Uuid::new_v4().to_string(),
@@ -88,5 +88,65 @@ impl Session {
 
     pub fn get_timestamp(&self) -> Option<i64> {
         self.timestamp
+    }
+}
+
+#[derive(Debug, Queryable, Insertable, Selectable, Associations, Identifiable)]
+#[diesel(belongs_to(User, foreign_key = creator))]
+#[diesel(belongs_to(Room, foreign_key = room))]
+#[diesel(belongs_to(Post, foreign_key = parent))]
+#[diesel(primary_key(id))]
+#[diesel(table_name = crate::schema::posts)]
+pub struct Post {
+    id: String,
+    creator: String,
+    body: String,
+    timestamp: i64,
+    rating: i32,
+    appendage_id: Option<String>,
+    room: Option<String>,
+    parent: Option<String>,
+    comments: i32,
+    shares: i32,
+    reposts: i32,
+    bookmarks: i32,
+}
+
+impl Post {
+    pub fn new(creator: &User, body: String, appendage_id: Option<String>, room: Option<&Room>, parent: Option<&Post>) -> Self {
+        Post {
+            id: Uuid::new_v4().to_string(), 
+            creator: creator.get_username(), 
+            body,
+            timestamp: time::UNIX_EPOCH.elapsed().unwrap().as_secs().try_into().unwrap(),
+            rating: 0,
+            appendage_id,
+            room: room.map(|r| r.get_id()),
+            parent: parent.map(|p| p.get_id()),
+            comments: 0, shares: 0, reposts: 0, bookmarks: 0
+        }
+    }
+
+    pub fn get_id(&self) -> String {
+        self.id.clone()
+    }
+}
+
+#[derive(Debug, Queryable, Insertable, Selectable, Identifiable)]
+#[diesel(primary_key(id))]
+#[diesel(table_name = crate::schema::rooms)]
+pub struct Room {
+    id: String,
+    name: String,
+    description: String,
+    color: String,
+    date_created: i64,
+    is_private: bool,
+}
+
+impl Room {
+
+    pub fn get_id(&self) -> String {
+        self.id.clone()
     }
 }

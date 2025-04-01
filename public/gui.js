@@ -8,3 +8,30 @@ fetch("api/who_am_i").then((response) => {
         window.localStorage.setItem("currentUser", JSON.stringify(json));
     })
 })
+
+const postScreen = document.querySelector("#postScreen");
+const postCreationScreen = document.querySelector("#postCreation");
+
+function showPostCreationScreen() {
+    postScreen.style.display = "none";
+    postCreationScreen.style.display = "flex";
+}
+
+function showPostScreen() {
+    postScreen.style.display = "flex";
+    postCreationScreen.style.display = "none";
+}
+
+function showRoomCreationScreen() {
+    //TODO
+}
+
+function showPublicSpaceScreen() {
+    showPostScreen();
+    //TODO
+}
+
+function showFollowingScreen() {
+    showPostScreen();
+    //TODO
+}

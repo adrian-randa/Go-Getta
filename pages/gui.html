@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
     <link rel="stylesheet" href="style.css">
-    <script src="gui.js"></script>
+    <script src="gui.js" defer></script>
+    <script src="createPost.js"></script>
     
     <title>Go Getta</title>
 </head>
@@ -29,8 +30,8 @@
         <separator></separator>
     
         <div class="feedSelector">
-            <button selected type="button" onclick="test()">Public Space</button>
-            <button type="button" onclick="test()">Following</button>
+            <button selected type="button" onclick="showPublicSpaceScreen()">Public Space</button>
+            <button type="button" onclick="showFollowingScreen()">Following</button>
         </div>
 
         <separator></separator>
@@ -104,7 +105,7 @@
             New Room            
         </button>
     
-        <button class="newPost">
+        <button class="newPost" onclick="showPostCreationScreen()">
             <svg viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M5 1V5M5 9V5M5 5H1M5 5H9" stroke="var(--white)" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
@@ -195,6 +196,47 @@
                 <h2>Lorem ipsum dolor sit amet consectetur adipisicing elit. Vel, quis.</h2>
             </div>
         </template>
+
+        <screen id="postCreation" style="display: none;">
+            <h1>New Post</h1>
+            <textarea name="body" id="newPostBody" placeholder="Enter your thoughts here..."></textarea>
+            <div class="postSettings">
+                <div class="roomDropdownContainer">
+                    Post in...
+                    <select name="room" id="newPostRoom" style="--color: var(--white);">
+                        <option value="" selected>Public Space</option>
+                    </select>
+                </div>
+                <div class="addMediaContainer">
+                    Add Media
+                    <div class="buttonsContainer">
+                        <button id="newPostAddVisual">
+                            <svg viewBox="0 0 18 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M15 9H17V1H5M1 10V3H13V11H3L1 10Z" stroke="var(--white)" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>                                
+                        </button>
+                        <button id="newPostAddAudio">
+                            <svg viewBox="0 0 18 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M1 5.5V8.5M3 4V10M5 5.5V8.5M7 1V13M9 4V10M11 2.5V11.5M13 5.5V8.5M15 4V10M17 5.5V8.5" stroke="var(--white)" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>                                
+                        </button>
+                    </div>
+                </div>
+                <spacer></spacer>
+                <div class="postButton">
+                    Post
+                    <button id="newPostSubmitButton" onclick="submitPost()">
+                        <svg viewBox="0 0 18 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M1 8.5V11H3.46154L13.3077 6L14.5385 8.5L17 2.25L9.61539 1L10.8462 3.5L1 8.5Z" stroke="var(--green)" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>                            
+                    </button>
+                </div>
+            </div>
+        </screen>
+
+        <screen id="postScreen">
+            THis is the post screen
+        </screen>
 
     </div>
 </body>
