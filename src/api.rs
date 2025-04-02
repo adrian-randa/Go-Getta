@@ -5,6 +5,7 @@ use crate::{db::{with_db_connection, DBConnection}, error::InvalidSessionError, 
 
 pub mod post;
 pub mod public_space;
+pub mod file_upload;
 
 #[derive(Debug, Serialize)]
 struct WhoAmIResponse {

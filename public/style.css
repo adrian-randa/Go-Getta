@@ -417,7 +417,8 @@ button {
                 width: 2rem;
                 height: 2rem;
 
-                background-color: var(--white);
+                background-size: cover;
+                background-position: center;
 
                 clip-path: var(--hexagon-path);
             }
@@ -458,6 +459,7 @@ button {
     .content {
         padding: .25rem;
         width: calc(100% - .5rem);
+        white-space: pre-line;
     }
 
     .appendages {

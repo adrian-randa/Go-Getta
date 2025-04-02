@@ -23,3 +23,7 @@ impl Reject for InvalidSessionError {}
 #[derive(Debug)]
 pub struct InvalidQueryError;
 impl Reject for InvalidQueryError {}
+
+#[derive(Debug)]
+pub struct InvalidFileError;
+impl Reject for InvalidFileError {}
