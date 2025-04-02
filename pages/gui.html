@@ -202,6 +202,19 @@
         <screen id="postCreation" style="display: none;">
             <h1>New Post</h1>
             <textarea name="body" id="newPostBody" placeholder="Enter your thoughts here..."></textarea>
+            <form enctype="multipart/form-data" id="addMediaForm" style="display: none;">
+                <input
+                    type="file"
+                    name="file"
+                    id="newPostFiles"
+                    multiple
+                    accept="audio/*, video/*, image/*"
+                    onchange="handleFileSelect(this)"
+                >
+            </form>
+            <div id="mediaPreviewContainer">
+
+            </div>
             <div class="postSettings">
                 <div class="roomDropdownContainer">
                     Post in...
@@ -209,18 +222,14 @@
                         <option value="" selected>Public Space</option>
                     </select>
                 </div>
-                <div class="addMediaContainer">
+                <div class="addMediaButtonContainer">
                     Add Media
                     <div class="buttonsContainer">
-                        <button id="newPostAddVisual">
-                            <svg viewBox="0 0 18 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M15 9H17V1H5M1 10V3H13V11H3L1 10Z" stroke="var(--white)" stroke-linecap="round" stroke-linejoin="round"/>
-                            </svg>                                
+                        <button id="newPostBrowse" onclick="browseFiles()">
+                            Browse...
                         </button>
-                        <button id="newPostAddAudio">
-                            <svg viewBox="0 0 18 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M1 5.5V8.5M3 4V10M5 5.5V8.5M7 1V13M9 4V10M11 2.5V11.5M13 5.5V8.5M15 4V10M17 5.5V8.5" stroke="var(--white)" stroke-linecap="round" stroke-linejoin="round"/>
-                            </svg>                                
+                        <button class="removeMediaButton" onclick="removeFiles()">
+                            Remove Media
                         </button>
                     </div>
                 </div>

@@ -18,6 +18,7 @@
     --gray-125: #69747C20;
     --red: #E94F37;
     --red-50: #E94F3780;
+    --red-25: #E94F3740;
 
     font-size: 14px;
     font-family: 'Roboto';
@@ -617,6 +618,28 @@ button {
         font-family: "Roboto";
     }
 
+    #mediaPreviewContainer {
+        width: 100%;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+
+        >div {
+            position: relative;
+        }
+
+        img {
+            max-height: 12rem;
+            max-width: 12rem;
+
+            min-width: 6rem;
+            min-height: 6rem;
+
+            border-radius: 1rem;
+        }
+
+    }
+
     .postSettings {
         margin-top: 1rem;
 
@@ -652,7 +675,7 @@ button {
 
                 background-color: var(--gray-125);
                 color: var(--color);
-                border-radius: 1rem;
+                border-radius: .5rem;
 
                 padding: 0 1rem;
             }
@@ -664,11 +687,10 @@ button {
                 gap: 1rem;
 
                 button {
-                    padding: 0;
+                    padding: 0 1rem;
                     margin: 0;
 
                     height: 3rem;
-                    width: 3rem;
 
                     display: grid;
                     place-items: center;
@@ -678,6 +700,10 @@ button {
                     svg {
                         width: 1.5rem;
                     }
+                }
+
+                .removeMediaButton {
+                    color: var(--red);
                 }
             }
         }

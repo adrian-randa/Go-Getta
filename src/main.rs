@@ -7,7 +7,7 @@ use uuid::*;
 
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 
-use go_getta::{api::{post::create_post, public_space::public_space_query, who_am_i}, clean_database, create_account::create_account, db::{establish_connection, scan_for_keys, with_db_connection}, login::*, models::*, pages::{with_page_store, PageStore}, render::render, schema::sessions::{self, timestamp}};
+use go_getta::{api::{file_upload::file_upload, post::create_post, public_space::public_space_query, who_am_i}, clean_database, create_account::create_account, db::{establish_connection, scan_for_keys, with_db_connection}, login::*, models::*, pages::{with_page_store, PageStore}, render::render, schema::sessions::{self, timestamp}};
 
 
 pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("./migrations/");
@@ -74,6 +74,15 @@ async fn main() {
         .and(warp::query::<HashMap<String, String>>())
         .and_then(public_space_query);
 
+    let file_upload_route = warp::post()
+        .and(warp::path("api"))
+        .and(warp::path("file_upload"))
+        .and(warp::path::end())
+        .and(warp::header::headers_cloned())
+        .and(with_db_connection(connection.clone()))
+        .and(warp::multipart::form().max_length(5_000_000))
+        .and_then(file_upload);
+
     dotenv().ok();
 
     let storage_route = warp::get()
@@ -88,6 +97,7 @@ async fn main() {
         .or(who_am_i_route)
         .or(create_post_route)
         .or(public_space_route)
+        .or(file_upload_route)
         .or(storage_route);
 
     select! {

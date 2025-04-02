@@ -1,4 +1,4 @@
-use std::env;
+use std::{env, fs};
 
 use serde::Serialize;
 use warp::multipart::FormData;
@@ -6,7 +6,7 @@ use bytes::BufMut;
 use futures::{TryStreamExt, StreamExt};
 use uuid::Uuid;
 
-use crate::error::InvalidFileError;
+use crate::{db::DBConnection, error::InvalidFileError, validate_session_from_headers};
 
 #[derive(Debug, Clone, Copy, Serialize)]
 enum FileType {
@@ -35,10 +35,10 @@ impl PendingFile {
     fn save(self) -> FileID {
         let file_id = Uuid::new_v4().to_string();
 
-        let _ = tokio::fs::write(
+        fs::write(
             format!("{}/appendage/file/{}", env::var("STORAGE_URL").unwrap(), file_id),
             self.content
-        );
+        ).unwrap();
 
         FileID { file_id, file_type: self.file_type }
     }
@@ -61,14 +61,15 @@ struct FileUploadResponse {
     appendage_id: String,
 }
 
-pub async fn file_upload(form: FormData) -> Result<impl warp::Reply, warp::Rejection> {
+pub async fn file_upload(headers: warp::http::HeaderMap, connection: DBConnection, form: FormData) -> Result<impl warp::Reply, warp::Rejection> {
+
+    let _user = validate_session_from_headers(&headers, connection);
+
     let mut parts = form.into_stream();
 
     let mut files = Vec::new();
 
     while let Some(Ok(part)) = parts.next().await {
-        if part.name() != "file" {continue}
-
         let file_type = FileType::try_from(
             part.content_type().ok_or(InvalidFileError)?
         ).ok_or(InvalidFileError)?;
@@ -89,7 +90,7 @@ pub async fn file_upload(form: FormData) -> Result<impl warp::Reply, warp::Rejec
         files: files.into_iter().map(PendingFile::save).collect()
     };
 
-    let _ = tokio::fs::write(
+    let _ = fs::write(
         format!("{}/appendage/{}", env::var("STORAGE_URL").unwrap(), appendage.appendage_id),
         serde_json::to_string(&appendage).unwrap()
     );
