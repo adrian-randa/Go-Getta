@@ -477,7 +477,7 @@ button {
 
         >* {
             max-height: 20rem;
-            max-width: 20rem;
+            max-width: 50%;            
         }
     }
 
@@ -495,7 +495,7 @@ button {
         >separator {
             width: 1px;
 
-            background-color: var(--gray-25);
+            background-color: var(--gray-25) !important;
         }
 
         button {

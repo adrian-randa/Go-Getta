@@ -27,3 +27,7 @@ impl Reject for InvalidQueryError {}
 #[derive(Debug)]
 pub struct InvalidFileError;
 impl Reject for InvalidFileError {}
+
+#[derive(Debug)]
+pub struct UserDoesNotExistError;
+impl Reject for UserDoesNotExistError {}

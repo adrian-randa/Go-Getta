@@ -1,10 +1,10 @@
 use std::{collections::HashMap, ops::DerefMut};
 
-use diesel::{query_dsl::methods::{FilterDsl, LimitDsl, SelectDsl}, ExpressionMethods, RunQueryDsl, SelectableHelper};
+use diesel::{query_dsl::methods::{FilterDsl, LimitDsl, SelectDsl}, BoolExpressionMethods, ExpressionMethods, RunQueryDsl, SelectableHelper};
 use serde::{Serialize, Deserialize};
 use warp::reject::InvalidQuery;
 
-use crate::{db::DBConnection, error::{InternalServerError, InvalidQueryError, InvalidSessionError}, models::Post, schema::posts::{self, room, timestamp}, validate_session_from_headers};
+use crate::{db::DBConnection, error::{InternalServerError, InvalidQueryError, InvalidSessionError}, models::Post, schema::posts::{self, parent, room, timestamp}, validate_session_from_headers};
 
 
 
@@ -20,7 +20,9 @@ pub async fn public_space_query(headers: warp::http::HeaderMap, connection: DBCo
 
     let posts: Vec<Post> = diesel::QueryDsl::order_by(
         diesel::query_dsl::methods::OffsetDsl::offset(
-            posts::table.select(Post::as_select()).filter(room.is_null()), 20 * page as i64),
+            posts::table.select(Post::as_select())
+                .filter(room.is_null().and(parent.is_null()))
+                , 20 * page as i64),
             timestamp.desc()
         )
         .limit(20)
