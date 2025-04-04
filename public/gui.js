@@ -15,7 +15,7 @@ const postCreationScreen = document.querySelector("#postCreation");
 
 const noPaginator = () => {};
 let currentPaginator = noPaginator;
-document.addEventListener("scrolledToBottom", currentPaginator);
+document.addEventListener("scrolledToBottom", () => {currentPaginator()});
 
 function showPostCreationScreen() {
     postScreen.style.display = "none";
@@ -40,7 +40,6 @@ function showPublicSpaceScreen() {
     showPostScreen();
     currentPaginator = initPublicSpacePaginator(mountPosts(postScreen));
     currentPaginator();
-    //TODO
 }
 
 function showFollowingScreen() {
@@ -64,6 +63,7 @@ const postTemplate = document.querySelector("#postTemplate");
 console.log(postTemplate)
 const mountPosts = (screen) => {
     return async (posts) => {
+        console.log("Mounting posts", posts);
         for (let i = 0; i < posts.length; i++) {
             screen.appendChild(await makePostNode(posts[i]));
         }

@@ -2,6 +2,8 @@ function initPublicSpacePaginator(handler) {
     var pageCounter = 0;
 
     return () => {
+        //console.log(`Fetching public_space page ${pageCounter}`);
+
         let req = new XMLHttpRequest();
 
         req.open("GET", `/api/fetch_public_space?page=${pageCounter++}`);
