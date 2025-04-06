@@ -92,7 +92,7 @@ impl Session {
     }
 }
 
-#[derive(Debug, Queryable, Insertable, Selectable, Associations, Identifiable, Serialize, Deserialize)]
+#[derive(Debug, Queryable, Insertable, Selectable, Associations, Identifiable, Serialize, Deserialize, AsChangeset)]
 #[diesel(belongs_to(User, foreign_key = creator))]
 #[diesel(belongs_to(Room, foreign_key = room))]
 #[diesel(belongs_to(Post, foreign_key = parent))]
@@ -131,6 +131,14 @@ impl Post {
     pub fn get_id(&self) -> String {
         self.id.clone()
     }
+
+    pub fn get_rating(&self) -> i32 {
+        self.rating
+    }
+
+    pub fn set_rating_unchecked(&mut self, rating: i32) {
+        self.rating = rating;
+    } 
 }
 
 #[derive(Debug, Queryable, Insertable, Selectable, Identifiable)]
@@ -146,8 +154,32 @@ pub struct Room {
 }
 
 impl Room {
-
     pub fn get_id(&self) -> String {
         self.id.clone()
+    }
+}
+
+#[derive(Debug, Queryable, Identifiable, Insertable, Selectable, AsChangeset, Associations)]
+#[diesel(belongs_to(User, foreign_key = user))]
+#[diesel(belongs_to(Post, foreign_key = post))]
+#[diesel(primary_key(user, post))]
+#[diesel(table_name = crate::schema::ratings)]
+pub struct Rating {
+    user: String,
+    post: String,
+    is_upvote: bool,
+}
+
+impl Rating {
+    pub fn is_upvote(&self) -> bool {
+        self.is_upvote
+    }
+
+    pub fn new(user: &User, post: &Post, is_upvote: bool) -> Self {
+        Self {
+            user: user.get_username(),
+            post: post.get_id(),
+            is_upvote
+        }
     }
 }

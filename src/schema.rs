@@ -25,6 +25,14 @@ diesel::table! {
 }
 
 diesel::table! {
+    ratings (user, post) {
+        user -> Text,
+        post -> Text,
+        is_upvote -> Bool,
+    }
+}
+
+diesel::table! {
     rooms (id) {
         id -> Text,
         name -> Text,
@@ -54,11 +62,14 @@ diesel::table! {
 
 diesel::joinable!(posts -> rooms (room));
 diesel::joinable!(posts -> users (creator));
+diesel::joinable!(ratings -> posts (post));
+diesel::joinable!(ratings -> users (user));
 diesel::joinable!(sessions -> users (username));
 
 diesel::allow_tables_to_appear_in_same_query!(
     account_keys,
     posts,
+    ratings,
     rooms,
     sessions,
     users,

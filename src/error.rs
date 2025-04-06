@@ -1,4 +1,4 @@
-use warp::reject::Reject;
+use warp::reject::{Reject, Rejection};
 
 #[derive(Debug)]
 pub struct InvalidKeyError;
@@ -31,3 +31,7 @@ impl Reject for InvalidFileError {}
 #[derive(Debug)]
 pub struct UserDoesNotExistError;
 impl Reject for UserDoesNotExistError {}
+
+#[derive(Debug)]
+pub struct PostDoesNotExistError;
+impl Reject for PostDoesNotExistError {}
