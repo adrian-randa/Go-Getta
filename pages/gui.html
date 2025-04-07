@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
     <link rel="stylesheet" href="style.css">
-    <script src="gui.js" defer></script>
+    <script defer src="displayPost.js"></script>
+    <script defer src="gui.js"></script>
 
     <script src="createPost.js"></script>
     <script src="publicSpace.js"></script>
@@ -246,9 +247,20 @@
         </screen>
 
         <screen id="postScreen">
-            THis is the post screen
+            
         </screen>
 
+        <screen id="postThread" style="display: none;">
+            <div class="parentPosts">
+
+            </div>
+            <div class="commentCreation">
+
+            </div>
+            <div class="childPosts">
+
+            </div>
+        </screen>
     </div>
 </body>
 </html>
