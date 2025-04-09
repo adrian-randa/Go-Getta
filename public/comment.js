@@ -1,16 +1,17 @@
-const POST_CHARACTER_LIMIT = 250;
+const COMMENT_CHARACTER_LIMIT = 250;
 
-async function submitPost() {
-    console.log("a")
-
-    const body = document.querySelector("#newPostBody").value;
+async function submitComment() {
+    const body = document.querySelector("#newCommentBody").value;
     if (body.length > POST_CHARACTER_LIMIT) {
         return;
     }
 
+    const parentID = new URL(window.location.href).searchParams.get("id");
+    if (!parentID) return;
+
     let appendageID = null;
 
-    const fileInput = document.querySelector("#newPostFiles");
+    const fileInput = document.querySelector("#newCommentFiles");
     if (fileInput.files && fileInput.files.length > 0) {
 
         let fileUploadFormData = new FormData();
@@ -33,10 +34,8 @@ async function submitPost() {
         "body": body,
         "appendage_id": appendageID,
         "room": null,
-        "parent": null,
+        "parent": parentID,
     }
-
-    console.log(payload)
 
     const req = new XMLHttpRequest();
 
@@ -64,12 +63,12 @@ async function submitPost() {
     req.send(JSON.stringify(payload));
 }
 
-function browseNewPostFiles() {
-    document.querySelector("#newPostFiles").click();
+function browseNewCommentFiles() {
+    document.querySelector("#newCommentFiles").click();
 }
 
-function handleNewPostFileSelect(input) {
-    const previewContainer = document.querySelector("#mediaPreviewContainer");
+function handleNewCommentFileSelect(input) {
+    const previewContainer = document.querySelector("#commentMediaPreviewContainer");
     previewContainer.innerHTML = "";
 
     if (input.files) {
@@ -92,7 +91,39 @@ function handleNewPostFileSelect(input) {
     }
 }
 
-function removeNewPostFiles() {
-    document.querySelector("#newPostFiles").value = "";
-    document.querySelector("#mediaPreviewContainer").innerHTML = "";
+function removeNewCommentFiles() {
+    document.querySelector("#newCommentFiles").value = "";
+    document.querySelector("#commentMediaPreviewContainer").innerHTML = "";
+}
+
+function initCommentPaginator(parentID, handler) {
+    var pageCounter = 0;
+
+    return () => {
+        //console.log(`Fetching public_space page ${pageCounter}`);
+
+        let req = new XMLHttpRequest();
+
+        req.open("GET", `/api/fetch_comments/${parentID}?page=${pageCounter++}`);
+
+        req.setRequestHeader("Content-Type", "application/json; charset=UTF-8");
+
+        req.addEventListener("error", (event) => {
+            event.preventDefault();
+
+            alert(req.responseText);
+        })
+
+        req.onreadystatechange = () => {
+            if (req.readyState === XMLHttpRequest.DONE) {
+                if (req.status === 200) {
+                    handler(JSON.parse(req.responseText));
+                } else {
+                    alert(req.responseText);
+                }
+            }
+        };
+
+        req.send();
+    }
 }

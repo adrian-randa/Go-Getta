@@ -1,8 +1,10 @@
-use std::time;
+use std::{ops::DerefMut, time};
 
 use diesel::{prelude::*, sqlite};
 use serde::{Serialize, Deserialize};
 use uuid::Uuid;
+
+use crate::{db::DBConnection, schema::posts};
 
 #[derive(Debug, Queryable, Selectable, Insertable)]
 #[diesel(table_name = crate::schema::account_keys)]
@@ -138,7 +140,24 @@ impl Post {
 
     pub fn set_rating_unchecked(&mut self, rating: i32) {
         self.rating = rating;
-    } 
+    }
+
+    pub async fn try_fetch_parent(&self, connection: DBConnection) -> Option<Post> {
+        let post: Post = posts::table
+            .find(self.parent.clone()?)
+            .first(connection.lock().await.deref_mut())
+            .ok()?;
+
+        Some(post)
+    }
+
+    pub fn get_comments_amount(&self) -> i32 {
+        self.comments
+    }
+
+    pub fn set_comments_amount_unchecked(&mut self, amount: i32) {
+        self.comments = amount;
+    }
 }
 
 #[derive(Debug, Queryable, Insertable, Selectable, Identifiable)]

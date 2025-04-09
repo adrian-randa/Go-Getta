@@ -11,6 +11,7 @@ pub mod public_space;
 pub mod file_upload;
 pub mod user_data;
 pub mod rating;
+pub mod thread;
 
 #[derive(Debug, Serialize)]
 struct WhoAmIResponse {
@@ -51,6 +52,10 @@ impl PostQueryResponse {
                 rating
             }
         }
+    }
+
+    pub fn get_post_ref(&self) -> &Post {
+        &self.post
     }
 }
 

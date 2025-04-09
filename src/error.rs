@@ -16,3 +16,4 @@ new_rejection!(InvalidSessionError);
 new_rejection!(InvalidQueryError);
 new_rejection!(InvalidFileError);
 new_rejection!(UserDoesNotExistError);
+new_rejection!(PostDoesNotExistError);

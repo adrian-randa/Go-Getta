@@ -9,17 +9,12 @@
     <script defer src="gui.js"></script>
 
     <script src="createPost.js"></script>
+    <script src="comment.js"></script>
     <script src="publicSpace.js"></script>
 
     <title>Go Getta</title>
 </head>
 <body>
-    <script>
-        function test() {
-            console.log("Hi")
-        }
-    </script>
-
     <div class="sidebar left">
         <div class="logoContainer">
             <svg viewBox="0 0 53 52" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -210,7 +205,7 @@
                     id="newPostFiles"
                     multiple
                     accept="audio/*, video/*, image/*"
-                    onchange="handleFileSelect(this)"
+                    onchange="handleNewPostFileSelect(this)"
                 >
             </form>
             <div id="mediaPreviewContainer">
@@ -226,10 +221,10 @@
                 <div class="addMediaButtonContainer">
                     Add Media
                     <div class="buttonsContainer">
-                        <button id="newPostBrowse" onclick="browseFiles()">
+                        <button id="newPostBrowse" onclick="browseNewPostFiles()">
                             Browse...
                         </button>
-                        <button class="removeMediaButton" onclick="removeFiles()">
+                        <button class="removeMediaButton" onclick="removeNewPostFiles()">
                             Remove Media
                         </button>
                     </div>
@@ -255,7 +250,34 @@
 
             </div>
             <div class="commentCreation">
+                <textarea name="body" id="newCommentBody" placeholder="Comment something..."></textarea>
+                <form enctype="multipart/form-data" id="commentAddMediaForm" style="display: none;">
+                    <input
+                        type="file"
+                        name="file"
+                        id="newCommentFiles"
+                        multiple
+                        accept="audio/*, video/*, image/*"
+                        onchange="handleNewCommentFileSelect(this)"
+                    >
+                </form>
+                <div id="commentMediaPreviewContainer">
 
+                </div>
+                <div class="actionButtons">
+                    <button id="commentAddMediaButton" onclick="browseNewCommentFiles()">
+                        Browse Media
+                    </button>
+                    <button id="commentRemoveMediaButton" onclick="removeNewCommentFiles()">
+                        Remove Media
+                    </button>
+                    <spacer></spacer>
+                    <button id="submitCommentButton" onclick="submitComment()">
+                        <svg viewBox="0 0 18 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M1 8.5V11H3.46154L13.3077 6L14.5385 8.5L17 2.25L9.61539 1L10.8462 3.5L1 8.5Z" stroke="var(--green)" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>                            
+                    </button>
+                </div>
             </div>
             <div class="childPosts">
 

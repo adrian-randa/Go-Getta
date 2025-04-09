@@ -7,7 +7,7 @@ use uuid::*;
 
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 
-use go_getta::{api::{file_upload::file_upload, post::create_post, public_space::public_space_query, rating::set_rating_state, user_data::get_user_data, who_am_i}, clean_database, create_account::create_account, db::{establish_connection, scan_for_keys, with_db_connection}, login::*, models::*, pages::{with_page_store, PageStore}, render::render, schema::sessions::{self, timestamp}};
+use go_getta::{api::{file_upload::file_upload, post::create_post, public_space::public_space_query, rating::set_rating_state, thread::{comment_query, get_thread}, user_data::get_user_data, who_am_i}, clean_database, create_account::create_account, db::{establish_connection, scan_for_keys, with_db_connection}, login::*, models::*, pages::{with_page_store, PageStore}, render::render, schema::sessions::{self, timestamp}};
 
 
 pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("./migrations/");
@@ -97,6 +97,19 @@ async fn main() {
         .and(warp::body::json())
         .and_then(set_rating_state);
 
+    let get_thread_route = warp::get()
+        .and(warp::header::headers_cloned())
+        .and(with_db_connection(connection.clone()))
+        .and(warp::path!("api" / "get_thread" / String))
+        .and_then(get_thread);
+
+    let fetch_comments_route = warp::get()
+        .and(warp::header::headers_cloned())
+        .and(with_db_connection(connection.clone()))
+        .and(warp::path!("api" / "fetch_comments" / String))
+        .and(warp::query::<HashMap<String, String>>())
+        .and_then(comment_query);
+
     let storage_route = warp::get()
         .and(warp::path("storage"))
         .and(warp::fs::dir(env::var("STORAGE_URL").unwrap()));
@@ -112,6 +125,8 @@ async fn main() {
         .or(file_upload_route)
         .or(get_user_data_route)
         .or(set_rating_state_route)
+        .or(get_thread_route)
+        .or(fetch_comments_route)
         .or(storage_route);
 
     select! {

@@ -9,22 +9,12 @@ fetch("api/who_am_i").then((response) => {
     })
 })
 
-let params = new URLSearchParams(new URL(window.location.href));
-switch (params.get("view")) {
-    case "view": {
-
-    }
-
-
-    default: {
-        showPublicSpaceScreen();
-    }
-}
-
 const mainContent = document.querySelector("#mainContent");
 const postScreen = document.querySelector("#postScreen");
 const postCreationScreen = document.querySelector("#postCreation");
 const postThreadScreen = document.querySelector("#postThread");
+const postThreadParentsSection = postThreadScreen.querySelector(".parentPosts");
+const postThreadCommentSection = postThreadScreen.querySelector(".childPosts");
 
 const noPaginator = () => {};
 let currentPaginator = noPaginator;
@@ -52,8 +42,10 @@ function showRoomCreationScreen() {
 }
 
 function showPublicSpaceScreen() {
+    window.history.pushState({}, "", window.location.origin);
+
     showPostScreen();
-    currentPaginator = initPublicSpacePaginator(debugPassthrough(mountPosts(postScreen)));
+    currentPaginator = initPublicSpacePaginator(mountPosts(postScreen));
     currentPaginator();
 }
 
@@ -62,8 +54,20 @@ function showFollowingScreen() {
     //TODO
 }
 
-function showPostThreadScreen() {
-    currentPaginator = noPaginator; //TODO: Change this to the child paginator
+async function showPostThreadScreen(postID) {
+    postThreadParentsSection.innerHTML = "";
+    postThreadCommentSection.innerHTML = "";
+
+    let parentThreadResponse = await fetch(`/api/get_thread/${postID}`);
+    let parentThread = await parentThreadResponse.json();
+
+    for (let i = 0; i < parentThread.length; i++) {
+        postThreadParentsSection.appendChild(await makePostNode(parentThread[i]));
+    }
+
+    currentPaginator = initCommentPaginator(postID, mountPosts(postThreadCommentSection));
+    currentPaginator();
+    
 
     postScreen.style.display = "none";
     postCreationScreen.style.display = "none";
@@ -86,5 +90,17 @@ const debugPassthrough = (handler) => {
     return function(data) {
         console.log(data);
         handler(data);
+    }
+}
+
+const params = new URL(window.location.href).searchParams;
+switch (params.get("view")) {
+    case "post": {
+        showPostThreadScreen(params.get("id"));
+        break;
+    }
+
+    default: {
+        showPublicSpaceScreen();
     }
 }
