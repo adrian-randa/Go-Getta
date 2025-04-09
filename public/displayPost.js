@@ -100,6 +100,33 @@ async function applyPostDataToNode(data, node) {
 
     let bookmarkButton = node.querySelector(".bookmark");
     bookmarkButton.querySelector("h5").textContent = post.bookmarks;
+
+    let deleteButton = node.querySelector(".delete");
+    if (post.creator !== window.localStorage.getItem("currentUsername")) deleteButton.style.display = "none";
+    else {
+        let deleteHandler = async () => {
+            let response = await fetch(`/api/delete_post/${post.id}`, {
+                method: "DELETE"
+            });
+            if (response.ok) window.location.href = window.location;
+            else alert(await response.text());
+        };
+
+        deleteButton.addEventListener("click", () => {showModal({
+            title: "Delete Post?",
+            body: "Deleting a post is irreversible. Do you wish to proceed?",
+            choices: [
+                {
+                    label: "Delete",
+                    class: "bad",
+                    onclick: deleteHandler
+                },
+                {
+                    label: "Cancel"
+                }
+            ]
+        })});
+    }
 }
 
 function generateRatingEventHandler(post) {

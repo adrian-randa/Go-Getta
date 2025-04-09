@@ -55,6 +55,10 @@ html {
     align-items: center;
 }
 
+html, body {
+    position: relative;
+}
+
 button {
     cursor: pointer;
 
@@ -377,7 +381,65 @@ button {
     border-left: 1px solid var(--gray-25);
 }
 
+#modal {
+    position: fixed;
+
+    width: 100vw;
+    height: 100vh;
+
+    top: 0;
+    left: 0;
+
+    background-color: var(--black-50);
+
+    display: grid;
+    place-items: center;
+
+    .modalWindow {
+        padding: 2rem;
+
+        max-width: 700px;
+
+        background-color: var(--black);
+        border-radius: 2rem;
+
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2rem;
+
+        p {
+            text-align: justify;
+            max-width: 500px;
+        }
+
+        .buttonContainer {
+            width: 100%;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            button {
+                padding: 1rem 1.5rem;
+            }
+
+            button.good {
+                background-color: var(--green-25);
+                color: var(--green);
+            }
+
+            button.bad {
+                background-color: var(--red-25);
+                color: var(--red);
+            }
+        }
+    }
+}
+
 #mainContent {
+    position: relative;
+
     padding-top: 4rem;
     padding-bottom: 8rem;
 
@@ -766,9 +828,18 @@ button {
         flex-direction: column;
     }
 
+    .parentPosts {
+        .post {
+            opacity: .5;
+        }
+
+        .post:last-child {
+            margin-top: 2rem;
+            opacity: 1;
+        }
+    }
+
     .commentCreation {
-
-
         textarea {
             width: calc(100% - 2rem);
             min-height: 6rem;

@@ -18,5 +18,6 @@ new_rejections!(
     InvalidQueryError,
     InvalidFileError,
     UserDoesNotExistError,
-    PostDoesNotExistError
+    PostDoesNotExistError,
+    InsufficientPermissionsError
 );

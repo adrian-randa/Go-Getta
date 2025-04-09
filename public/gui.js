@@ -5,7 +5,8 @@ fetch("api/who_am_i").then((response) => {
         currentUser.querySelector(".username").textContent = json.public_name;
         currentUser.querySelector(".profilePicture").setAttribute("style", `background-image: url('storage/profile_picture/${json.username}')`);
 
-        window.localStorage.setItem("currentUser", JSON.stringify(json));
+        window.localStorage.setItem("currentUsername", json.username);
+        window.localStorage.setItem("currentPublicName", json.public_name);
     })
 })
 

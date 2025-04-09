@@ -158,6 +158,10 @@ impl Post {
     pub fn set_comments_amount_unchecked(&mut self, amount: i32) {
         self.comments = amount;
     }
+
+    pub fn get_creator(&self) -> String {
+        self.creator.clone()
+    }
 }
 
 #[derive(Debug, Queryable, Insertable, Selectable, Identifiable)]

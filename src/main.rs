@@ -7,7 +7,7 @@ use uuid::*;
 
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 
-use go_getta::{api::{file_upload::file_upload, post::create_post, public_space::public_space_query, rating::set_rating_state, thread::{comment_query, get_thread}, user_data::get_user_data, who_am_i}, clean_database, create_account::create_account, db::{establish_connection, scan_for_keys, with_db_connection}, login::*, models::*, pages::{with_page_store, PageStore}, render::render, schema::sessions::{self, timestamp}};
+use go_getta::{api::{file_upload::file_upload, post::{create_post, delete_post}, public_space::public_space_query, rating::set_rating_state, thread::{comment_query, get_thread}, user_data::get_user_data, who_am_i}, clean_database, create_account::create_account, db::{establish_connection, scan_for_keys, with_db_connection}, login::*, models::*, pages::{with_page_store, PageStore}, render::render, schema::sessions::{self, timestamp}};
 
 
 pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("./migrations/");
@@ -65,6 +65,12 @@ async fn main() {
         .and(warp::body::json())
         .and_then(create_post);
 
+    let delete_post_route = warp::delete()
+        .and(warp::header::headers_cloned())
+        .and(with_db_connection(connection.clone()))
+        .and(warp::path!("api" / "delete_post" / String))
+        .and_then(delete_post);
+
     let public_space_route = warp::get()
         .and(warp::path("api"))
         .and(warp::path("fetch_public_space"))
@@ -121,6 +127,7 @@ async fn main() {
         .or(create_account_route)
         .or(who_am_i_route)
         .or(create_post_route)
+        .or(delete_post_route)
         .or(public_space_route)
         .or(file_upload_route)
         .or(get_user_data_route)
