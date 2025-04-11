@@ -2,9 +2,9 @@ use std::ops::DerefMut;
 
 use diesel::{query_dsl::methods::FindDsl, RunQueryDsl};
 use serde::{Deserialize, Serialize};
-use warp::reject::Reject;
+use warp::reject::{InvalidHeader, Reject};
 
-use crate::{db::DBConnection, models::{Session, User}, schema::{sessions, users}, error::{InternalServerError, InvalidPasswordError}};
+use crate::{db::DBConnection, error::{InternalServerError, InvalidPasswordError, InvalidSessionError}, extract_cookie, models::{Session, User}, schema::{sessions, users}, validate_session_from_headers};
 
 #[derive(Debug, Deserialize)]
 pub struct LoginCredentials {
@@ -37,4 +37,15 @@ pub async fn login(login_credentials: LoginCredentials, connection: DBConnection
     Ok(warp::reply::with_header(warp::reply::json(
         &LoginResponse { session_id }
     ), "Access-Control-Allow-Origin", "*"))
+}
+
+
+pub async fn logout(headers: warp::http::HeaderMap, connection: DBConnection) -> Result<impl warp::Reply, warp::Rejection> {
+
+    let cookie_jar = headers.get("cookie").ok_or(InvalidSessionError)?.to_str().map_err(|_| InvalidSessionError)?.to_string();
+    let session_id = extract_cookie(cookie_jar, "session_id".into()).ok_or(InvalidSessionError)?;
+
+    let _ = diesel::delete(sessions::table.find(session_id)).execute(connection.lock().await.deref_mut());
+
+    Ok(warp::reply())
 }

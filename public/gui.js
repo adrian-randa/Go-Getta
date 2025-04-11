@@ -10,6 +10,17 @@ fetch("api/who_am_i").then((response) => {
     })
 })
 
+async function logout() {
+    let response = await fetch("/logout", {method: "DELETE"});
+
+    if (!response.ok) {
+        alert(await response.text());
+    } else {
+        document.cookie = "session_id= ;";
+        window.location.reload();
+    }
+}
+
 const mainContent = document.querySelector("#mainContent");
 const postScreen = document.querySelector("#postScreen");
 const postCreationScreen = document.querySelector("#postCreation");

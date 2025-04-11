@@ -19,5 +19,7 @@ new_rejections!(
     InvalidFileError,
     UserDoesNotExistError,
     PostDoesNotExistError,
-    InsufficientPermissionsError
+    InsufficientPermissionsError,
+    EmptyContentError,
+    ContentTooLargeError
 );

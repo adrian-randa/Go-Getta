@@ -41,6 +41,13 @@ async fn main() {
         .and(with_db_connection(connection.clone()))
         .and_then(login);
 
+    let logout_route = warp::delete()
+        .and(warp::path("logout"))
+        .and(warp::path::end())
+        .and(warp::header::headers_cloned())
+        .and(with_db_connection(connection.clone()))
+        .and_then(logout);
+
     let create_account_route = warp::post()
         .and(warp::path("create_account"))
         .and(warp::path::end())
@@ -124,6 +131,7 @@ async fn main() {
     let routes = public_route
         .or(main_route)
         .or(login_route)
+        .or(logout_route)
         .or(create_account_route)
         .or(who_am_i_route)
         .or(create_post_route)

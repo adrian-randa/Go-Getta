@@ -369,6 +369,14 @@ button {
     .newPost {
         background-color: var(--green-25);
     }
+
+    #logoutButton {
+        background-color: transparent;
+        padding: 0;
+
+        display: grid;
+        place-items: center;
+    }
 }
 
 .sidebar.left {

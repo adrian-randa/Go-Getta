@@ -1,6 +1,6 @@
 use std::ops::DerefMut;
 
-use crate::{db::DBConnection, error::{InsufficientPermissionsError, InternalServerError, InvalidSessionError, PostDoesNotExistError}, models::Post, schema::{posts, ratings::{self, post}}, validate_session_from_headers};
+use crate::{db::DBConnection, error::{ContentTooLargeError, EmptyContentError, InsufficientPermissionsError, InternalServerError, InvalidSessionError, PostDoesNotExistError}, models::Post, schema::{posts, ratings::{self, post}}, validate_session_from_headers};
 
 use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl, SaveChangesDsl};
 use serde::{Deserialize, Serialize};
@@ -20,6 +20,13 @@ struct PostCreationResponse {
 
 pub async fn create_post(headers: warp::http::HeaderMap, connection: DBConnection, post_data: PostCreationData) -> Result<impl warp::Reply, warp::Rejection> {
     let user = validate_session_from_headers(&headers, connection.clone()).await.ok_or(InvalidSessionError)?;
+
+    if post_data.body.split_ascii_whitespace().next().is_none() {
+        Err(EmptyContentError)?;
+    }
+    if post_data.body.len() > 250 {
+        Err(ContentTooLargeError)?;
+    }
 
     let mut parent_post  = None;
     if let Some(parent_id) = post_data.parent {

@@ -2,7 +2,7 @@ use std::{collections::HashMap, ops::DerefMut};
 
 use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl};
 
-use crate::{db::DBConnection, error::{InternalServerError, InvalidQueryError, InvalidSessionError, PostDoesNotExistError}, models::Post, schema::posts::{self, parent, timestamp}, validate_session_from_headers};
+use crate::{db::DBConnection, error::{InternalServerError, InvalidQueryError, InvalidSessionError, PostDoesNotExistError}, models::Post, schema::posts::{self, parent, rating, timestamp}, validate_session_from_headers};
 
 use super::PostQueryResponse;
 
@@ -43,7 +43,7 @@ pub async fn comment_query(headers: warp::http::HeaderMap, connection: DBConnect
 
     let comments: Vec<Post> = posts::table
         .filter(parent.eq(parent_post_id))
-        .order(timestamp.desc())
+        .order(rating.desc())
         .offset(20 * page)
         .limit(20)
         .load(connection.lock().await.deref_mut())
