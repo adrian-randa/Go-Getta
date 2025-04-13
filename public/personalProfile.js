@@ -1,4 +1,4 @@
-(async () => {
+async function initPersonalProfilePage() {
     const heading = personalProfileScreen.querySelector(".heading");
     const profilePicture = heading.querySelector(".profilePicture");
     const publicNameText = heading.querySelector("h3");
@@ -107,9 +107,7 @@
     });
 
     newBiographyInput.addEventListener("blur", handleBiographyInput);
-
-
-})()
+}
 
 function handleProfilePictureUpdate(input) {
 

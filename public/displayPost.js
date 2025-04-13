@@ -32,9 +32,16 @@ async function applyPostDataToNode(data, node) {
     let userData = await userDataResponse.json();
 
     let creatorDisplay = node.querySelector(".userDisplay");
+    creatorDisplay.setAttribute("href", `?view=profile&id=${post.creator}`);
     creatorDisplay.querySelector("h4").textContent = userData.public_name;
     creatorDisplay.querySelector("h5").textContent = post.creator;
     creatorDisplay.querySelector(".profilePicture").style.backgroundImage = `url("/storage/profile_picture/${post.creator}")`;
+
+    let threadInfo = node.querySelector(".threadInfoContainer");
+    if (!post.parent) threadInfo.style.display = "none";
+    else {
+        threadInfo.setAttribute("href", `?view=post&id=${post.parent}`);
+    }
 
     let timestamp = new Date(post.timestamp * 1000);
     let [date, fullTime] = timestamp.toISOString().split("T");

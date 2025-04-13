@@ -29,6 +29,7 @@ const postThreadScreen = document.querySelector("#postThread");
 const postThreadParentsSection = postThreadScreen.querySelector(".parentPosts");
 const postThreadCommentSection = postThreadScreen.querySelector(".childPosts");
 const personalProfileScreen = document.querySelector("#personalProfile");
+const profileScreen = document.querySelector("#profile");
 
 const noPaginator = () => {};
 let currentPaginator = noPaginator;
@@ -39,6 +40,7 @@ function showPostCreationScreen() {
     postCreationScreen.style.display = "flex";
     postThreadScreen.style.display = "none";
     personalProfileScreen.style.display = "none";
+    profileScreen.style.display = "none";
 
     currentPaginator = noPaginator;
 }
@@ -49,6 +51,7 @@ function showPostScreen() {
     postCreationScreen.style.display = "none";
     postThreadScreen.style.display = "none";
     personalProfileScreen.style.display = "none";
+    profileScreen.style.display = "none";
 }
 
 function showRoomCreationScreen() {
@@ -75,11 +78,25 @@ function showPersonalProfileScreen() {
     postCreationScreen.style.display = "none";
     postThreadScreen.style.display = "none";
     personalProfileScreen.style.display = "flex";
+    profileScreen.style.display = "none";
 
     const currentUsername = window.localStorage.getItem("currentUsername");
     const postsContainer = personalProfileScreen.querySelector(".posts");
 
     currentPaginator = initUsersPostsPaginator(currentUsername, mountPosts(postsContainer));
+    currentPaginator();
+}
+
+function showProfileScreen(username) {
+    postScreen.style.display = "none";
+    postCreationScreen.style.display = "none";
+    postThreadScreen.style.display = "none";
+    personalProfileScreen.style.display = "none";
+    profileScreen.style.display = "flex";
+
+    const postsContainer = profileScreen.querySelector(".posts");
+
+    currentPaginator = initUsersPostsPaginator(username, mountPosts(postsContainer));
     currentPaginator();
 }
 
@@ -130,7 +147,15 @@ switch (params.get("view")) {
     }
 
     case "me": {
+        initPersonalProfilePage();
         showPersonalProfileScreen();
+        break;
+    }
+
+    case "profile": {
+        const username = params.get("id");
+        initProfilePage(username);
+        showProfileScreen(username);
         break;
     }
 

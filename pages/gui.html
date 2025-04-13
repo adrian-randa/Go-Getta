@@ -7,9 +7,10 @@
     <link rel="stylesheet" href="style.css">
     <script defer src="displayPost.js"></script>
     <script defer src="profilePosts.js"></script>
+    <script defer src="personalProfile.js"></script>
+    <script src="profile.js"></script>
     <script defer src="gui.js"></script>
     <script defer src="modal.js"></script>
-    <script defer src="personalProfile.js"></script>
 
     <script src="createPost.js"></script>
     <script src="comment.js"></script>
@@ -130,6 +131,13 @@
                             <h5>@user</h5>
                         </div>
                     </a>
+                    <a class="threadInfoContainer">
+                        <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M1 4.5V9.75L2.75 10.625L1 15L6.25 12.375L8 13.25L15 9.75V4.5L8 1L1 4.5Z" stroke="var(--gray)" stroke-linejoin="round"/>
+                        </svg>
+                        Response
+                    </a>
+                    <spacer></spacer>
                     <div class="timestamp">
                         <h5>1900/01/01</h5>
                         <h5>00:00</h5>
@@ -332,6 +340,26 @@
                         <path d="M4.56659 13.25L10.1666 2.75L6.43325 1L0.833252 11.5M4.56659 13.25L0.833252 11.5M4.56659 13.25L0.833252 15V11.5" stroke="var(--white)" stroke-linejoin="round"/>
                     </svg>                         
                 </button>
+            </div>
+            <separator></separator>
+            <div class="posts">
+
+            </div>
+        </screen>
+
+        <screen id="profile" style="display: none;">
+            <div class="heading">
+                <div class="profilePictureContainer">
+                    <div class="profilePicture"></div>
+                </div>
+                <div class="publicNameContainer">
+                    <h3></h3>
+                </div>
+                <h4></h4>
+            </div>
+            <separator></separator>
+            <div class="biography">
+                <p></p>
             </div>
             <separator></separator>
             <div class="posts">
