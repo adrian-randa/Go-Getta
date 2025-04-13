@@ -3,7 +3,7 @@ use std::ops::DerefMut;
 use diesel::{query_dsl::methods::{FilterDsl, FindDsl}, ExpressionMethods, QueryResult, RunQueryDsl};
 use serde::Deserialize;
 
-use crate::{db::DBConnection, error::{InternalServerError, InvalidKeyError, UserAlreadyExistsError}, models::{AccountKey, User}, schema::{account_keys::{self, key, used}, users}};
+use crate::{db::DBConnection, error::{InternalServerError, InvalidKeyError, UserAlreadyExistsError, InvalidUsernameError}, models::{AccountKey, User}, schema::{account_keys::{self, key, used}, users}};
 
 
 #[derive(Debug, Deserialize)]
@@ -18,12 +18,16 @@ pub async fn create_account(credentials: AccountCreationCredentials, connection:
     let mut connection_lock = connection.lock().await;
     let connection_lock = connection_lock.deref_mut();
 
+    if credentials.username.contains(['/', '\\']) {
+        Err(InvalidUsernameError)?;
+    }
+
     let creation_key: AccountKey = account_keys::table
         .find(credentials.key.clone())
         .first(connection_lock).map_err(|_| InvalidKeyError)?;
 
     if creation_key.is_used() {
-        return Err(InvalidKeyError.into())
+        Err(InvalidKeyError)?;
     }
 
     let queried_user: Result<User, diesel::result::Error> = users::table.find(credentials.username.clone()).first(connection_lock);

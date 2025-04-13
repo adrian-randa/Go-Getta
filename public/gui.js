@@ -2,6 +2,7 @@ fetch("api/who_am_i").then((response) => {
     response.json().then((json) => {
         let currentUser = document.querySelector("#currentUser");
 
+
         currentUser.querySelector(".username").textContent = json.public_name;
         currentUser.querySelector(".profilePicture").setAttribute("style", `background-image: url('storage/profile_picture/${json.username}')`);
 
@@ -27,6 +28,7 @@ const postCreationScreen = document.querySelector("#postCreation");
 const postThreadScreen = document.querySelector("#postThread");
 const postThreadParentsSection = postThreadScreen.querySelector(".parentPosts");
 const postThreadCommentSection = postThreadScreen.querySelector(".childPosts");
+const personalProfileScreen = document.querySelector("#personalProfile");
 
 const noPaginator = () => {};
 let currentPaginator = noPaginator;
@@ -36,6 +38,7 @@ function showPostCreationScreen() {
     postScreen.style.display = "none";
     postCreationScreen.style.display = "flex";
     postThreadScreen.style.display = "none";
+    personalProfileScreen.style.display = "none";
 
     currentPaginator = noPaginator;
 }
@@ -45,6 +48,7 @@ function showPostScreen() {
     postScreen.style.display = "flex";
     postCreationScreen.style.display = "none";
     postThreadScreen.style.display = "none";
+    personalProfileScreen.style.display = "none";
 }
 
 function showRoomCreationScreen() {
@@ -64,6 +68,19 @@ function showPublicSpaceScreen() {
 function showFollowingScreen() {
     showPostScreen();
     //TODO
+}
+
+function showPersonalProfileScreen() {
+    postScreen.style.display = "none";
+    postCreationScreen.style.display = "none";
+    postThreadScreen.style.display = "none";
+    personalProfileScreen.style.display = "flex";
+
+    const currentUsername = window.localStorage.getItem("currentUsername");
+    const postsContainer = personalProfileScreen.querySelector(".posts");
+
+    currentPaginator = initUsersPostsPaginator(currentUsername, mountPosts(postsContainer));
+    currentPaginator();
 }
 
 async function showPostThreadScreen(postID) {
@@ -109,6 +126,11 @@ const params = new URL(window.location.href).searchParams;
 switch (params.get("view")) {
     case "post": {
         showPostThreadScreen(params.get("id"));
+        break;
+    }
+
+    case "me": {
+        showPersonalProfileScreen();
         break;
     }
 

@@ -8,13 +8,6 @@ use crate::{db::DBConnection, error::{InternalServerError, InvalidQueryError, In
 
 use super::PostQueryResponse;
 
-
-
-#[derive(Debug, Serialize)]
-pub struct PublicSpaceQueryResponse {
-    posts: Vec<Post>
-}
-
 pub async fn public_space_query(headers: warp::http::HeaderMap, connection: DBConnection, query: HashMap<String, String>) -> Result<impl warp::Reply, warp::Rejection> {
     let user = validate_session_from_headers(&headers, connection.clone()).await.ok_or(InvalidSessionError)?;
 

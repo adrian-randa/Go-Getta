@@ -6,8 +6,10 @@
     
     <link rel="stylesheet" href="style.css">
     <script defer src="displayPost.js"></script>
+    <script defer src="profilePosts.js"></script>
     <script defer src="gui.js"></script>
     <script defer src="modal.js"></script>
+    <script defer src="personalProfile.js"></script>
 
     <script src="createPost.js"></script>
     <script src="comment.js"></script>
@@ -62,18 +64,20 @@
     </div>
 
     <div class="sidebar right">
-        <a class="currentUser" id="currentUser" href="#">
+        <div class="currentUser" id="currentUser">
             <button id="logoutButton" onclick="logout()">
                 <svg viewBox="0 0 16 13" fill="transparent" xmlns="http://www.w3.org/2000/svg">
                     <path d="M3.8 7.875V9.25L9.4 12L15 9.25V3.75L9.4 1L3.8 3.75V5.125M6.6 6.5H1M1 6.5L2.4 5.8125M1 6.5L2.4 7.1875" stroke="var(--red-50)" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
             </button>
-            <div class="textContainer">
-                <h2 class="username"></h2>
-                <p>Click to edit profile</p>
-            </div>
-            <div class="profilePicture" id="currentUserProfilePicture"></div>        
-        </a>
+            <a href="?view=me">
+                <div class="textContainer">
+                    <h2 class="username"></h2>
+                    <p>Click to edit profile</p>
+                </div>
+                <div class="profilePicture" id="currentUserProfilePicture"></div>        
+            </a>
+        </div>
 
         <div class="notifications">
             <div class="titleBar">
@@ -283,6 +287,54 @@
                 </div>
             </div>
             <div class="childPosts">
+
+            </div>
+        </screen>
+
+        <screen id="personalProfile" style="display: none;">
+            <div class="heading">
+                <div class="profilePictureContainer">
+                    <div class="profilePicture"></div>
+                    <form action="" id="profilePictureSelectorForm" style="display: none;">
+                        <input
+                            type="file"
+                            name="profilePicture"
+                            id="profilePictureFileInput"
+                            accept="image/*"
+                            oninput="handleProfilePictureUpdate(this)"
+                        >
+                    </form>
+                    <button class="edit">
+                        <svg viewBox="0 0 11 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M4.56659 13.25L10.1666 2.75L6.43325 1L0.833252 11.5M4.56659 13.25L0.833252 11.5M4.56659 13.25L0.833252 15V11.5" stroke="var(--white)" stroke-linejoin="round"/>
+                        </svg>                         
+                    </button>
+                </div>
+                <div class="publicNameContainer">
+                    <h3></h3>
+                    <input type="text" name="newPublicNameInput" class="newPublicNameInput" style="display: none;" minlength="1" maxlength="32">
+                    <button class="edit">
+                        <svg viewBox="0 0 11 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M4.56659 13.25L10.1666 2.75L6.43325 1L0.833252 11.5M4.56659 13.25L0.833252 11.5M4.56659 13.25L0.833252 15V11.5" stroke="var(--white)" stroke-linejoin="round"/>
+                        </svg>                         
+                    </button>
+                </div>
+                <h4></h4>
+            </div>
+            <separator></separator>
+            <div class="biography">
+                <p></p>
+
+                <textarea name="newBiographyInput" id="newBiographyInput" placeholder="Describe yourself here..." style="display: none;"></textarea>
+
+                <button class="edit">
+                    <svg viewBox="0 0 11 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M4.56659 13.25L10.1666 2.75L6.43325 1L0.833252 11.5M4.56659 13.25L0.833252 11.5M4.56659 13.25L0.833252 15V11.5" stroke="var(--white)" stroke-linejoin="round"/>
+                    </svg>                         
+                </button>
+            </div>
+            <separator></separator>
+            <div class="posts">
 
             </div>
         </screen>

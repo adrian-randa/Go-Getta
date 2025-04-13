@@ -41,7 +41,6 @@ pub async fn login(login_credentials: LoginCredentials, connection: DBConnection
 
 
 pub async fn logout(headers: warp::http::HeaderMap, connection: DBConnection) -> Result<impl warp::Reply, warp::Rejection> {
-
     let cookie_jar = headers.get("cookie").ok_or(InvalidSessionError)?.to_str().map_err(|_| InvalidSessionError)?.to_string();
     let session_id = extract_cookie(cookie_jar, "session_id".into()).ok_or(InvalidSessionError)?;
 

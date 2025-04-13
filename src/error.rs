@@ -21,5 +21,8 @@ new_rejections!(
     PostDoesNotExistError,
     InsufficientPermissionsError,
     EmptyContentError,
-    ContentTooLargeError
+    ContentTooLargeError,
+    InvalidUsernameError,
+    InvalidPublicNameError,
+    InvalidBiographyError
 );

@@ -6,7 +6,7 @@ use bytes::BufMut;
 use futures::{TryStreamExt, StreamExt};
 use uuid::Uuid;
 
-use crate::{db::DBConnection, error::InvalidFileError, validate_session_from_headers};
+use crate::{db::DBConnection, error::{EmptyContentError, InternalServerError, InvalidFileError, InvalidSessionError}, validate_session_from_headers};
 
 #[derive(Debug, Clone, Copy, Serialize)]
 enum FileType {
@@ -63,7 +63,7 @@ struct FileUploadResponse {
 
 pub async fn file_upload(headers: warp::http::HeaderMap, connection: DBConnection, form: FormData) -> Result<impl warp::Reply, warp::Rejection> {
 
-    let _user = validate_session_from_headers(&headers, connection);
+    let _user = validate_session_from_headers(&headers, connection).await.ok_or(InvalidSessionError)?;
 
     let mut parts = form.into_stream();
 
@@ -96,4 +96,27 @@ pub async fn file_upload(headers: warp::http::HeaderMap, connection: DBConnectio
     );
 
     Ok(warp::reply::json(&FileUploadResponse { appendage_id: appendage.appendage_id }))
+}
+
+pub async fn update_profile_picture(headers: warp::http::HeaderMap, connection: DBConnection, form: FormData) -> Result<impl warp::Reply, warp::Rejection> {
+    let user = validate_session_from_headers(&headers, connection.clone()).await.ok_or(InvalidSessionError)?;
+
+    let mut parts = form.into_stream();
+
+    let file = parts.next().await.ok_or(EmptyContentError)?.map_err(|_| InternalServerError)?;
+
+    let content = file.stream()
+        .try_fold(Vec::new(), |mut v, buffer| {
+            v.put(buffer);
+            async move { Ok(v) }
+        })
+        .await
+        .map_err(|_| InvalidFileError)?;
+
+    fs::write(
+        format!("{}/profile_picture/{}", env::var("STORAGE_URL").unwrap(), user.get_username()),
+        content
+    ).map_err(|_| InternalServerError)?;
+
+    Ok(warp::reply())
 }

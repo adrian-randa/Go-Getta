@@ -7,7 +7,7 @@ use uuid::*;
 
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 
-use go_getta::{api::{file_upload::file_upload, post::{create_post, delete_post}, public_space::public_space_query, rating::set_rating_state, thread::{comment_query, get_thread}, user_data::get_user_data, who_am_i}, clean_database, create_account::create_account, db::{establish_connection, scan_for_keys, with_db_connection}, login::*, models::*, pages::{with_page_store, PageStore}, render::render, schema::sessions::{self, timestamp}};
+use go_getta::{api::{file_upload::{file_upload, update_profile_picture}, post::{create_post, delete_post}, public_space::public_space_query, rating::set_rating_state, thread::{comment_query, get_thread}, user_data::{get_user_data, update_biography, update_public_name, users_posts_query}, who_am_i}, clean_database, create_account::create_account, db::{establish_connection, scan_for_keys, with_db_connection}, login::*, models::*, pages::{with_page_store, PageStore}, render::render, schema::sessions::{self, timestamp}};
 
 
 pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("./migrations/");
@@ -96,6 +96,22 @@ async fn main() {
         .and(warp::multipart::form().max_length(5_000_000))
         .and_then(file_upload);
 
+    let update_profile_picture_route = warp::post()
+        .and(warp::path("api"))
+        .and(warp::path("update_profile_picture"))
+        .and(warp::path::end())
+        .and(warp::header::headers_cloned())
+        .and(with_db_connection(connection.clone()))
+        .and(warp::multipart::form().max_length(2_000_000))
+        .and_then(update_profile_picture);
+
+    let users_posts_query = warp::get()
+        .and(warp::header::headers_cloned())
+        .and(with_db_connection(connection.clone()))
+        .and(warp::query::<HashMap<String, String>>())
+        .and(warp::path!("api" / "users_posts" / String))
+        .and_then(users_posts_query);
+
     let get_user_data_route = warp::get()
         .and(warp::header::headers_cloned())
         .and(with_db_connection(connection.clone()))
@@ -123,6 +139,22 @@ async fn main() {
         .and(warp::query::<HashMap<String, String>>())
         .and_then(comment_query);
 
+    let update_public_name_route = warp::post()
+        .and(warp::path("api"))
+        .and(warp::path("update_public_name"))
+        .and(warp::header::headers_cloned())
+        .and(with_db_connection(connection.clone()))
+        .and(warp::body::json())
+        .and_then(update_public_name);
+
+    let update_biography_route = warp::post()
+        .and(warp::path("api"))
+        .and(warp::path("update_biography"))
+        .and(warp::header::headers_cloned())
+        .and(with_db_connection(connection.clone()))
+        .and(warp::body::json())
+        .and_then(update_biography);
+
     let storage_route = warp::get()
         .and(warp::path("storage"))
         .and(warp::fs::dir(env::var("STORAGE_URL").unwrap()));
@@ -138,10 +170,14 @@ async fn main() {
         .or(delete_post_route)
         .or(public_space_route)
         .or(file_upload_route)
+        .or(update_profile_picture_route)
         .or(get_user_data_route)
+        .or(users_posts_query)
         .or(set_rating_state_route)
         .or(get_thread_route)
         .or(fetch_comments_route)
+        .or(update_public_name_route)
+        .or(update_biography_route)
         .or(storage_route);
 
     select! {

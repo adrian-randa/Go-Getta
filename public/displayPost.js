@@ -65,7 +65,9 @@ async function applyPostDataToNode(data, node) {
     node.querySelector(".content").textContent = post.body;
 
     let ratingDisplay = node.querySelector(".rating");
-    ratingDisplay.querySelector("h5").textContent = post.rating;
+    let ratingDisplayNumber = ratingDisplay.querySelector("h5");
+    ratingDisplayNumber.textContent = post.rating;
+    if (post.rating < 0) ratingDisplayNumber.style.color = "var(--red-50)";
     let [upvoteButton, downvoteButton] = ratingDisplay.querySelectorAll("button");
     const ratingInteractionGenerator = generateRatingEventHandler(post, node);
     if (interaction.rating == "Upvote") {

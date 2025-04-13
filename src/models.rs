@@ -29,7 +29,7 @@ impl AccountKey {
 }
 
 
-#[derive(Debug, Queryable, Selectable, Insertable, Identifiable)]
+#[derive(Debug, Queryable, Selectable, Insertable, Identifiable, AsChangeset)]
 #[diesel(table_name = crate::schema::users)]
 #[diesel(primary_key(username))]
 #[diesel(check_for_backend(sqlite::Sqlite))]
@@ -59,6 +59,14 @@ impl User {
 
     pub fn get_biography(&self) -> String {
         self.biography.clone()
+    }
+
+    pub fn set_public_name_unchecked(&mut self, public_name: String) {
+        self.public_name = public_name;
+    }
+
+    pub fn set_biography_unchecked(&mut self, biography: String) {
+        self.biography = biography;
     }
 }
 
