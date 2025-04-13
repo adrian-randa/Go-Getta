@@ -21,6 +21,7 @@ diesel::table! {
         shares -> Integer,
         reposts -> Integer,
         bookmarks -> Integer,
+        child -> Nullable<Text>,
     }
 }
 

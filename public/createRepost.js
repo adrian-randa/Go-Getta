@@ -1,14 +1,14 @@
-const POST_CHARACTER_LIMIT = 300;
+//const POST_CHARACTER_LIMIT = 300; // Set in createPost.js
 
-async function submitPost() {
-    const body = document.querySelector("#newPostBody").value;
+async function submitRepost(referencedPostID) {
+    const body = document.querySelector("#newRepostBody").value;
     if (body.length > POST_CHARACTER_LIMIT) {
         return;
     }
 
     let appendageID = null;
 
-    const fileInput = document.querySelector("#newPostFiles");
+    const fileInput = document.querySelector("#newRepostFiles");
     if (fileInput.files && fileInput.files.length > 0) {
 
         let fileUploadFormData = new FormData();
@@ -32,7 +32,7 @@ async function submitPost() {
         "appendage_id": appendageID,
         "room": null,
         "parent": null,
-        "child": null,
+        "child": referencedPostID,
     }
 
     const req = new XMLHttpRequest();
@@ -61,12 +61,12 @@ async function submitPost() {
     req.send(JSON.stringify(payload));
 }
 
-function browseNewPostFiles() {
-    document.querySelector("#newPostFiles").click();
+function browseNewRepostFiles() {
+    document.querySelector("#newRepostFiles").click();
 }
 
-function handleNewPostFileSelect(input) {
-    const previewContainer = document.querySelector("#mediaPreviewContainer");
+function handleNewRepostFileSelect(input) {
+    const previewContainer = document.querySelector("#repostMediaPreviewContainer");
     previewContainer.innerHTML = "";
 
     if (input.files) {
@@ -89,7 +89,7 @@ function handleNewPostFileSelect(input) {
     }
 }
 
-function removeNewPostFiles() {
-    document.querySelector("#newPostFiles").value = "";
-    document.querySelector("#mediaPreviewContainer").innerHTML = "";
+function removeNewRepostFiles() {
+    document.querySelector("#newRepostFiles").value = "";
+    document.querySelector("#repostMediaPreviewContainer").innerHTML = "";
 }

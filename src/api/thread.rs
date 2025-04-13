@@ -22,7 +22,7 @@ pub async fn get_thread(headers: warp::http::HeaderMap, connection: DBConnection
     thread.push(PostQueryResponse::from_post_for_user(selected_post, &user, connection.clone()).await);
 
     for i in 0..MAX_PARENT_POST_COUNT {
-        if let Some(parent_post) = thread[i].get_post_ref().try_fetch_parent(connection.clone()).await {
+        if let Some(parent_post) = thread[i].get_post_ref().try_get_parent(connection.clone()).await {
             thread.push(PostQueryResponse::from_post_for_user(parent_post, &user, connection.clone()).await);
         } else {
             break;

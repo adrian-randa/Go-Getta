@@ -105,7 +105,6 @@ impl Session {
 #[derive(Debug, Queryable, Insertable, Selectable, Associations, Identifiable, Serialize, Deserialize, AsChangeset)]
 #[diesel(belongs_to(User, foreign_key = creator))]
 #[diesel(belongs_to(Room, foreign_key = room))]
-#[diesel(belongs_to(Post, foreign_key = parent))]
 #[diesel(primary_key(id))]
 #[diesel(table_name = crate::schema::posts)]
 pub struct Post {
@@ -121,10 +120,11 @@ pub struct Post {
     shares: i32,
     reposts: i32,
     bookmarks: i32,
+    child: Option<String>,
 }
 
 impl Post {
-    pub fn new(creator: &User, body: String, appendage_id: Option<String>, room: Option<&Room>, parent: Option<&Post>) -> Self {
+    pub fn new(creator: &User, body: String, appendage_id: Option<String>, room: Option<&Room>, parent: Option<&Post>, child: Option<&Post>) -> Self {
         Post {
             id: Uuid::new_v4().to_string(), 
             creator: creator.get_username(), 
@@ -134,7 +134,8 @@ impl Post {
             appendage_id,
             room: room.map(|r| r.get_id()),
             parent: parent.map(|p| p.get_id()),
-            comments: 0, shares: 0, reposts: 0, bookmarks: 0
+            comments: 0, shares: 0, reposts: 0, bookmarks: 0,
+            child: child.map(|p| p.get_id()),
         }
     }
 
@@ -150,9 +151,18 @@ impl Post {
         self.rating = rating;
     }
 
-    pub async fn try_fetch_parent(&self, connection: DBConnection) -> Option<Post> {
+    pub async fn try_get_parent(&self, connection: DBConnection) -> Option<Post> {
         let post: Post = posts::table
             .find(self.parent.clone()?)
+            .first(connection.lock().await.deref_mut())
+            .ok()?;
+
+        Some(post)
+    }
+
+    pub async fn try_get_child(&self, connection: DBConnection) -> Option<Post> {
+        let post: Post = posts::table
+            .find(self.child.clone()?)
             .first(connection.lock().await.deref_mut())
             .ok()?;
 
@@ -169,6 +179,18 @@ impl Post {
 
     pub fn get_creator(&self) -> String {
         self.creator.clone()
+    }
+
+    pub fn get_child(&self) -> Option<String> {
+        self.child.clone()
+    }
+
+    pub fn get_reposts_amount(&self) -> i32 {
+        self.reposts
+    }
+
+    pub fn set_reposts_amount_unchecked(&mut self, reposts: i32) {
+        self.reposts = reposts;
     }
 }
 

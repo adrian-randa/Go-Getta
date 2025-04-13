@@ -4,7 +4,7 @@ use diesel::{QueryDsl, RunQueryDsl};
 use serde::{Deserialize, Serialize};
 use warp::Filter;
 
-use crate::{db::{with_db_connection, DBConnection}, error::InvalidSessionError, models::{Post, Rating, User}, schema::ratings, validate_session_from_headers};
+use crate::{db::{with_db_connection, DBConnection}, error::{InvalidSessionError, PostDoesNotExistError}, models::{Post, Rating, User}, schema::{posts, ratings}, validate_session_from_headers};
 
 pub mod post;
 pub mod public_space;
@@ -36,7 +36,7 @@ pub async fn who_am_i(headers: warp::http::HeaderMap, connection: DBConnection) 
 pub struct PostQueryResponse {
     post: Post,
     interaction: PostInteraction,
-    //TODO: When adding support for reposts, add child: Option<Post>
+    child: Option<Post>,
 }
 
 impl PostQueryResponse {
@@ -46,11 +46,20 @@ impl PostQueryResponse {
             .find((user.get_username(), post.get_id()))
             .first(connection.lock().await.deref_mut()).ok().into();
 
+        let mut child: Option<Post> = None;
+        if let Some(child_id) = post.get_child() {
+            child = posts::table
+                .find(child_id)
+                .first(connection.lock().await.deref_mut())
+                .ok();
+        }
+
         Self {
             post,
             interaction: PostInteraction {
                 rating
-            }
+            },
+            child
         }
     }
 

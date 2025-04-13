@@ -5,12 +5,15 @@ use crate::{db::DBConnection, error::{ContentTooLargeError, EmptyContentError, I
 use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl, SaveChangesDsl};
 use serde::{Deserialize, Serialize};
 
+use super::PostQueryResponse;
+
 #[derive(Debug, Deserialize)]
 pub struct PostCreationData {
     body: String,
     appendage_id: Option<String>,
     room: Option<String>,
     parent: Option<String>,
+    child: Option<String>
 }
 
 #[derive(Debug, Serialize)]
@@ -24,7 +27,7 @@ pub async fn create_post(headers: warp::http::HeaderMap, connection: DBConnectio
     if post_data.body.split_ascii_whitespace().next().is_none() {
         Err(EmptyContentError)?;
     }
-    if post_data.body.len() > 250 {
+    if post_data.body.len() > 300 {
         Err(ContentTooLargeError)?;
     }
 
@@ -38,7 +41,17 @@ pub async fn create_post(headers: warp::http::HeaderMap, connection: DBConnectio
         parent_post = Some(p);
     }
 
-    let new_post = Post::new(&user, post_data.body, post_data.appendage_id, None, parent_post.as_ref());
+    let mut child_post = None;
+    if let Some(child_id) = post_data.child {
+        let p: Post = posts::table
+            .find(child_id)
+            .first(connection.lock().await.deref_mut())
+            .map_err(|_| PostDoesNotExistError)?;
+
+        child_post = Some(p);
+    }
+
+    let new_post = Post::new(&user, post_data.body, post_data.appendage_id, None, parent_post.as_ref(), child_post.as_ref());
     let post_id = new_post.get_id();
 
     diesel::insert_into(posts::table)
@@ -52,6 +65,14 @@ pub async fn create_post(headers: warp::http::HeaderMap, connection: DBConnectio
         );
 
         let _: Result<Post, _> = parent_post.save_changes(connection.lock().await.deref_mut());
+    }
+
+    if let Some(mut child_post) = child_post {
+        child_post.set_reposts_amount_unchecked(
+            child_post.get_reposts_amount() + 1
+        );
+
+        let _: Result<Post, _> = child_post.save_changes(connection.lock().await.deref_mut());
     }
 
     Ok(warp::reply::json(&PostCreationResponse {
@@ -72,7 +93,8 @@ pub async fn delete_post(headers: warp::http::HeaderMap, connection: DBConnectio
         Err(InsufficientPermissionsError)?;
     }
 
-    let parent_post = post_to_delete.try_fetch_parent(connection.clone()).await;
+    let parent_post = post_to_delete.try_get_parent(connection.clone()).await;
+    let child_post = post_to_delete.try_get_child(connection.clone()).await;
 
     diesel::delete(&post_to_delete)
         .execute(connection.lock().await.deref_mut())
@@ -81,6 +103,11 @@ pub async fn delete_post(headers: warp::http::HeaderMap, connection: DBConnectio
     if let Some(mut parent_post) = parent_post {
         parent_post.set_comments_amount_unchecked(parent_post.get_comments_amount() - 1);
         let _: Result<Post, _> = parent_post.save_changes(connection.lock().await.deref_mut());
+    }
+
+    if let Some(mut child_post) = child_post {
+        child_post.set_reposts_amount_unchecked(child_post.get_reposts_amount() - 1);
+        let _: Result<Post, _> = child_post.save_changes(connection.lock().await.deref_mut());
     }
 
     tokio::spawn(post_deletion_cleanup(connection, post_to_delete));
@@ -95,4 +122,16 @@ async fn post_deletion_cleanup(connection: DBConnection, deleted_post: Post) {
         ratings::table.filter(post.eq(deleted_post.get_id()))
     ).execute(connection.lock().await.deref_mut());
 
+}
+
+pub async fn get_post(headers: warp::http::HeaderMap, connection: DBConnection, post_id: String) -> Result<impl warp::Reply, warp::Rejection> {
+
+    let user = validate_session_from_headers(&headers, connection.clone()).await.ok_or(InvalidSessionError)?;
+    
+    let queried_post: Post = posts::table
+        .find(post_id)
+        .first(connection.lock().await.deref_mut())
+        .map_err(|_| PostDoesNotExistError)?;
+
+    Ok(warp::reply::json(&PostQueryResponse::from_post_for_user(queried_post, &user, connection).await))
 }

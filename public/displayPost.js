@@ -24,7 +24,7 @@ async function makePostNode(post) {
 
 async function applyPostDataToNode(data, node) {
 
-    const { post, interaction } = data;
+    const { post, interaction, child } = data;
 
     if (node instanceof DocumentFragment) node.querySelector(".post").setAttribute("id", `post-${post.id}`);
 
@@ -71,6 +71,12 @@ async function applyPostDataToNode(data, node) {
 
     node.querySelector(".content").textContent = post.body;
 
+    const referencedPost = node.querySelector(".referencedPost");
+    if (post.child) {
+        if (child) referencedPost.appendChild(await makeChildPostNode(child));
+        else referencedPost.innerText = "The referenced post has been deleted.";
+    } else referencedPost.style.display = "none";
+
     let ratingDisplay = node.querySelector(".rating");
     let ratingDisplayNumber = ratingDisplay.querySelector("h5");
     ratingDisplayNumber.textContent = post.rating;
@@ -106,6 +112,9 @@ async function applyPostDataToNode(data, node) {
 
     let repostButton = node.querySelector(".repost");
     repostButton.querySelector("h5").textContent = post.reposts;
+    repostButton.addEventListener("click", () => {
+        showRepostCreationScreen(post.id);
+    });
 
     let bookmarkButton = node.querySelector(".bookmark");
     bookmarkButton.querySelector("h5").textContent = post.bookmarks;
@@ -136,6 +145,57 @@ async function applyPostDataToNode(data, node) {
             ]
         })});
     }
+}
+
+async function makeChildPostNode(post) {
+    let node = postTemplate.content.cloneNode(true);
+
+    let userDataResponse = await fetch(`/api/get_user_data/${post.creator}`);
+    let userData = await userDataResponse.json();
+
+    let creatorDisplay = node.querySelector(".userDisplay");
+    creatorDisplay.setAttribute("href", `?view=profile&id=${post.creator}`);
+    creatorDisplay.querySelector("h4").textContent = userData.public_name;
+    creatorDisplay.querySelector("h5").textContent = post.creator;
+    creatorDisplay.querySelector(".profilePicture").style.backgroundImage = `url("/storage/profile_picture/${post.creator}")`;
+
+    let threadInfo = node.querySelector(".threadInfoContainer");
+    if (!post.parent) threadInfo.style.display = "none";
+    else {
+        threadInfo.setAttribute("href", `?view=post&id=${post.parent}`);
+    }
+
+    let timestamp = new Date(post.timestamp * 1000);
+    let [date, fullTime] = timestamp.toISOString().split("T");
+    let [hour, minute] = fullTime.split(":");
+
+    let timestampDisplay = node.querySelector(".timestamp");
+    let [dateDisplay, timeDisplay] = timestampDisplay.querySelectorAll("h5");
+    dateDisplay.textContent = date;
+    timeDisplay.textContent = `${hour}:${minute}`;
+
+    if (post.appendage_id) {
+        let appendageResponse = await fetch(`/storage/appendage/${post.appendage_id}`);
+        if (appendageResponse.ok) {
+            let appendage = await appendageResponse.json();
+    
+            const mediaContainer = node.querySelector(".appendages");
+            
+            appendage.files.forEach((file) => {
+                let mediaType = mediaTypeLookup[file.file_type];
+                let mediaNode = document.createElement(mediaType);
+                mediaNode.setAttribute("src", `/storage/appendage/file/${file.file_id}`);
+                if (mediaType == "video") mediaNode.setAttribute("controls", "");
+                mediaContainer.appendChild(mediaNode);
+            })
+        }
+    }
+
+    node.querySelector(".content").textContent = post.body;
+    node.querySelector(".interactionBar").remove();
+    node.querySelector(".referencedPostContainer").remove();
+
+    return node;
 }
 
 function generateRatingEventHandler(post) {

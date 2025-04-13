@@ -25,6 +25,7 @@ async function logout() {
 const mainContent = document.querySelector("#mainContent");
 const postScreen = document.querySelector("#postScreen");
 const postCreationScreen = document.querySelector("#postCreation");
+const repostCreationScreen = document.querySelector("#repostCreation");
 const postThreadScreen = document.querySelector("#postThread");
 const postThreadParentsSection = postThreadScreen.querySelector(".parentPosts");
 const postThreadCommentSection = postThreadScreen.querySelector(".childPosts");
@@ -38,6 +39,29 @@ document.addEventListener("scrolledToBottom", () => {currentPaginator()});
 function showPostCreationScreen() {
     postScreen.style.display = "none";
     postCreationScreen.style.display = "flex";
+    repostCreationScreen.style.display = "none";
+    postThreadScreen.style.display = "none";
+    personalProfileScreen.style.display = "none";
+    profileScreen.style.display = "none";
+
+    currentPaginator = noPaginator;
+}
+
+const referencedPostContainer = repostCreationScreen.querySelector(".referencedPost");
+async function showRepostCreationScreen(childPostID) {
+
+    let response = await fetch(`/api/get_post/${childPostID}`);
+    if (!response.ok) alert(await response.text());
+    let referencedPostData = await response.json();
+
+    referencedPostContainer.innerHTML = "";
+    referencedPostContainer.appendChild(await makePostNode(referencedPostData));
+
+    document.querySelector("#newRepostSubmitButton").onclick = () => {submitRepost(childPostID)};
+
+    postScreen.style.display = "none";
+    postCreationScreen.style.display = "none";
+    repostCreationScreen.style.display = "flex";
     postThreadScreen.style.display = "none";
     personalProfileScreen.style.display = "none";
     profileScreen.style.display = "none";
@@ -47,8 +71,10 @@ function showPostCreationScreen() {
 
 function showPostScreen() {
     postScreen.innerHTML = "";
+
     postScreen.style.display = "flex";
     postCreationScreen.style.display = "none";
+    repostCreationScreen.style.display = "none";
     postThreadScreen.style.display = "none";
     personalProfileScreen.style.display = "none";
     profileScreen.style.display = "none";
@@ -76,6 +102,7 @@ function showFollowingScreen() {
 function showPersonalProfileScreen() {
     postScreen.style.display = "none";
     postCreationScreen.style.display = "none";
+    repostCreationScreen.style.display = "none";
     postThreadScreen.style.display = "none";
     personalProfileScreen.style.display = "flex";
     profileScreen.style.display = "none";
@@ -90,6 +117,7 @@ function showPersonalProfileScreen() {
 function showProfileScreen(username) {
     postScreen.style.display = "none";
     postCreationScreen.style.display = "none";
+    repostCreationScreen.style.display = "none";
     postThreadScreen.style.display = "none";
     personalProfileScreen.style.display = "none";
     profileScreen.style.display = "flex";

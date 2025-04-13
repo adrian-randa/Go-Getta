@@ -35,6 +35,7 @@ async function submitComment() {
         "appendage_id": appendageID,
         "room": null,
         "parent": parentID,
+        "child": null
     }
 
     const req = new XMLHttpRequest();

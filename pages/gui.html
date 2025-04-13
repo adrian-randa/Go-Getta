@@ -8,7 +8,8 @@
     <script defer src="displayPost.js"></script>
     <script defer src="profilePosts.js"></script>
     <script defer src="personalProfile.js"></script>
-    <script src="profile.js"></script>
+    <script defer src="profile.js"></script>
+    <script defer src="createRepost.js"></script>
     <script defer src="gui.js"></script>
     <script defer src="modal.js"></script>
 
@@ -148,6 +149,11 @@
                 </div>
                 <div class="appendages">
                 </div>
+                <div class="referencedPostContainer">
+                    <div class="referencedPost">
+                        
+                    </div>
+                </div>
                 <div class="interactionBar">
                     <div class="rating">
                         <button>
@@ -248,6 +254,55 @@
                 <div class="postButton">
                     Post
                     <button id="newPostSubmitButton" onclick="submitPost()">
+                        <svg viewBox="0 0 18 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M1 8.5V11H3.46154L13.3077 6L14.5385 8.5L17 2.25L9.61539 1L10.8462 3.5L1 8.5Z" stroke="var(--green)" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>                            
+                    </button>
+                </div>
+            </div>
+        </screen>
+
+        <screen id="repostCreation" style="display: none;">
+            <h1>Repost</h1>
+            <div class="referencedPost">
+
+            </div>
+            <textarea name="body" id="newRepostBody" placeholder="Enter your thoughts here..."></textarea>
+            <form enctype="multipart/form-data" id="addRepostMediaForm" style="display: none;">
+                <input
+                    type="file"
+                    name="file"
+                    id="newRepostFiles"
+                    multiple
+                    accept="audio/*, video/*, image/*"
+                    onchange="handleNewRepostFileSelect(this)"
+                >
+            </form>
+            <div id="repostMediaPreviewContainer">
+
+            </div>
+            <div class="postSettings">
+                <div class="roomDropdownContainer">
+                    Post in...
+                    <select name="room" id="newRepostRoom" style="--color: var(--white);">
+                        <option value="" selected>Public Space</option>
+                    </select>
+                </div>
+                <div class="addMediaButtonContainer">
+                    Add Media
+                    <div class="buttonsContainer">
+                        <button id="newRepostBrowse" onclick="browseNewRepostFiles()">
+                            Browse...
+                        </button>
+                        <button class="removeMediaButton" onclick="removeNewRepostFiles()">
+                            Remove Media
+                        </button>
+                    </div>
+                </div>
+                <spacer></spacer>
+                <div class="postButton">
+                    Repost
+                    <button id="newRepostSubmitButton" onclick="submitRepost()">
                         <svg viewBox="0 0 18 12" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M1 8.5V11H3.46154L13.3077 6L14.5385 8.5L17 2.25L9.61539 1L10.8462 3.5L1 8.5Z" stroke="var(--green)" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>                            
