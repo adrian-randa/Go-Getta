@@ -7,7 +7,7 @@ use uuid::*;
 
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 
-use go_getta::{api::{file_upload::{file_upload, update_profile_picture}, post::{create_post, delete_post, get_post}, public_space::public_space_query, rating::set_rating_state, thread::{comment_query, get_thread}, user_data::{get_user_data, update_biography, update_public_name, users_posts_query}, who_am_i}, clean_database, create_account::create_account, db::{establish_connection, scan_for_keys, with_db_connection}, login::*, models::*, pages::{with_page_store, PageStore}, render::render, schema::sessions::{self, timestamp}};
+use go_getta::{api::{file_upload::{file_upload, update_profile_picture, update_room_banner}, post::{create_post, delete_post, get_post}, public_space::public_space_query, rating::set_rating_state, room::{create_room, get_joined_rooms}, thread::{comment_query, get_thread}, user_data::{get_user_data, update_biography, update_public_name, users_posts_query}, who_am_i}, clean_database, create_account::create_account, db::{establish_connection, scan_for_keys, with_db_connection}, login::*, models::*, pages::{with_page_store, PageStore}, render::render, schema::sessions::{self, timestamp}};
 
 
 pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("./migrations/");
@@ -161,6 +161,28 @@ async fn main() {
         .and(warp::body::json())
         .and_then(update_biography);
 
+    let create_room_route = warp::post()
+        .and(warp::path("api"))
+        .and(warp::path("create_room"))
+        .and(warp::header::headers_cloned())
+        .and(with_db_connection(connection.clone()))
+        .and(warp::body::json())
+        .and_then(create_room);
+
+    let update_room_banner_route = warp::post()
+        .and(warp::header::headers_cloned())
+        .and(with_db_connection(connection.clone()))
+        .and(warp::path!("api" / "update_room_banner" / String))
+        .and(warp::multipart::form().max_length(3_000_000))
+        .and_then(update_room_banner);
+
+    let get_joined_rooms_route = warp::get()
+        .and(warp::path("api"))
+        .and(warp::path("get_joined_rooms"))
+        .and(warp::header::headers_cloned())
+        .and(with_db_connection(connection.clone()))
+        .and_then(get_joined_rooms);
+
     let storage_route = warp::get()
         .and(warp::path("storage"))
         .and(warp::fs::dir(env::var("STORAGE_URL").unwrap()));
@@ -185,6 +207,9 @@ async fn main() {
         .or(update_public_name_route)
         .or(update_biography_route)
         .or(get_post_route)
+        .or(create_room_route)
+        .or(update_room_banner_route)
+        .or(get_joined_rooms_route)
         .or(storage_route);
 
     select! {

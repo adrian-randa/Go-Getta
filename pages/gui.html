@@ -11,6 +11,7 @@
     <script defer src="profile.js"></script>
     <script defer src="createRepost.js"></script>
     <script defer src="gui.js"></script>
+    <script defer src="createRoom.js"></script>
     <script defer src="modal.js"></script>
 
     <script src="createPost.js"></script>
@@ -43,13 +44,14 @@
             <h5>My Rooms</h5>
 
             <template id="roomButtonTemplate">
-                <button style="--room-color: var(--white);">
+                <a style="--room-color: var(--white);">
                     <strip></strip>
                     <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M1 11.5L8 15L15 11.5V4.5L8 1L1 4.5V11.5Z" stroke="var(--room-color)" stroke-linecap="round" stroke-linejoin="round"/>
                         <path d="M1 11.5L8 8M8 8L15 11.5M8 8V1" stroke="var(--room-color)" stroke-opacity="0.25" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>Room Name</span>
-                </button>
+                    </svg>
+                    <span>Room Name</span>
+                </a>
             </template>
 
         </div>
@@ -151,7 +153,7 @@
                 </div>
                 <div class="referencedPostContainer">
                     <div class="referencedPost">
-                        
+
                     </div>
                 </div>
                 <div class="interactionBar">
@@ -257,6 +259,45 @@
                         <svg viewBox="0 0 18 12" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M1 8.5V11H3.46154L13.3077 6L14.5385 8.5L17 2.25L9.61539 1L10.8462 3.5L1 8.5Z" stroke="var(--green)" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>                            
+                    </button>
+                </div>
+            </div>
+        </screen>
+
+        <screen id="roomCreation" style="display: none;">
+            <h1>New Room</h1>
+            <div id="newRoomSettings" class="roomSettings">
+                <div class="left">
+                    <input type="text" name="roomName" id="newRoomName" placeholder="Name" maxlength="24">
+                    <textarea name="roomDescription" id="newRoomDescription" placeholder="Description" maxlength="150"></textarea>
+                </div>
+                <div class="right">
+                    <button class="bannerContainer" onclick="browseNewRoomBannerImage()">
+                        Banner Image
+                        <span>Image will be cropped to fit a 3/1 aspect-ratio</span>
+                        <img src="" id="newRoomBannerPreview" alt="Click to choose">
+                    </button>
+                    <input type="file" name="roomBanner" id="newRoomBanner" style="display: none;" accept="image/*" oninput="handleNewRoomBannerInput(this)">
+                    <div class="h">
+                        <div class="colorPickerContainer">
+                            Color
+                            <input type="color" name="roomColor" id="newRoomColor">
+                        </div>
+                        <button class="privateToggleButton" onclick="toggleNewRoomIsPrivateState()">
+                            <div class="public" style="background-color: var(--green-25); color: var(--green);">Public</div>
+                            <div class="private">Private</div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="bottomRow">
+                <div class="openButton">
+                    Open
+                    <button id="openNewRoomButton" onclick="openNewRoom()">
+                        <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M1 11.5L8 15L15 11.5V4.5L8 1L1 4.5V11.5Z" stroke="var(--green)" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M1 11.5L8 8M8 8L15 11.5M8 8V1" stroke="var(--green)" stroke-opacity="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>                        
                     </button>
                 </div>
             </div>

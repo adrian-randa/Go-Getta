@@ -11,18 +11,19 @@ macro_rules! new_rejections {
 
 new_rejections!(
     InvalidKeyError,
-    UserAlreadyExistsError,
-    InvalidPasswordError,
-    InternalServerError,
     InvalidSessionError,
     InvalidQueryError,
     InvalidFileError,
-    UserDoesNotExistError,
-    PostDoesNotExistError,
-    InsufficientPermissionsError,
-    EmptyContentError,
-    ContentTooLargeError,
     InvalidUsernameError,
     InvalidPublicNameError,
-    InvalidBiographyError
+    InvalidBiographyError,
+    InvalidPasswordError,
+    UserAlreadyExistsError,
+    UserDoesNotExistError,
+    PostDoesNotExistError,
+    RoomDoesNotExistError,
+    InternalServerError,
+    InsufficientPermissionsError,
+    EmptyContentError,
+    ContentTooLargeError
 );

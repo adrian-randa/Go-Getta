@@ -8,6 +8,14 @@ diesel::table! {
 }
 
 diesel::table! {
+    memberships (user, room) {
+        user -> Text,
+        room -> Text,
+        date_joined -> BigInt,
+    }
+}
+
+diesel::table! {
     posts (id) {
         id -> Text,
         creator -> Text,
@@ -41,6 +49,7 @@ diesel::table! {
         color -> Text,
         date_created -> BigInt,
         is_private -> Bool,
+        owner -> Text,
     }
 }
 
@@ -61,14 +70,17 @@ diesel::table! {
     }
 }
 
+diesel::joinable!(memberships -> rooms (room));
 diesel::joinable!(posts -> rooms (room));
 diesel::joinable!(posts -> users (creator));
 diesel::joinable!(ratings -> posts (post));
 diesel::joinable!(ratings -> users (user));
+diesel::joinable!(rooms -> users (owner));
 diesel::joinable!(sessions -> users (username));
 
 diesel::allow_tables_to_appear_in_same_query!(
     account_keys,
+    memberships,
     posts,
     ratings,
     rooms,

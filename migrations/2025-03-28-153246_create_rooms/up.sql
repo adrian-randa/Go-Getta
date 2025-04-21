@@ -5,5 +5,6 @@ CREATE TABLE rooms (
     description VARCHAR(150) NOT NULL,
     color VARCHAR(6) NOT NULL,
     date_created BIGINT NOT NULL,
-    is_private BOOLEAN NOT NULL
+    is_private BOOLEAN NOT NULL,
+    owner VARCHAR(24) NOT NULL REFERENCES users(username)
 )

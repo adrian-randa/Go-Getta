@@ -12,6 +12,7 @@ pub mod file_upload;
 pub mod user_data;
 pub mod rating;
 pub mod thread;
+pub mod room;
 
 #[derive(Debug, Serialize)]
 struct WhoAmIResponse {

@@ -8,8 +8,31 @@ fetch("api/who_am_i").then((response) => {
 
         window.localStorage.setItem("currentUsername", json.username);
         window.localStorage.setItem("currentPublicName", json.public_name);
-    })
-})
+    });
+});
+
+const roomButtonTamplate = document.querySelector("#roomButtonTemplate");
+const roomButtonContainer = document.querySelector("#myRooms");
+
+fetch("api/get_joined_rooms").then((response) => {
+    if (!response.ok) {
+        response.text().then(alert);
+        return;
+    }
+
+    response.json().then((rooms) => {
+        Array.from(rooms).forEach((room) => {
+            let node = roomButtonTamplate.content.cloneNode(true);
+
+            node.children[0].setAttribute("style", `--room-color: #${room.color}`);
+            node.children[0].setAttribute("href", `?view=room&id=${room.id}`);
+
+            node.querySelector("span").textContent = room.name;
+
+            roomButtonContainer.appendChild(node);
+        });
+    });
+});
 
 async function logout() {
     let response = await fetch("/logout", {method: "DELETE"});
@@ -31,6 +54,7 @@ const postThreadParentsSection = postThreadScreen.querySelector(".parentPosts");
 const postThreadCommentSection = postThreadScreen.querySelector(".childPosts");
 const personalProfileScreen = document.querySelector("#personalProfile");
 const profileScreen = document.querySelector("#profile");
+const roomCreationScreen = document.querySelector("#roomCreation");
 
 const noPaginator = () => {};
 let currentPaginator = noPaginator;
@@ -43,6 +67,7 @@ function showPostCreationScreen() {
     postThreadScreen.style.display = "none";
     personalProfileScreen.style.display = "none";
     profileScreen.style.display = "none";
+    roomCreationScreen.style.display = "none";
 
     currentPaginator = noPaginator;
 }
@@ -78,10 +103,17 @@ function showPostScreen() {
     postThreadScreen.style.display = "none";
     personalProfileScreen.style.display = "none";
     profileScreen.style.display = "none";
+    roomCreationScreen.style.display = "none";
 }
 
 function showRoomCreationScreen() {
-    //TODO
+    postScreen.style.display = "none";
+    postCreationScreen.style.display = "none";
+    repostCreationScreen.style.display = "none";
+    postThreadScreen.style.display = "none";
+    personalProfileScreen.style.display = "none";
+    profileScreen.style.display = "none";
+    roomCreationScreen.style.display = "flex";
 
     currentPaginator = noPaginator;
 }
@@ -106,6 +138,7 @@ function showPersonalProfileScreen() {
     postThreadScreen.style.display = "none";
     personalProfileScreen.style.display = "flex";
     profileScreen.style.display = "none";
+    roomCreationScreen.style.display = "none";
 
     const currentUsername = window.localStorage.getItem("currentUsername");
     const postsContainer = personalProfileScreen.querySelector(".posts");
@@ -121,6 +154,7 @@ function showProfileScreen(username) {
     postThreadScreen.style.display = "none";
     personalProfileScreen.style.display = "none";
     profileScreen.style.display = "flex";
+    roomCreationScreen.style.display = "none";
 
     const postsContainer = profileScreen.querySelector(".posts");
 
@@ -145,7 +179,11 @@ async function showPostThreadScreen(postID) {
 
     postScreen.style.display = "none";
     postCreationScreen.style.display = "none";
+    repostCreationScreen.style.display = "none";
     postThreadScreen.style.display = "flex";
+    personalProfileScreen.style.display = "none";
+    profileScreen.style.display = "none";
+    roomCreationScreen.style.display = "none";
 }
 
 // Scroll to bottom event
@@ -184,6 +222,12 @@ switch (params.get("view")) {
         const username = params.get("id");
         initProfilePage(username);
         showProfileScreen(username);
+        break;
+    }
+
+    case "debug": {
+        showRoomCreationScreen();
+
         break;
     }
 

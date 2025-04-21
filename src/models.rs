@@ -4,7 +4,7 @@ use diesel::{prelude::*, sqlite};
 use serde::{Serialize, Deserialize};
 use uuid::Uuid;
 
-use crate::{db::DBConnection, schema::posts};
+use crate::{api::room::RoomCreationData, db::DBConnection, error::ContentTooLargeError, schema::posts};
 
 #[derive(Debug, Queryable, Selectable, Insertable)]
 #[diesel(table_name = crate::schema::account_keys)]
@@ -194,8 +194,9 @@ impl Post {
     }
 }
 
-#[derive(Debug, Queryable, Insertable, Selectable, Identifiable)]
+#[derive(Debug, Queryable, Insertable, Selectable, Identifiable, Serialize)]
 #[diesel(primary_key(id))]
+#[diesel(belongs_to(User, foreign_key = owner))]
 #[diesel(table_name = crate::schema::rooms)]
 pub struct Room {
     id: String,
@@ -204,11 +205,32 @@ pub struct Room {
     color: String,
     date_created: i64,
     is_private: bool,
+    owner: String
 }
 
 impl Room {
     pub fn get_id(&self) -> String {
         self.id.clone()
+    }
+
+    pub fn try_open(data: RoomCreationData, user: &User) -> Result<Self, warp::Rejection> {
+        if data.name.len() > 24 || data.description.len() > 150 || data.color.len() > 6 {
+            Err(ContentTooLargeError)?;
+        }
+
+        Ok(Self {
+            id: Uuid::new_v4().into(),
+            name: data.name,
+            description: data.description,
+            color: data.color,
+            date_created: time::UNIX_EPOCH.elapsed().unwrap().as_secs().try_into().unwrap(),
+            is_private: data.is_private,
+            owner: user.get_username(),
+        })
+    }
+
+    pub fn get_owner(&self) -> String {
+        self.owner.clone()
     }
 }
 
@@ -233,6 +255,27 @@ impl Rating {
             user: user.get_username(),
             post: post.get_id(),
             is_upvote
+        }
+    }
+}
+
+#[derive(Debug, Queryable, Identifiable, Insertable, Selectable, Associations, Serialize)]
+#[diesel(belongs_to(User, foreign_key = user))]
+#[diesel(belongs_to(Room, foreign_key = room))]
+#[diesel(primary_key(user, room))]
+#[diesel(table_name = crate::schema::memberships)]
+pub struct Membership {
+    user: String,
+    room: String,
+    date_joined: i64,
+}
+
+impl Membership {
+    pub fn new(user: &User, room: &Room) -> Self {
+        Self {
+            user: user.get_username(),
+            room: room.get_id(),
+            date_joined: time::UNIX_EPOCH.elapsed().unwrap().as_secs().try_into().unwrap(),
         }
     }
 }

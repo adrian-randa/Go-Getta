@@ -1,12 +1,13 @@
-use std::{env, fs};
+use std::{env, fs, ops::DerefMut};
 
 use serde::Serialize;
 use warp::multipart::FormData;
 use bytes::BufMut;
 use futures::{TryStreamExt, StreamExt};
 use uuid::Uuid;
+use diesel::{QueryDsl, RunQueryDsl};
 
-use crate::{db::DBConnection, error::{EmptyContentError, InternalServerError, InvalidFileError, InvalidSessionError}, validate_session_from_headers};
+use crate::{db::DBConnection, error::{EmptyContentError, InsufficientPermissionsError, InternalServerError, InvalidFileError, InvalidSessionError, RoomDoesNotExistError}, models::Room, schema::rooms, validate_session_from_headers};
 
 #[derive(Debug, Clone, Copy, Serialize)]
 enum FileType {
@@ -117,6 +118,39 @@ pub async fn update_profile_picture(headers: warp::http::HeaderMap, connection: 
         format!("{}/profile_picture/{}", env::var("STORAGE_URL").unwrap(), user.get_username()),
         content
     ).map_err(|_| InternalServerError)?;
+
+    Ok(warp::reply())
+}
+
+pub async fn update_room_banner(headers: warp::http::HeaderMap, connection: DBConnection, room_id: String, form: FormData) -> Result<impl warp::Reply, warp::Rejection> {
+
+    let user = validate_session_from_headers(&headers, connection.clone()).await.ok_or(InvalidSessionError)?;
+
+    let room: Room = rooms::table
+        .find(&room_id)
+        .first(connection.lock().await.deref_mut())
+        .map_err(|_| RoomDoesNotExistError)?;
+
+    if room.get_owner() != user.get_username() {
+        Err(InsufficientPermissionsError)?;
+    }
+
+    let mut parts = form.into_stream();
+
+    let file = parts.next().await.ok_or(EmptyContentError)?.map_err(|_| InternalServerError)?;
+
+    let content = file.stream()
+        .try_fold(Vec::new(), |mut v, buffer| {
+            v.put(buffer);
+            async move { Ok(v) }
+        })
+        .await
+        .map_err(|_| InvalidFileError)?;
+    
+        fs::write(
+            format!("{}/room_banner/{}", env::var("STORAGE_URL").unwrap(), room_id),
+            content
+        ).map_err(|_| InternalServerError)?;
 
     Ok(warp::reply())
 }

@@ -4,7 +4,7 @@ use diesel::{query_dsl::methods::FindDsl, RunQueryDsl};
 use serde::{Deserialize, Serialize};
 use warp::reject::{InvalidHeader, Reject};
 
-use crate::{db::DBConnection, error::{InternalServerError, InvalidPasswordError, InvalidSessionError}, extract_cookie, models::{Session, User}, schema::{sessions, users}, validate_session_from_headers};
+use crate::{db::DBConnection, error::{InternalServerError, InvalidPasswordError, InvalidSessionError, UserDoesNotExistError}, extract_cookie, models::{Session, User}, schema::{sessions, users}, validate_session_from_headers};
 
 #[derive(Debug, Deserialize)]
 pub struct LoginCredentials {
@@ -21,7 +21,7 @@ struct LoginResponse {
 pub async fn login(login_credentials: LoginCredentials, connection: DBConnection) -> Result<impl warp::Reply, warp::Rejection> {
     let user: User = users::table
         .find(login_credentials.username)
-        .first(connection.lock().await.deref_mut()).map_err(|_| InternalServerError)?;
+        .first(connection.lock().await.deref_mut()).map_err(|_| UserDoesNotExistError)?;
 
     if !user.verify_password(login_credentials.password).map_err(|_| InternalServerError)? {
         return Err(InvalidPasswordError.into())

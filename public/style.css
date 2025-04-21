@@ -150,7 +150,7 @@ button {
             background-color: var(--room-color);
         }
 
-        button {
+        a {
             padding: 0;
             width: calc(100% - 2rem);
 
@@ -162,7 +162,8 @@ button {
 
             overflow: hidden;
 
-
+            background-color: var(--gray-25);
+            border-radius: .5rem;
             color: var(--room-color);
             
             svg {
@@ -699,7 +700,8 @@ button {
 }
 
 .roomHeading {
-    height: 14rem;
+    width: 100%;
+    aspect-ratio: 3 / 1;
 
     position: relative;
     
@@ -712,6 +714,7 @@ button {
         height: 100%;
         
         object-fit: cover;
+        object-position: center;
     }
     
     .gradient {
@@ -746,7 +749,7 @@ button {
     }
 }
 
-#postCreation, #repostCreation {
+#postCreation, #repostCreation, #roomCreation {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -896,6 +899,173 @@ button {
         opacity: .8;
 
         width: 100%;
+    }
+}
+
+#roomCreation {
+    .roomSettings {
+
+        width: 100%;
+        display: flex;
+        gap: 1rem;
+
+        .left, .right {
+            flex: 1;
+
+            display: flex;
+            flex-direction: column;
+
+            gap: 1rem;
+        }
+
+        .left {
+            input {
+                padding: .5rem 1rem;
+
+                border: none;
+                outline: none;
+
+                border-radius: .5rem;
+
+                font-size: 1rem;
+
+                background-color: var(--gray-25);
+                color: var(--white);
+            }
+
+            textarea {
+                border-radius: .5rem;
+                font-size: 1rem;
+            }
+        }
+
+        .right {
+            .bannerContainer {
+                width: 100%;
+
+                padding: .5rem 0;
+
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+
+                background-color: var(--gray-25);
+                border-radius: .5rem;
+
+                span {
+                    color: var(--gray);
+                }
+
+                img {
+                    margin-top: 1rem;
+
+                    width: calc(100% - 1rem);
+                    aspect-ratio: 3 / 1;
+
+                    color: var(--gray);
+                    font-style: italic;
+                    border-radius: .5rem;
+
+                    object-fit: cover;
+                    object-position: center;
+
+                    display: grid;
+                    place-items: center;
+                }
+            }
+
+            .h {
+                display: flex;
+                gap: 1;
+                align-items: center;
+                justify-content: space-between;
+
+                >* {
+                    margin: 0;
+                }
+
+                .colorPickerContainer {
+                    padding: .5rem 1rem;
+
+                    background-color: var(--gray-25);
+                    display: flex;
+                    align-items: center;
+                    gap: 1rem;
+                    border-radius: .5rem;
+
+                    color: var(--white);
+
+                    input {
+                        border: none;
+                        outline: none;
+
+                        width: 2rem;
+                        height: 1rem;
+
+                        border-radius: .5rem;
+                    }
+                }
+
+                .privateToggleButton {
+                    padding: 0;
+
+                    display: flex;
+
+                    >* {
+                        display: grid;
+                        place-items: center;
+                        padding: .5rem 1rem;
+
+                        background-color: var(--gray-25);
+                        color: var(--white);
+                    }
+
+                    .public {
+                        border-top-left-radius: .5rem;
+                        border-bottom-left-radius: .5rem;
+                    }
+
+                    .private {
+                        border-top-right-radius: .5rem;
+                        border-bottom-right-radius: .5rem;
+                    }
+                }
+            }
+        }
+    }
+
+    .bottomRow {
+        width: 100%;
+
+        display: flex;
+        justify-content: flex-end;
+
+        .openButton {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+
+            gap: .5rem;
+
+            color: var(--green);
+
+            button {
+                width: 3rem;
+                height: 3rem;
+
+                margin: 0;
+                padding: 0;
+
+                background-color: var(--green-25);
+
+                display: grid;
+                place-items: center;
+
+                svg {
+                    height: 1.5rem;
+                }
+            }
+        }
     }
 }
 
