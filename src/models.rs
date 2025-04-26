@@ -70,7 +70,7 @@ impl User {
     }
 }
 
-#[derive(Debug, Queryable, Insertable, Selectable, Associations, Identifiable)]
+#[derive(Debug, Queryable, Insertable, Selectable, Associations, Identifiable, AsChangeset)]
 #[diesel(belongs_to(User, foreign_key = username))]
 #[diesel(primary_key(id))]
 #[diesel(table_name = crate::schema::sessions)]
@@ -99,6 +99,12 @@ impl Session {
 
     pub fn get_timestamp(&self) -> Option<i64> {
         self.timestamp
+    }
+
+    pub fn renew(&mut self, timestamp: i64) {
+        if let Some(t) = self.timestamp.as_mut() {
+            *t = timestamp;
+        }
     }
 }
 
@@ -192,9 +198,13 @@ impl Post {
     pub fn set_reposts_amount_unchecked(&mut self, reposts: i32) {
         self.reposts = reposts;
     }
+
+    pub fn get_room(&self) -> Option<String> {
+        self.room.clone()
+    }
 }
 
-#[derive(Debug, Queryable, Insertable, Selectable, Identifiable, Serialize)]
+#[derive(Debug, Queryable, Insertable, Selectable, Identifiable, Serialize, AsChangeset)]
 #[diesel(primary_key(id))]
 #[diesel(belongs_to(User, foreign_key = owner))]
 #[diesel(table_name = crate::schema::rooms)]
@@ -231,6 +241,26 @@ impl Room {
 
     pub fn get_owner(&self) -> String {
         self.owner.clone()
+    }
+
+    pub fn is_private(&self) -> bool {
+        self.is_private
+    }
+
+    pub fn get_name(&self) -> String {
+        self.name.clone()
+    }
+
+    pub fn set_name_unchecked(&mut self, name: String) {
+        self.name = name;
+    }
+
+    pub fn set_description_unchecked(&mut self, description: String) {
+        self.description = description;
+    }
+
+    pub fn set_color_unchecked(&mut self, color: String) {
+        self.color = color;
     }
 }
 

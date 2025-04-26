@@ -452,6 +452,9 @@ button {
 
         p {
             text-align: justify;
+
+            white-space: pre-line;
+
             max-width: 500px;
         }
 
@@ -704,7 +707,8 @@ button {
     aspect-ratio: 3 / 1;
 
     position: relative;
-    
+    border-radius: 1rem;
+    overflow: hidden;
 
     img {
         top: 0;
@@ -715,6 +719,8 @@ button {
         
         object-fit: cover;
         object-position: center;
+
+        background-color: var(--gray-125) !important;
     }
     
     .gradient {
@@ -726,6 +732,66 @@ button {
 
         opacity: .8;
         background: linear-gradient(to bottom, var(--black), transparent 80%, transparent);
+    }
+
+    button, .updateColorContainer {
+        backdrop-filter: brightness(.25);
+        background-color: var(--gray-25) !important;
+    }
+
+    .roomNameContainer, .roomDescriptionContainer {
+        display: flex;
+        align-items: center;
+
+        button {
+            z-index: 10;
+
+            margin: 0;
+            padding: 0;
+            width: 2rem;
+            height: 2rem;
+    
+    
+            display: grid;
+            place-items: center;
+    
+            svg {
+                height: 1rem;
+            }
+        }
+
+        input {
+            z-index: 10;
+
+            border: none;
+            outline: none;
+
+            margin: .5rem 1rem;
+
+            font-size: 2rem;
+            font-family: "K2D";
+            font-weight: 600;
+            color: var(--room-color);
+        }
+
+        textarea {
+            z-index: 10;
+
+            border: none;
+            outline: none;
+
+            width: 100%;
+
+            margin: .5rem 1rem;
+
+            color: var(--room-color);
+            filter: saturate(.25) brightness(1.2);
+            font-size: 1rem;
+            font-family: "Roboto";
+            font-weight: 400;
+
+            resize: none;
+        }
     }
 
     h1 {
@@ -740,13 +806,68 @@ button {
         margin: .5rem 1rem;
 
         position: relative;
+        filter: saturate(.25) brightness(1.2);
 
         font-family: "Roboto";
         font-weight: 400;
         font-size: 1rem;
+        white-space: pre-line;
 
         color: var(--room-color);
     }
+
+    .bottomButtons {
+        
+        position: absolute;
+
+        bottom: 1rem;
+        right: 1rem;
+
+        width: calc(100% - 2rem);
+
+        display: flex;
+        flex-direction: row-reverse;
+
+        align-items: center;
+        gap: 1rem;
+
+        .updateColorContainer {
+            padding: 1rem;
+
+            display: flex;
+            align-items: center;
+
+            gap: .5rem;
+            border-radius: .5rem;
+
+            color: var(--gray);
+
+            input {
+                height: 1rem;
+                width: 2rem;
+                border-radius: .5rem;
+
+                outline: none;
+                border: none;
+            }
+        }
+
+        button {
+            padding: 1rem;
+    
+            background-color: var(--gray-25) !important;
+        }
+
+        spacer {
+            flex: 1;
+        }
+
+        .deleteRoom {
+            color: var(--red);
+            background-color: var(--red-25) !important;
+        }
+    }
+
 }
 
 #postCreation, #repostCreation, #roomCreation {

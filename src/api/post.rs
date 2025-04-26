@@ -1,6 +1,6 @@
 use std::ops::DerefMut;
 
-use crate::{db::DBConnection, error::{ContentTooLargeError, EmptyContentError, InsufficientPermissionsError, InternalServerError, InvalidSessionError, PostDoesNotExistError}, models::Post, schema::{posts, ratings::{self, post}}, validate_session_from_headers};
+use crate::{db::DBConnection, error::{ContentTooLargeError, EmptyContentError, InsufficientPermissionsError, InternalServerError, InvalidSessionError, PostDoesNotExistError, RoomBoundaryViolationError, RoomDoesNotExistError}, models::{Membership, Post, Room}, schema::{memberships, posts, ratings::{self, post}, rooms}, validate_session_from_headers};
 
 use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl, SaveChangesDsl};
 use serde::{Deserialize, Serialize};
@@ -21,7 +21,7 @@ struct PostCreationResponse {
     post_id: String,
 }
 
-pub async fn create_post(headers: warp::http::HeaderMap, connection: DBConnection, post_data: PostCreationData) -> Result<impl warp::Reply, warp::Rejection> {
+pub async fn create_post(headers: warp::http::HeaderMap, connection: DBConnection, mut post_data: PostCreationData) -> Result<impl warp::Reply, warp::Rejection> {
     let user = validate_session_from_headers(&headers, connection.clone()).await.ok_or(InvalidSessionError)?;
 
     if post_data.body.split_ascii_whitespace().next().is_none() {
@@ -38,6 +38,15 @@ pub async fn create_post(headers: warp::http::HeaderMap, connection: DBConnectio
             .first(connection.lock().await.deref_mut())
             .map_err(|_| PostDoesNotExistError)?;
 
+        if let Some(r) = p.get_room() {
+            let r: Room = rooms::table
+                .find(r)
+                .first(connection.lock().await.deref_mut())
+                .map_err(|_| RoomDoesNotExistError)?;
+
+            post_data.room = Some(r.get_id());
+        }
+
         parent_post = Some(p);
     }
 
@@ -48,10 +57,30 @@ pub async fn create_post(headers: warp::http::HeaderMap, connection: DBConnectio
             .first(connection.lock().await.deref_mut())
             .map_err(|_| PostDoesNotExistError)?;
 
+        if let Some(r) = p.get_room() {
+            let r: Room = rooms::table
+                .find(r)
+                .first(connection.lock().await.deref_mut())
+                .map_err(|_| RoomDoesNotExistError)?;
+
+            if r.is_private() && post_data.room.as_ref().is_none_or(|room_id| room_id != &r.get_id()) {
+                Err(RoomBoundaryViolationError)?;
+            }
+        }
+
         child_post = Some(p);
     }
 
-    let new_post = Post::new(&user, post_data.body, post_data.appendage_id, None, parent_post.as_ref(), child_post.as_ref());
+    let mut contained_room = None;
+    
+    if let Some(id) =  post_data.room.as_ref() {
+        contained_room = Some(rooms::table
+            .find(id)
+            .first::<Room>(connection.lock().await.deref_mut())
+            .map_err(|_| InternalServerError)?);
+    };
+
+    let new_post = Post::new(&user, post_data.body, post_data.appendage_id, contained_room.as_ref(), parent_post.as_ref(), child_post.as_ref());
     let post_id = new_post.get_id();
 
     diesel::insert_into(posts::table)
@@ -128,10 +157,20 @@ pub async fn get_post(headers: warp::http::HeaderMap, connection: DBConnection, 
 
     let user = validate_session_from_headers(&headers, connection.clone()).await.ok_or(InvalidSessionError)?;
     
-    let queried_post: Post = posts::table
+    let (queried_post, contained_room): (Post, Room) = posts::table
         .find(post_id)
+        .inner_join(rooms::table)
         .first(connection.lock().await.deref_mut())
         .map_err(|_| PostDoesNotExistError)?;
+
+    if contained_room.is_private() {
+        if memberships::table
+            .find((user.get_username(), contained_room.get_id()))
+            .first::<Membership>(connection.lock().await.deref_mut())
+            .is_err() {
+                Err(RoomBoundaryViolationError)?;
+            }
+    }
 
     Ok(warp::reply::json(&PostQueryResponse::from_post_for_user(queried_post, &user, connection).await))
 }

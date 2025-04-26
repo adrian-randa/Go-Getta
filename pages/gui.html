@@ -10,6 +10,7 @@
     <script defer src="personalProfile.js"></script>
     <script defer src="profile.js"></script>
     <script defer src="createRepost.js"></script>
+    <script defer src="displayRoom.js"></script>
     <script defer src="gui.js"></script>
     <script defer src="createRoom.js"></script>
     <script defer src="modal.js"></script>
@@ -106,7 +107,7 @@
 
         </div>
 
-        <button class="newRoom">
+        <button class="newRoom" onclick="showRoomCreationScreen()">
             <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M1 11.5L8 15L15 11.5V4.5L8 1L1 4.5V11.5Z" stroke="#FCF7F8" stroke-linecap="round" stroke-linejoin="round"/>
                 <path d="M1 11.5L8 8M8 8L15 11.5M8 8V1" stroke="#FCF7F8" stroke-opacity="0.25" stroke-linecap="round" stroke-linejoin="round"/>
@@ -211,10 +212,48 @@
 
         <template id="roomHeadingTemplate">
             <div class="roomHeading">
-                <img src="https://utopia.de/app/uploads/2022/09/roter-panda-cc0-pixabay-pexels-220910.jpg" alt="Room Banner">
+                <img src="" alt="">
                 <div class="gradient"></div>
-                <h1>Room Name</h1>
-                <h2>Lorem ipsum dolor sit amet consectetur adipisicing elit. Vel, quis.</h2>
+                <div class="roomNameContainer">
+                    <h1></h1>
+                    <input type="text" class="roomEditNameInput" style="display: none;" maxlength="24" minlength="1">
+                    <button class="edit" style="display: none;">
+                        <svg viewBox="0 0 11 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M4.56659 13.25L10.1666 2.75L6.43325 1L0.833252 11.5M4.56659 13.25L0.833252 11.5M4.56659 13.25L0.833252 15V11.5" stroke="var(--white)" stroke-linejoin="round"/>
+                        </svg> 
+                    </button>
+                </div>
+                <div class="roomDescriptionContainer">
+                    <h2></h2>
+                    <textarea class="roomEditDescriptionInput" style="display: none;" maxlength="150" minlength="1"></textarea>
+                    <button class="edit" style="display: none;">
+                        <svg viewBox="0 0 11 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M4.56659 13.25L10.1666 2.75L6.43325 1L0.833252 11.5M4.56659 13.25L0.833252 11.5M4.56659 13.25L0.833252 15V11.5" stroke="var(--white)" stroke-linejoin="round"/>
+                        </svg> 
+                    </button>
+                </div>
+                <div class="bottomButtons">
+                    <button class="updateRoomBanner" style="display: none;">
+                        Update room banner
+                    </button>
+                    <div class="updateColorContainer">
+                        Update Color
+                        <input type="color" class="updateRoomColorInput">
+                    </div>
+                    <button class="addUser">
+                        Add people
+                    </button>
+                    <spacer></spacer>
+                    <button class="deleteRoom">
+                        Delete room
+                    </button>
+                </div>
+                <input
+                    type="file"
+                    class="roomUpdateBannerInput"
+                    accept="image/*"
+                    style="display: none;"
+                >
             </div>
         </template>
 

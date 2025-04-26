@@ -28,13 +28,14 @@ pub async fn validate_session_from_headers(headers: &warp::http::HeaderMap, conn
     let mut connection_lock = connection.lock().await;
     let connection_lock = connection_lock.deref_mut();
 
-    let session: Session = sessions::table
+    let mut session: Session = sessions::table
         .find(session_id)
         .first(connection_lock).ok()?;
 
-    if session.get_timestamp().is_none_or(|t| now - t <= 600)  {
+    if session.get_timestamp().is_none_or(|t| now - t <= 600) {
         // Renew session timeout
-        let _ = diesel::update(FilterDsl::filter(sessions::table, id.eq(session.get_id()))).set(timestamp.eq(now));
+        session.renew(now);
+        let _: Result<Session, _> = session.save_changes(connection_lock);
 
         return Some(
             users::table

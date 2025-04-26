@@ -1,38 +1,52 @@
-fetch("api/who_am_i").then((response) => {
-    response.json().then((json) => {
-        let currentUser = document.querySelector("#currentUser");
+let whoAmI = new Promise((resolve, reject) => {
+    fetch("api/who_am_i").then((response) => {
+        response.json().then((json) => {
+            let currentUser = document.querySelector("#currentUser");
+    
+    
+            currentUser.querySelector(".username").textContent = json.public_name;
+            currentUser.querySelector(".profilePicture").setAttribute("style", `background-image: url('storage/profile_picture/${json.username}')`);
+    
+            window.localStorage.setItem("currentUsername", json.username);
+            window.localStorage.setItem("currentPublicName", json.public_name);
 
-
-        currentUser.querySelector(".username").textContent = json.public_name;
-        currentUser.querySelector(".profilePicture").setAttribute("style", `background-image: url('storage/profile_picture/${json.username}')`);
-
-        window.localStorage.setItem("currentUsername", json.username);
-        window.localStorage.setItem("currentPublicName", json.public_name);
+            resolve(json);
+        });
     });
 });
 
 const roomButtonTamplate = document.querySelector("#roomButtonTemplate");
 const roomButtonContainer = document.querySelector("#myRooms");
+const newPostRoomSelector = document.querySelector("#newPostRoom");
+let joinedRooms = new Promise((resolve, reject) => {
+    fetch("api/get_joined_rooms").then((response) => {
+        if (!response.ok) {
+            response.text().then(alert);
+            return;
+        }
+    
+        response.json().then((rooms) => {
+            rooms = Array.from(rooms);
+            rooms.forEach((room) => {
+                let node = roomButtonTamplate.content.cloneNode(true);
 
-fetch("api/get_joined_rooms").then((response) => {
-    if (!response.ok) {
-        response.text().then(alert);
-        return;
-    }
+                node.children[0].setAttribute("style", `--room-color: #${room.color}`);
+                node.children[0].setAttribute("href", `?view=room&id=${room.id}`);
 
-    response.json().then((rooms) => {
-        Array.from(rooms).forEach((room) => {
-            let node = roomButtonTamplate.content.cloneNode(true);
+                node.querySelector("span").textContent = room.name;
 
-            node.children[0].setAttribute("style", `--room-color: #${room.color}`);
-            node.children[0].setAttribute("href", `?view=room&id=${room.id}`);
+                roomButtonContainer.appendChild(node);
 
-            node.querySelector("span").textContent = room.name;
-
-            roomButtonContainer.appendChild(node);
+                let option = document.createElement("option")
+                option.setAttribute("value", room.id);
+                option.innerText = room.name;
+                newPostRoomSelector.appendChild(option);
+            });
+            resolve(rooms);
         });
     });
 });
+
 
 async function logout() {
     let response = await fetch("/logout", {method: "DELETE"});
@@ -74,15 +88,40 @@ function showPostCreationScreen() {
 
 const referencedPostContainer = repostCreationScreen.querySelector(".referencedPost");
 async function showRepostCreationScreen(childPostID) {
-
     let response = await fetch(`/api/get_post/${childPostID}`);
     if (!response.ok) alert(await response.text());
     let referencedPostData = await response.json();
-
+    
+    console.log(referencedPostData);
     referencedPostContainer.innerHTML = "";
     referencedPostContainer.appendChild(await makePostNode(referencedPostData));
 
     document.querySelector("#newRepostSubmitButton").onclick = () => {submitRepost(childPostID)};
+
+    const repostRoomSelector = document.querySelector("#newRepostRoom");
+    let rooms = await joinedRooms;
+    rooms.forEach((r) => {
+        let option = document.createElement("option");
+        option.setAttribute("value", r.id);
+        option.innerText = r.name;
+        repostRoomSelector.appendChild(option);
+    });
+
+    if (referencedPostData.post.room) {
+        let room = rooms.find((r) => r.id == referencedPostData.post.room);
+        if (!room) return;
+
+        if (room.is_private) {
+            repostRoomSelector.innerHTML = "";
+            let option = document.createElement("option");
+            option.setAttribute("value", room.id);
+            option.innerText = room.name;
+            option.setAttribute("selected", "");
+            repostRoomSelector.appendChild(option);
+            repostRoomSelector.value = referencedPostData.post.room;
+        }
+    }
+
 
     postScreen.style.display = "none";
     postCreationScreen.style.display = "none";
@@ -186,6 +225,22 @@ async function showPostThreadScreen(postID) {
     roomCreationScreen.style.display = "none";
 }
 
+const roomHeadingTemplate = document.querySelector("#roomHeadingTemplate");
+async function showRoomScreen(roomData) {
+    showPostScreen();
+    await whoAmI;
+
+    let roomHeading = createRoomHeadingNode(roomData);
+
+    postScreen.appendChild(roomHeading);
+    postScreen.setAttribute("style", `--room-color: #${roomData.color}`);
+
+
+
+    currentPaginator = initRoomPostPaginator(roomData.id, mountPosts(postScreen));
+    currentPaginator();
+}
+
 // Scroll to bottom event
 document.addEventListener("scrollend", (event) => {
     const scrollPos = document.documentElement.scrollTop;
@@ -225,9 +280,12 @@ switch (params.get("view")) {
         break;
     }
 
-    case "debug": {
-        showRoomCreationScreen();
-
+    case "room": {
+        const id = params.get("id");
+        joinedRooms.then((rooms) => {
+            showRoomScreen(rooms.find((r) => r.id == id));
+            console.log(rooms);
+        });
         break;
     }
 

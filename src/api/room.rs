@@ -1,10 +1,10 @@
-use std::ops::DerefMut;
+use std::{collections::HashMap, ops::DerefMut};
 
-use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl, SelectableHelper};
+use diesel::{AsChangeset, ExpressionMethods, QueryDsl, RunQueryDsl, SaveChangesDsl, SelectableHelper};
 use serde::{Deserialize, Serialize};
 use warp::filters::multipart::FormData;
 
-use crate::{db::DBConnection, error::{InternalServerError, InvalidSessionError}, models::{Membership, Room}, schema::{memberships::{self}, rooms}, validate_session_from_headers};
+use crate::{api::PostQueryResponse, db::DBConnection, error::{ContentTooLargeError, EmptyContentError, InsufficientPermissionsError, InternalServerError, InvalidQueryError, InvalidSessionError, RoomBoundaryViolationError, RoomDoesNotExistError}, models::{Membership, Post, Room}, schema::{memberships::{self}, posts::{self, timestamp}, rooms}, validate_session_from_headers};
 
 #[derive(Debug, Deserialize)]
 pub struct RoomCreationData {
@@ -58,4 +58,168 @@ pub async fn get_joined_rooms(headers: warp::http::HeaderMap, connection: DBConn
         .map_err(|_| InternalServerError)?;
 
     Ok(warp::reply::json(&membership_associations))
+}
+
+pub async fn room_posts_query(headers: warp::http::HeaderMap, connection: DBConnection, room_id: String, query: HashMap<String, String>) -> Result<impl warp::Reply, warp::Rejection> {
+
+    let user = validate_session_from_headers(&headers, connection.clone()).await.ok_or(InvalidSessionError)?;
+
+    let _membership: Membership = memberships::table
+        .find((user.get_username(), &room_id))
+        .first(connection.lock().await.deref_mut())
+        .map_err(|_| RoomBoundaryViolationError)?;
+
+    let page = query.get("page").ok_or(InvalidQueryError)?.parse::<i64>().map_err(|_| InvalidQueryError)?;
+
+    use posts::room;
+    let posts: Vec<Post> = posts::table
+        .filter(room.eq(&room_id))
+        .order(timestamp.desc())
+        .offset(page * 20)
+        .limit(20)
+        .load(connection.lock().await.deref_mut())
+        .map_err(|_| InternalServerError)?;
+
+    let mut response = Vec::with_capacity(posts.len());
+
+    for post in posts {
+        response.push(PostQueryResponse::from_post_for_user(post, &user, connection.clone()).await);
+    }
+
+    Ok(warp::reply::json(&response))
+}
+
+#[derive(Debug, Deserialize)]
+pub struct UpdateRoomNameData {
+    room_id: String,
+    new_name: String,
+}
+
+pub async fn update_room_name(headers: warp::http::HeaderMap, connection: DBConnection, data: UpdateRoomNameData) -> Result<impl warp::Reply, warp::Rejection> {
+
+    if data.new_name.len() > 24 {
+        Err(ContentTooLargeError)?;
+    }
+
+    if data.new_name.len() == 0 {
+        Err(EmptyContentError)?;
+    }
+
+    let user = validate_session_from_headers(&headers, connection.clone()).await.ok_or(InvalidSessionError)?;
+
+    let mut room: Room = rooms::table
+        .find(data.room_id)
+        .first(connection.lock().await.deref_mut())
+        .map_err(|_| RoomDoesNotExistError)?;
+
+    if room.get_owner() != user.get_username() {
+        Err(InsufficientPermissionsError)?;
+    }
+
+    room.set_name_unchecked(data.new_name);
+    let _: Room = room.save_changes(connection.lock().await.deref_mut()).map_err(|_| InternalServerError)?;
+
+    Ok(warp::reply())
+}
+
+
+#[derive(Debug, Deserialize)]
+pub struct UpdateRoomDescriptionData {
+    room_id: String,
+    new_description: String,
+}
+
+pub async fn update_room_description(headers: warp::http::HeaderMap, connection: DBConnection, data: UpdateRoomDescriptionData) -> Result<impl warp::Reply, warp::Rejection> {
+
+    if data.new_description.len() > 150 {
+        Err(ContentTooLargeError)?;
+    }
+
+    if data.new_description.len() == 0 {
+        Err(EmptyContentError)?;
+    }
+
+    let user = validate_session_from_headers(&headers, connection.clone()).await.ok_or(InvalidSessionError)?;
+
+    let mut room: Room = rooms::table
+        .find(data.room_id)
+        .first(connection.lock().await.deref_mut())
+        .map_err(|_| RoomDoesNotExistError)?;
+
+    if room.get_owner() != user.get_username() {
+        Err(InsufficientPermissionsError)?;
+    }
+
+    room.set_description_unchecked(data.new_description);
+    let _: Room = room.save_changes(connection.lock().await.deref_mut()).map_err(|_| InternalServerError)?; 
+
+    Ok(warp::reply())
+}
+
+
+#[derive(Debug, Deserialize)]
+pub struct UpdateRoomColorData {
+    room_id: String,
+    new_color: String,
+}
+
+pub async fn update_room_color(headers: warp::http::HeaderMap, connection: DBConnection, data: UpdateRoomColorData) -> Result<impl warp::Reply, warp::Rejection> {
+
+    if data.new_color.len() != 6 {
+        Err(InvalidQueryError)?;
+    }
+
+    let user = validate_session_from_headers(&headers, connection.clone()).await.ok_or(InvalidSessionError)?;
+
+    let mut room: Room = rooms::table
+        .find(data.room_id)
+        .first(connection.lock().await.deref_mut())
+        .map_err(|_| RoomDoesNotExistError)?;
+
+    if room.get_owner() != user.get_username() {
+        Err(InsufficientPermissionsError)?;
+    }
+
+    room.set_color_unchecked(data.new_color);
+    let _: Room = room.save_changes(connection.lock().await.deref_mut()).map_err(|_| InternalServerError)?;
+
+    Ok(warp::reply())
+}
+
+
+pub async fn delete_room(headers: warp::http::HeaderMap, connection: DBConnection, room_id: String) -> Result<impl warp::Reply, warp::Rejection> {
+
+    let user = validate_session_from_headers(&headers, connection.clone()).await.ok_or(InvalidSessionError)?;
+
+    let room: Room = rooms::table
+        .find(room_id)
+        .first(connection.lock().await.deref_mut())
+        .map_err(|_| RoomDoesNotExistError)?;
+
+    if room.get_owner() != user.get_username() {
+        Err(InsufficientPermissionsError)?;
+    }
+
+    let _ = diesel::delete(rooms::table.find(room.get_id()))
+        .execute(connection.lock().await.deref_mut())
+        .map_err(|_| InternalServerError)?;
+
+    tokio::spawn(room_deletion_cleanup(connection, room));
+
+    Ok(warp::reply())
+}
+
+async fn room_deletion_cleanup(connection: DBConnection, room: Room) {
+    let room_id = room.get_id();
+    
+    // Remove Memberships
+    let _ = diesel::delete(
+        memberships::table.filter(memberships::room.eq(&room_id))
+    ).execute(connection.lock().await.deref_mut());
+
+
+    // Remove Posts
+    let _ = diesel::delete(
+        posts::table.filter(posts::room.eq(&room_id))
+    ).execute(connection.lock().await.deref_mut());
 }

@@ -27,10 +27,12 @@ async function submitRepost(referencedPostID) {
         appendageID = responseObj.appendage_id;
     }
 
+    let roomID = document.querySelector("#newRepostRoom").value || null;
+
     let payload = {
         "body": body,
         "appendage_id": appendageID,
-        "room": null,
+        "room": roomID,
         "parent": null,
         "child": referencedPostID,
     }

@@ -7,7 +7,7 @@ use uuid::*;
 
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 
-use go_getta::{api::{file_upload::{file_upload, update_profile_picture, update_room_banner}, post::{create_post, delete_post, get_post}, public_space::public_space_query, rating::set_rating_state, room::{create_room, get_joined_rooms}, thread::{comment_query, get_thread}, user_data::{get_user_data, update_biography, update_public_name, users_posts_query}, who_am_i}, clean_database, create_account::create_account, db::{establish_connection, scan_for_keys, with_db_connection}, login::*, models::*, pages::{with_page_store, PageStore}, render::render, schema::sessions::{self, timestamp}};
+use go_getta::{api::{file_upload::{file_upload, update_profile_picture, update_room_banner}, post::{create_post, delete_post, get_post}, public_space::public_space_query, rating::set_rating_state, room::{create_room, delete_room, get_joined_rooms, room_posts_query, update_room_color, update_room_description, update_room_name}, thread::{comment_query, get_thread}, user_data::{get_user_data, update_biography, update_public_name, users_posts_query}, who_am_i}, clean_database, create_account::create_account, db::{establish_connection, scan_for_keys, with_db_connection}, login::*, models::*, pages::{with_page_store, PageStore}, render::render, schema::sessions::{self, timestamp}};
 
 
 pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("./migrations/");
@@ -176,12 +176,49 @@ async fn main() {
         .and(warp::multipart::form().max_length(3_000_000))
         .and_then(update_room_banner);
 
+    let update_room_name_route = warp::post()
+        .and(warp::path("api"))
+        .and(warp::path("update_room_name"))
+        .and(warp::header::headers_cloned())
+        .and(with_db_connection(connection.clone()))
+        .and(warp::body::json())
+        .and_then(update_room_name);
+
+    let update_room_description_route = warp::post()
+        .and(warp::path("api"))
+        .and(warp::path("update_room_description"))
+        .and(warp::header::headers_cloned())
+        .and(with_db_connection(connection.clone()))
+        .and(warp::body::json())
+        .and_then(update_room_description);
+
+    let update_room_color_route = warp::post()
+        .and(warp::path("api"))
+        .and(warp::path("update_room_color"))
+        .and(warp::header::headers_cloned())
+        .and(with_db_connection(connection.clone()))
+        .and(warp::body::json())
+        .and_then(update_room_color);
+
+    let delete_room_route = warp::delete()
+        .and(warp::header::headers_cloned())
+        .and(with_db_connection(connection.clone()))
+        .and(warp::path!("api" / "delete_room" / String))
+        .and_then(delete_room);
+
     let get_joined_rooms_route = warp::get()
         .and(warp::path("api"))
         .and(warp::path("get_joined_rooms"))
         .and(warp::header::headers_cloned())
         .and(with_db_connection(connection.clone()))
         .and_then(get_joined_rooms);
+
+    let fetch_room_posts_route = warp::get()
+        .and(warp::header::headers_cloned())
+        .and(with_db_connection(connection.clone()))
+        .and(warp::path!("api" / "fetch_room_posts" / String))
+        .and(warp::query::<HashMap<String, String>>())
+        .and_then(room_posts_query);
 
     let storage_route = warp::get()
         .and(warp::path("storage"))
@@ -209,7 +246,12 @@ async fn main() {
         .or(get_post_route)
         .or(create_room_route)
         .or(update_room_banner_route)
+        .or(update_room_name_route)
+        .or(update_room_description_route)
+        .or(update_room_color_route)
+        .or(delete_room_route)
         .or(get_joined_rooms_route)
+        .or(fetch_room_posts_route)
         .or(storage_route);
 
     select! {

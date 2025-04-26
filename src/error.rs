@@ -25,5 +25,6 @@ new_rejections!(
     InternalServerError,
     InsufficientPermissionsError,
     EmptyContentError,
-    ContentTooLargeError
+    ContentTooLargeError,
+    RoomBoundaryViolationError
 );
