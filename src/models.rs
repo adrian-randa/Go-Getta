@@ -309,3 +309,22 @@ impl Membership {
         }
     }
 }
+
+#[derive(Debug, Queryable, Insertable, Selectable, Identifiable, Associations)]
+#[diesel(belongs_to(User, foreign_key = user))]
+#[diesel(belongs_to(Room, foreign_key = room))]
+#[diesel(primary_key(user, room))]
+#[diesel(table_name = crate::schema::bans)]
+pub struct Ban {
+    user: String,
+    room: String
+}
+
+impl Ban {
+    pub fn new(user: &User, room: &Room) -> Self {
+        Self {
+            user: user.get_username(),
+            room: room.get_id(),
+        }
+    }
+}

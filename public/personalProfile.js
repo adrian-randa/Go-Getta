@@ -45,6 +45,7 @@ async function initPersonalProfilePage() {
             showModal({
                 title: "Change public name?",
                 body: `Do you really want to change your public name from "${userData.public_name}" to "${newPublicNameInput.value}"?`,
+                inputFields: [],
                 choices: [
                     {
                         label: "Yes",
@@ -75,6 +76,7 @@ async function initPersonalProfilePage() {
         showModal({
             title: "Change biography?",
             body: "Do really you want to change biography?",
+            inputFields: [],
             choices: [
                 {
                     label: "Yes",
@@ -114,6 +116,7 @@ function handleProfilePictureUpdate(input) {
     showModal({
         title: "Update profile picture?",
         body: "Do you really want to set the selected image as your profile picture?",
+        inputFields: [],
         choices: [
             {
                 label: "Yes",

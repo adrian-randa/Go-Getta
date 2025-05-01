@@ -284,8 +284,12 @@ switch (params.get("view")) {
         const id = params.get("id");
         joinedRooms.then((rooms) => {
             showRoomScreen(rooms.find((r) => r.id == id));
-            console.log(rooms);
         });
+        break;
+    }
+
+    case "debug": {
+        showManageRoomUsersModal();
         break;
     }
 

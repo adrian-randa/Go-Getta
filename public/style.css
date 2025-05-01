@@ -423,7 +423,9 @@ button {
     border-left: 1px solid var(--gray-25);
 }
 
-#modal {
+#modal, #manageRoomUsersModal {
+    z-index: 1000;
+
     position: fixed;
 
     width: 100vw;
@@ -458,6 +460,19 @@ button {
             max-width: 500px;
         }
 
+        input {
+            padding: .25rem .5rem;
+
+            background-color: var(--gray-25);
+
+            border: none;
+            outline: none;
+
+            color: var(--white);
+            font-size: 1rem;
+            border-radius: .5rem;
+        }
+
         .buttonContainer {
             width: 100%;
 
@@ -477,6 +492,121 @@ button {
             button.bad {
                 background-color: var(--red-25);
                 color: var(--red);
+            }
+        }
+    }
+}
+
+#manageRoomUsersModal {
+    .close {
+        position: absolute;
+        top: 1rem;
+        left: 1rem;
+
+        padding: 0;
+        margin: 0;
+
+        background-color: transparent;
+        border-radius: 0;
+
+        color: var(--gray);
+    }
+
+    .categorySwitch {
+        width: 100%;
+
+        display: flex;
+        align-items: center;
+        justify-content: space-evenly;
+
+        button {
+            background-color: transparent;
+        }
+    }
+
+    .modalWindow {
+        position: relative;
+
+        h1 {
+            margin: 0 4rem;
+        }
+
+        input {
+            padding: .5rem 1rem;
+            margin: 0;
+            
+            background-color: var(--gray-25);
+            font-size: 1rem;
+            border-radius: .5rem;
+            border: none;
+            outline: none;
+
+            width: calc(100% - 2rem);
+            color: var(--white);
+        }
+
+        .usersContainer, .bannedUsersContainer {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+
+            max-height: 50vh;
+            min-width: 500px;
+            overflow: hidden;
+            overflow-y: scroll;
+
+            .user {
+                display: flex;
+                gap: 1rem;
+
+                spacer {
+                    flex: 1;
+                }
+
+                .userDisplay {
+                    display: flex;
+                    gap: .5rem;
+                    align-items: center;
+                }
+
+                .profilePicture {
+                    width: 2rem;
+                    height: 2rem;
+    
+                    background-size: cover;
+                    background-position: center;
+                    background-color: white;
+
+                    clip-path: var(--hexagon-path);
+                }
+    
+                .textContainer {
+                    display: flex;
+                    flex-direction: column;
+    
+                    transform: translateY(-.1rem);
+    
+                    h4 {
+                        color: var(--green);
+                        font-size: 1rem;
+                        font-weight: 500;
+                        font-family: "K2D";
+                    }
+        
+                    h5 {
+                        font-style: normal;
+                        font-family: .75rem;
+                    }
+                }
+
+                button {
+                    height: 100%;
+                }
+
+                .ban, .unban {
+                    background-color: var(--red-25);
+                    color: var(--red);
+                }
             }
         }
     }

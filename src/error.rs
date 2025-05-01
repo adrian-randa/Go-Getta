@@ -20,6 +20,7 @@ new_rejections!(
     InvalidPasswordError,
     UserAlreadyExistsError,
     UserDoesNotExistError,
+    UserIsBannedError,
     PostDoesNotExistError,
     RoomDoesNotExistError,
     InternalServerError,

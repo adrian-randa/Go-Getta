@@ -236,15 +236,15 @@
                     <button class="updateRoomBanner" style="display: none;">
                         Update room banner
                     </button>
-                    <div class="updateColorContainer">
+                    <div class="updateColorContainer" style="display: none;">
                         Update Color
                         <input type="color" class="updateRoomColorInput">
                     </div>
-                    <button class="addUser">
-                        Add people
+                    <button class="manageUsers" style="display: none;">
+                        Manage members
                     </button>
                     <spacer></spacer>
-                    <button class="deleteRoom">
+                    <button class="deleteRoom" style="display: none;">
                         Delete room
                     </button>
                 </div>
@@ -259,7 +259,7 @@
 
         <screen id="postCreation" style="display: none;">
             <h1>New Post</h1>
-            <textarea name="body" id="newPostBody" placeholder="Enter your thoughts here..."></textarea>
+            <textarea name="body" id="newPostBody" placeholder="Enter your thoughts here..." maxlength="300"></textarea>
             <form enctype="multipart/form-data" id="addMediaForm" style="display: none;">
                 <input
                     type="file"
@@ -503,10 +503,56 @@
         </screen>
     </div>
 
+    <screen id="manageRoomUsersModal" style="display: none;">
+        <div class="modalWindow">
+            <button class="close">Close</button>
+            <h1>Manage Users</h1>
+            <div class="categorySwitch">
+                <button class="members">Members</button>
+                <button class="banned">Banned</button>
+            </div>
+            <input type="text" name="search" id="manageRoomUsersSearch" placeholder="Search members" maxlength="24">
+            <div class="usersContainer">
+                <template class="userTemplate">
+                    <div class="user">
+                        <a class="userDisplay" href="#">
+                            <div class="profilePicture"></div>
+                            <div class="textContainer">
+                                <h4>User</h4>
+                                <h5>@user</h5>
+                            </div>
+                        </a>
+                        <spacer></spacer>
+                        <button class="kick">Kick</button>
+                        <button class="ban">Ban</button>
+                    </div>
+                </template>
+                <template class="bannedUserTemplate">
+                    <div class="user">
+                        <a class="userDisplay" href="#">
+                            <div class="profilePicture"></div>
+                            <div class="textContainer">
+                                <h4>User</h4>
+                                <h5>@user</h5>
+                            </div>
+                        </a>
+                        <spacer></spacer>
+                        <button class="unban">Unban</button>
+                    </div>
+                </template>
+            </div>
+
+            <button class="addUser">Add user</button>
+        </div>
+    </screen>
+
     <screen id="modal" style="display: none;">
         <div class="modalWindow">
             <h1>Modal Text</h1>
             <p>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Ratione cupiditate accusantium cum deserunt possimus reprehenderit odit, pariatur assumenda facilis, id, quos provident officia ipsa eveniet. Voluptatibus nesciunt facilis quam praesentium placeat unde eos amet consequatur aperiam impedit vel quibusdam, perspiciatis accusamus id accusantium eum. Ad accusantium quae hic sed facilis?</p>
+            <div class="inputFields">
+
+            </div>
             <div class="buttonContainer">
                 
             </div>

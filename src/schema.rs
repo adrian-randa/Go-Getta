@@ -8,6 +8,13 @@ diesel::table! {
 }
 
 diesel::table! {
+    bans (user, room) {
+        user -> Text,
+        room -> Text,
+    }
+}
+
+diesel::table! {
     memberships (user, room) {
         user -> Text,
         room -> Text,
@@ -70,7 +77,10 @@ diesel::table! {
     }
 }
 
+diesel::joinable!(bans -> rooms (room));
+diesel::joinable!(bans -> users (user));
 diesel::joinable!(memberships -> rooms (room));
+diesel::joinable!(memberships -> users (user));
 diesel::joinable!(posts -> rooms (room));
 diesel::joinable!(posts -> users (creator));
 diesel::joinable!(ratings -> posts (post));
@@ -80,6 +90,7 @@ diesel::joinable!(sessions -> users (username));
 
 diesel::allow_tables_to_appear_in_same_query!(
     account_keys,
+    bans,
     memberships,
     posts,
     ratings,

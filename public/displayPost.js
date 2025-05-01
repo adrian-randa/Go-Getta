@@ -133,6 +133,7 @@ async function applyPostDataToNode(data, node) {
         deleteButton.addEventListener("click", () => {showModal({
             title: "Delete Post?",
             body: "Deleting a post is irreversible. Do you wish to proceed?",
+            inputFields: [],
             choices: [
                 {
                     label: "Delete",
