@@ -225,6 +225,29 @@ async fn room_deletion_cleanup(connection: DBConnection, room: Room) {
 }
 
 
+pub async fn leave_room(headers: warp::http::HeaderMap, connection: DBConnection, room_id: String) -> Result<impl warp::Reply, warp::Rejection> {
+
+    let user = validate_session_from_headers(&headers, connection.clone()).await.ok_or(InvalidSessionError)?;
+
+    let room: Room = rooms::table
+        .find(&room_id)
+        .first(connection.lock().await.deref_mut())
+        .map_err(|_| RoomDoesNotExistError)?;
+
+    let username = user.get_username();
+
+    if room.get_owner() == username {
+        Err(InvalidQueryError)?;
+    }
+
+    diesel::delete(memberships::table.find((username, room_id)))
+        .execute(connection.lock().await.deref_mut())
+        .map_err(|_| InternalServerError)?;
+
+    Ok(warp::reply())
+}
+
+
 #[derive(Debug, Serialize)]
 struct JoinedUserResponse {
     username: String,

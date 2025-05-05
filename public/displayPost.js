@@ -1,9 +1,8 @@
 const postTemplate = document.querySelector("#postTemplate");
-const mountPosts = (screen) => {
+const mountPosts = (screen, showDeleteButton = false) => {
     return async (posts) => {
-        console.log("Mounting posts", posts);
         for (let i = 0; i < posts.length; i++) {
-            screen.appendChild(await makePostNode(posts[i]));
+            screen.appendChild(await makePostNode(posts[i], showDeleteButton));
         }
     }
 }
@@ -14,15 +13,15 @@ const mediaTypeLookup = {
     "Audio": "audio",
 }
 
-async function makePostNode(post) {
+async function makePostNode(post, showDeleteButton = false) {
     let node = postTemplate.content.cloneNode(true);
 
-    await applyPostDataToNode(post, node);
+    await applyPostDataToNode(post, node, showDeleteButton);
 
     return node;
 }
 
-async function applyPostDataToNode(data, node) {
+async function applyPostDataToNode(data, node, showDeleteButton = false) {
 
     const { post, interaction, child } = data;
 
@@ -120,7 +119,7 @@ async function applyPostDataToNode(data, node) {
     bookmarkButton.querySelector("h5").textContent = post.bookmarks;
 
     let deleteButton = node.querySelector(".delete");
-    if (post.creator !== window.localStorage.getItem("currentUsername")) deleteButton.style.display = "none";
+    if (post.creator !== window.localStorage.getItem("currentUsername") && !showDeleteButton) deleteButton.style.display = "none";
     else {
         let deleteHandler = async () => {
             let response = await fetch(`/api/delete_post/${post.id}`, {

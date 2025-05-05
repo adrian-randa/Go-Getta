@@ -237,7 +237,7 @@ async function showRoomScreen(roomData) {
 
 
 
-    currentPaginator = initRoomPostPaginator(roomData.id, mountPosts(postScreen));
+    currentPaginator = initRoomPostPaginator(roomData.id, mountPosts(postScreen, window.localStorage.getItem("currentUsername") == roomData.owner));
     currentPaginator();
 }
 

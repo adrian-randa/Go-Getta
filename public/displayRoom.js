@@ -177,6 +177,28 @@ function createRoomHeadingNode(roomData) {
             });
         });
         deleteRoomButton.style.display = "grid";
+
+        roomHeading.querySelector(".leaveRoom").style.display = "none";
+    } else {
+        roomHeading.querySelector(".leaveRoom").addEventListener("click", () => {
+            showModal({
+                title: "Leave room?",
+                body: "This will remove you from the room. Your posts inside this room will remain. If this room is private, you will not be able to simply rejoin and have to ask the room owner to add you when want to do so.",
+                inputFields: [],
+                choices: [
+                    {
+                        label: "Leave",
+                        class: "bad",
+                        onclick: () => {
+                            leaveRoom(roomData.id);
+                        }
+                    },
+                    {
+                        label: "Cancel"
+                    }
+                ]
+            });
+        });
     }
 
     return roomHeading;
@@ -271,6 +293,19 @@ async function handleRoomBannerUpdate(roomID, input) {
 async function deleteRoom(roomID) {
     let response = await fetch(`/api/delete_room/${roomID}`, {
         method: "DELETE",
+    });
+
+    if (!response.ok) {
+        response.text().then(alert);
+        return;
+    }
+
+    window.location.href = window.location.origin;
+}
+
+async function leaveRoom(roomID) {
+    let response = await fetch(`/api/leave_room/${roomID}`, {
+        method: "DELETE"
     });
 
     if (!response.ok) {

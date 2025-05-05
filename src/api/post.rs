@@ -118,7 +118,19 @@ pub async fn delete_post(headers: warp::http::HeaderMap, connection: DBConnectio
         .first(connection.lock().await.deref_mut())
         .map_err(|_| PostDoesNotExistError)?;
 
-    if user.get_username() != post_to_delete.get_creator() {
+    let room: Option<Room> = match post_to_delete.get_room() {
+        Some(room_id) => {
+            Some(rooms::table
+                .find(room_id)
+                .first(connection.lock().await.deref_mut())
+                .map_err(|_| InternalServerError)?)
+        },
+        None => None,
+    };
+
+    let username = user.get_username();
+
+    if username != post_to_delete.get_creator() && room.is_none_or(|r| r.get_owner() != username) {
         Err(InsufficientPermissionsError)?;
     }
 
