@@ -2,6 +2,7 @@ use std::{ops::DerefMut, time};
 
 use db::DBConnection;
 use diesel::{prelude::*, query_dsl::methods::FilterDsl};
+use error::InvalidSessionError;
 use models::{Session, User};
 use schema::{sessions::{self, id, timestamp}, users};
 
@@ -45,6 +46,12 @@ pub async fn validate_session_from_headers(headers: &warp::http::HeaderMap, conn
     }
 
     None
+}
+
+pub async fn session_gate(headers: warp::http::HeaderMap, connection: DBConnection) -> Result<(), warp::Rejection> {
+    validate_session_from_headers(&headers, connection).await.ok_or(InvalidSessionError)?;
+
+    Ok(())
 }
 
 pub async fn clean_database(connection: DBConnection) {

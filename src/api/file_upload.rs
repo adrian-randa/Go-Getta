@@ -1,13 +1,13 @@
 use std::{env, fs, ops::DerefMut};
 
 use serde::Serialize;
-use warp::multipart::FormData;
+use warp::{multipart::FormData, Filter};
 use bytes::BufMut;
 use futures::{TryStreamExt, StreamExt};
 use uuid::Uuid;
 use diesel::{QueryDsl, RunQueryDsl};
 
-use crate::{db::DBConnection, error::{EmptyContentError, InsufficientPermissionsError, InternalServerError, InvalidFileError, InvalidSessionError, RoomDoesNotExistError}, models::Room, schema::rooms, validate_session_from_headers};
+use crate::{db::{with_db_connection, DBConnection}, error::{EmptyContentError, InsufficientPermissionsError, InternalServerError, InvalidFileError, InvalidSessionError, RoomDoesNotExistError}, models::Room, schema::rooms, validate_session_from_headers};
 
 #[derive(Debug, Clone, Copy, Serialize)]
 enum FileType {
