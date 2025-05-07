@@ -1,7 +1,7 @@
 -- Your SQL goes here
 CREATE TABLE posts (
     id VARCHAR(32) NOT NULL PRIMARY KEY,
-    creator VARCHAR(32) NOT NULL REFERENCES users(username),
+    creator VARCHAR(24) NOT NULL REFERENCES users(username),
     body VARCHAR(300) NOT NULL,
     timestamp BIGINT NOT NULL,
     rating INTEGER NOT NULL,

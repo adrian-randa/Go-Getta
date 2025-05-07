@@ -19,11 +19,11 @@ pub async fn get_thread(headers: warp::http::HeaderMap, connection: DBConnection
         .first(connection.lock().await.deref_mut()).map_err(|_| PostDoesNotExistError)?;
 
     let mut thread = Vec::with_capacity(MAX_PARENT_POST_COUNT + 1);
-    thread.push(PostQueryResponse::from_post_for_user(selected_post, &user, connection.clone()).await);
+    thread.push(PostQueryResponse::from_post_for_user(selected_post, &user, connection.clone()).await?);
 
     for i in 0..MAX_PARENT_POST_COUNT {
         if let Some(parent_post) = thread[i].get_post_ref().try_get_parent(connection.clone()).await {
-            thread.push(PostQueryResponse::from_post_for_user(parent_post, &user, connection.clone()).await);
+            thread.push(PostQueryResponse::from_post_for_user(parent_post, &user, connection.clone()).await?);
         } else {
             break;
         }
@@ -52,7 +52,7 @@ pub async fn comment_query(headers: warp::http::HeaderMap, connection: DBConnect
     let mut response = Vec::with_capacity(comments.len());
 
     for comment in comments {
-        response.push(PostQueryResponse::from_post_for_user(comment, &user, connection.clone()).await);
+        response.push(PostQueryResponse::from_post_for_user(comment, &user, connection.clone()).await?);
     }
 
     Ok(warp::reply::json(&response))

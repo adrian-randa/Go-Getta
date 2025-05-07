@@ -184,5 +184,20 @@ pub async fn get_post(headers: warp::http::HeaderMap, connection: DBConnection, 
             }
     }
 
-    Ok(warp::reply::json(&PostQueryResponse::from_post_for_user(queried_post, &user, connection).await))
+    Ok(warp::reply::json(&PostQueryResponse::from_post_for_user(queried_post, &user, connection).await?))
+}
+
+pub async fn register_post_share(headers: warp::http::HeaderMap, connection: DBConnection, post_id: String) -> Result<impl warp::Reply, warp::Rejection> {
+
+    let user = validate_session_from_headers(&headers, connection.clone()).await.ok_or(InvalidSessionError)?;
+
+    let mut shared_post: Post = posts::table
+        .find(post_id)
+        .first(connection.lock().await.deref_mut())
+        .map_err(|_| PostDoesNotExistError)?;
+
+    shared_post.set_shares_unchecked(shared_post.get_shares() + 1);
+    let _: Post = shared_post.save_changes(connection.lock().await.deref_mut()).map_err(|_| InternalServerError)?;
+
+    Ok(warp::reply::json(&PostQueryResponse::from_post_for_user(shared_post, &user, connection).await?))
 }

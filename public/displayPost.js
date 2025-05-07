@@ -78,10 +78,39 @@ async function applyPostDataToNode(data, node, showDeleteButton = false) {
 
     let ratingDisplay = node.querySelector(".rating");
     let ratingDisplayNumber = ratingDisplay.querySelector("h5");
+
     ratingDisplayNumber.textContent = post.rating;
+    
     if (post.rating < 0) ratingDisplayNumber.style.color = "var(--red-50)";
+    
     let [upvoteButton, downvoteButton] = ratingDisplay.querySelectorAll("button");
-    const ratingInteractionGenerator = generateRatingEventHandler(post, node);
+    
+    const ratingInteractionGenerator = (targetValue) => {
+        return async (event) => {
+            let payload = `{
+                "post_id": "${post.id}",
+                "new_rating": "${targetValue}"
+            }`;
+
+            let response = await fetch("/api/set_rating_state", {
+                method: "POST",
+                body: payload,
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            });
+
+            if (!response.ok) {
+                alert(await response.text());
+                return;
+            }
+    
+            let refreshedPost = await response.json();
+    
+            document.querySelector(`#post-${post.id}`).replaceWith(await makePostNode(refreshedPost, showDeleteButton));
+        }
+    };
+    
     if (interaction.rating == "Upvote") {
         const path = upvoteButton.querySelector("path");
         path.setAttribute("fill", "var(--green)");
@@ -108,6 +137,23 @@ async function applyPostDataToNode(data, node, showDeleteButton = false) {
 
     let shareButton = node.querySelector(".share");
     shareButton.querySelector("h5").textContent = post.shares;
+    shareButton.addEventListener("click", () => {
+        navigator.share({
+            title: `Post by ${post.creator}`,
+            url: `${window.location.origin}?view=post&id=${post.id}`
+        }).then(async () => {
+            let response = await fetch(`/api/register_post_share/${post.id}`, {method: "POST"});
+
+            if (!response.ok) {
+                response.text().then(alert);
+                return;
+            }
+
+            let refreshedPost = await response.json();
+
+            document.querySelector(`#post-${post.id}`).replaceWith(await makePostNode(refreshedPost, showDeleteButton));
+        });
+    });
 
     let repostButton = node.querySelector(".repost");
     repostButton.querySelector("h5").textContent = post.reposts;
@@ -117,6 +163,34 @@ async function applyPostDataToNode(data, node, showDeleteButton = false) {
 
     let bookmarkButton = node.querySelector(".bookmark");
     bookmarkButton.querySelector("h5").textContent = post.bookmarks;
+    if (interaction.bookmarked) {
+        bookmarkButton.querySelector("h5").style.color = "var(--green)";
+        bookmarkButton.querySelector("path").style.stroke = "var(--green)";
+
+        bookmarkButton.addEventListener("click", async () => {
+            let response = await fetch(`/api/unbookmark_post/${post.id}`, {method: "POST"});
+
+            if (!response.ok) {
+                response.text().then(alert);
+                return;
+            }
+
+            let refreshedPost = await response.json();
+            document.querySelector(`#post-${post.id}`).replaceWith(await makePostNode(refreshedPost, showDeleteButton));
+        });
+    } else {
+        bookmarkButton.addEventListener("click", async () => {
+            let response = await fetch(`/api/bookmark_post/${post.id}`, {method: "POST"});
+
+            if (!response.ok) {
+                response.text().then(alert);
+                return;
+            }
+
+            let refreshedPost = await response.json();
+            document.querySelector(`#post-${post.id}`).replaceWith(await makePostNode(refreshedPost, showDeleteButton));
+        });
+    }
 
     let deleteButton = node.querySelector(".delete");
     if (post.creator !== window.localStorage.getItem("currentUsername") && !showDeleteButton) deleteButton.style.display = "none";
@@ -221,7 +295,6 @@ function generateRatingEventHandler(post) {
     
             let refreshedPost = await response.json();
     
-            //applyPostDataToNode(refreshedPost, document.querySelector(`#post-${post.id}`));
             document.querySelector(`#post-${post.id}`).replaceWith(await makePostNode(refreshedPost));
         }
     }

@@ -109,6 +109,11 @@ async function initPersonalProfilePage() {
     });
 
     newBiographyInput.addEventListener("blur", handleBiographyInput);
+
+    const viewBookmarkedPostsButton = personalProfileScreen.querySelector(".viewBookmarkedPostsButton");
+    viewBookmarkedPostsButton.addEventListener("click", () => {
+        showBookmarkedScreen();
+    });
 }
 
 function handleProfilePictureUpdate(input) {
@@ -183,4 +188,20 @@ async function updateBiography(newBiography) {
 
     if (response.ok) window.location.reload();
     else alert(await response.text());
+}
+
+
+function initBookmarkedPaginator(handler) {
+    var counter = 0;
+
+    return async () => {
+        let response = await fetch(`/api/fetch_bookmarked_posts?page=${counter++}`);
+
+        if (!response.ok) {
+            response.text().then(alert);
+            return;
+        }
+
+        response.json().then(handler);
+    }
 }

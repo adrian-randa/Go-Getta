@@ -39,5 +39,5 @@ pub async fn set_rating_state(headers: warp::http::HeaderMap, connection: DBConn
         Ok(post)
     }).map_err(|_: diesel::result::Error| InternalServerError)?;
 
-    Ok(warp::reply::json(&PostQueryResponse::from_post_for_user(new_post, &user, connection).await))
+    Ok(warp::reply::json(&PostQueryResponse::from_post_for_user(new_post, &user, connection).await?))
 }

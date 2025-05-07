@@ -23,7 +23,7 @@ pub async fn public_space_query(headers: warp::http::HeaderMap, connection: DBCo
     let mut response = Vec::with_capacity(posts.len());
 
     for post in posts {
-        response.push(PostQueryResponse::from_post_for_user(post, &user, connection.clone()).await);
+        response.push(PostQueryResponse::from_post_for_user(post, &user, connection.clone()).await?);
     }
 
     Ok(warp::reply::json(&response))

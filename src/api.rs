@@ -1,10 +1,10 @@
 use std::ops::DerefMut;
 
-use diesel::{QueryDsl, RunQueryDsl};
+use diesel::{result::Error::NotFound, QueryDsl, RunQueryDsl};
 use serde::{Deserialize, Serialize};
 use warp::Filter;
 
-use crate::{db::{with_db_connection, DBConnection}, error::{InvalidSessionError, PostDoesNotExistError}, models::{Post, Rating, User}, schema::{posts, ratings}, validate_session_from_headers};
+use crate::{db::{with_db_connection, DBConnection}, error::{InternalServerError, InvalidSessionError, PostDoesNotExistError}, models::{Bookmark, Post, Rating, User}, schema::{bookmarks, posts, ratings}, validate_session_from_headers};
 
 pub mod post;
 pub mod public_space;
@@ -13,6 +13,7 @@ pub mod user_data;
 pub mod rating;
 pub mod thread;
 pub mod room;
+pub mod bookmark;
 
 #[derive(Debug, Serialize)]
 struct WhoAmIResponse {
@@ -41,10 +42,13 @@ pub struct PostQueryResponse {
 }
 
 impl PostQueryResponse {
-    pub async fn from_post_for_user(post: Post, user: &User, connection: DBConnection) -> Self {
+    pub async fn from_post_for_user(post: Post, user: &User, connection: DBConnection) -> Result<Self, warp::Rejection> {
+
+        let username = user.get_username();
+        let post_id = post.get_id();
 
         let rating: RatingInteraction = ratings::table
-            .find((user.get_username(), post.get_id()))
+            .find((&username, &post_id))
             .first(connection.lock().await.deref_mut()).ok().into();
 
         let mut child: Option<Post> = None;
@@ -55,13 +59,23 @@ impl PostQueryResponse {
                 .ok();
         }
 
-        Self {
+        let bookmarked = match bookmarks::table
+            .find((&username, &post_id))
+            .first::<Bookmark>(connection.lock().await.deref_mut()) {
+                Ok(_) => true,
+                Err(NotFound) => false,
+                _ => {Err(InternalServerError)?}
+            };
+
+
+        Ok(Self {
             post,
             interaction: PostInteraction {
-                rating
+                rating,
+                bookmarked
             },
             child
-        }
+        })
     }
 
     pub fn get_post_ref(&self) -> &Post {
@@ -72,7 +86,7 @@ impl PostQueryResponse {
 #[derive(Debug, Serialize)]
 pub struct PostInteraction {
     rating: RatingInteraction,
-    //TODO: when adding support for bookmarks, add bookmarked: bool,
+    bookmarked: bool,
 }
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]

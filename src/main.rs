@@ -7,7 +7,7 @@ use uuid::*;
 
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 
-use go_getta::{api::{file_upload::{file_upload, update_profile_picture, update_room_banner}, post::{create_post, delete_post, get_post}, public_space::public_space_query, rating::set_rating_state, room::{add_user_to_room, ban_user_from_room, create_room, delete_room, fetch_banned_users, fetch_joined_users, get_joined_rooms, kick_user_from_room, leave_room, room_posts_query, search_for_banned_user, search_for_room_member, unban_user_from_room, update_room_color, update_room_description, update_room_name}, thread::{comment_query, get_thread}, user_data::{get_user_data, update_biography, update_public_name, users_posts_query}, who_am_i}, clean_database, create_account::create_account, db::{establish_connection, scan_for_keys, with_db_connection}, login::*, models::*, pages::{with_page_store, PageStore}, render::render, schema::sessions::{self, timestamp}, session_gate};
+use go_getta::{api::{bookmark::{bookmark_post, fetch_bookmarked_posts, unbookmark_post}, file_upload::{file_upload, update_profile_picture, update_room_banner}, post::{create_post, delete_post, get_post, register_post_share}, public_space::public_space_query, rating::set_rating_state, room::{add_user_to_room, ban_user_from_room, create_room, delete_room, fetch_banned_users, fetch_joined_users, get_joined_rooms, kick_user_from_room, leave_room, room_posts_query, search_for_banned_user, search_for_room_member, unban_user_from_room, update_room_color, update_room_description, update_room_name}, thread::{comment_query, get_thread}, user_data::{get_user_data, update_biography, update_public_name, users_posts_query}, who_am_i}, clean_database, create_account::create_account, db::{establish_connection, scan_for_keys, with_db_connection}, login::*, models::*, pages::{with_page_store, PageStore}, render::render, schema::sessions::{self, timestamp}, session_gate};
 
 
 pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("./migrations/");
@@ -78,6 +78,26 @@ async fn main() {
         .and(warp::path!("api" / "delete_post" / String))
         .and_then(delete_post);
 
+    let bookmark_post_route = warp::post()
+        .and(warp::header::headers_cloned())
+        .and(with_db_connection(connection.clone()))
+        .and(warp::path!("api" / "bookmark_post" / String))
+        .and_then(bookmark_post);
+
+    let unbookmark_post_route = warp::post()
+        .and(warp::header::headers_cloned())
+        .and(with_db_connection(connection.clone()))
+        .and(warp::path!("api" / "unbookmark_post" / String))
+        .and_then(unbookmark_post);
+
+    let fetch_bookmarked_posts_route = warp::get()
+        .and(warp::path("api"))
+        .and(warp::path("fetch_bookmarked_posts"))
+        .and(warp::header::headers_cloned())
+        .and(with_db_connection(connection.clone()))
+        .and(warp::query::<HashMap<String, String>>())
+        .and_then(fetch_bookmarked_posts);
+
     let public_space_route = warp::get()
         .and(warp::path("api"))
         .and(warp::path("fetch_public_space"))
@@ -123,6 +143,12 @@ async fn main() {
         .and(with_db_connection(connection.clone()))
         .and(warp::path!("api" / "get_post" / String))
         .and_then(get_post);
+
+    let register_post_share_route = warp::post()
+        .and(warp::header::headers_cloned())
+        .and(with_db_connection(connection.clone()))
+        .and(warp::path!("api" / "register_post_share" / String))
+        .and_then(register_post_share);
 
     let set_rating_state_route = warp::post()
         .and(warp::path("api"))
@@ -301,6 +327,7 @@ async fn main() {
         .or(get_user_data_route)
         .or(users_posts_query)
         .or(set_rating_state_route)
+        .or(register_post_share_route)
         .or(get_thread_route)
         .or(fetch_comments_route)
         .or(update_public_name_route)
@@ -323,6 +350,9 @@ async fn main() {
         .or(unban_user_from_room_route)
         .or(fetch_banned_users_route)
         .or(search_for_banned_user_route)
+        .or(bookmark_post_route)
+        .or(unbookmark_post_route)
+        .or(fetch_bookmarked_posts_route)
         .or(storage_route);
 
     select! {

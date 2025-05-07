@@ -170,6 +170,13 @@ function showFollowingScreen() {
     //TODO
 }
 
+function showBookmarkedScreen() {
+    showPostScreen();
+
+    currentPaginator = initBookmarkedPaginator(mountPosts(postScreen));
+    currentPaginator();
+}
+
 function showPersonalProfileScreen() {
     postScreen.style.display = "none";
     postCreationScreen.style.display = "none";

@@ -202,6 +202,22 @@ impl Post {
     pub fn get_room(&self) -> Option<String> {
         self.room.clone()
     }
+
+    pub fn set_shares_unchecked(&mut self, shares: i32) {
+        self.shares = shares;
+    }
+
+    pub fn get_shares(&self) -> i32 {
+        self.shares
+    }
+
+    pub fn set_bookmarks_unchecked(&mut self, bookmarks: i32) {
+        self.bookmarks = bookmarks;
+    }
+
+    pub fn get_bookmarks(&self) -> i32 {
+        self.bookmarks
+    }
 }
 
 #[derive(Debug, Queryable, Insertable, Selectable, Identifiable, Serialize, AsChangeset)]
@@ -327,4 +343,26 @@ impl Ban {
             room: room.get_id(),
         }
     }
+}
+
+
+#[derive(Debug, Queryable, Insertable, Selectable, Identifiable, Associations)]
+#[diesel(belongs_to(User, foreign_key = user))]
+#[diesel(belongs_to(Post, foreign_key = post))]
+#[diesel(primary_key(user, post))]
+#[diesel(table_name = crate::schema::bookmarks)]
+pub struct Bookmark {
+    user: String,
+    post: String,
+}
+
+impl Bookmark {
+
+    pub fn new(user: &User, post: &Post) -> Self {
+        Self {
+            user: user.get_username(),
+            post: post.get_id(),
+        }
+    }
+
 }

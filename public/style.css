@@ -1536,6 +1536,25 @@ button {
 
             color: var(--gray);
         }
+
+        .actionButtons {
+            height: 2rem;
+
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+
+            button {
+                font-size: 1rem;
+                display: flex;
+                gap: .5rem;
+                align-items: center;
+
+                svg {
+                    height: 1rem;
+                }
+            }
+        }
     }
 
     .biography {
