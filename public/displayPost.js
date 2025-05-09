@@ -72,7 +72,10 @@ async function applyPostDataToNode(data, node, showDeleteButton = false) {
 
     const referencedPost = node.querySelector(".referencedPost");
     if (post.child) {
-        if (child) referencedPost.appendChild(await makeChildPostNode(child));
+        if (child) {
+            referencedPost.appendChild(await makeChildPostNode(child));
+            referencedPost.setAttribute("href", `?view=post&id=${child.id}`);
+        }
         else referencedPost.innerText = "The referenced post has been deleted.";
     } else referencedPost.style.display = "none";
 

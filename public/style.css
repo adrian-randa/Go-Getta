@@ -758,6 +758,9 @@ button {
             border-radius: 1rem;
             background-color: var(--gray-125) !important;
 
+            color: var(--white);
+            text-decoration: none;
+
             .post {
                 opacity: .75;
 
@@ -1600,5 +1603,185 @@ button {
         align-items: center;
 
         gap: 1rem;
+    }
+}
+
+#search {
+    width: 100%;
+    
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+
+    .searchBar {
+        margin: 1rem;
+
+        height: 2.5rem;
+        width: calc(100% - 2rem);
+
+        background-color: var(--gray-25);
+        border-radius: 1rem;
+
+        display: flex;
+        align-items: center;
+
+        padding: 0 1rem 0 1rem;
+        gap: 1rem;
+
+        svg {
+            height: 1.2rem;
+        }
+
+        input {
+            flex: 1;
+
+            outline: none;
+            border: none;
+
+            color: var(--gray);
+            background-color: transparent;
+            
+        }
+    }
+
+    .searchCategorySelection {
+        button.active {
+            color: var(--green);
+            font-weight: 700;
+            text-decoration: underline;
+        }
+    }
+
+    .content {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+
+        .roomSearchResult {
+            width: 20rem;
+
+            display: flex;
+            flex-direction: column;
+
+            border-radius: 1rem;
+
+            background-color: var(--gray-125);
+
+            overflow: hidden;
+
+            .banner {
+                width: 100%;
+                aspect-ratio: 3 / 1;
+
+                background-color: var(--room-color);
+
+                background-size: cover;
+                background-position: center;
+            }
+
+            .context {
+                padding: 1rem;
+                flex: 1;
+
+                display: flex;
+                flex-direction: column;
+                justify-content: space-evenly;
+            }
+
+            h3 {
+                color: var(--room-color);
+            }
+
+            button {
+                margin-top: 1rem;
+                background-color: var(--gray-25);
+            }
+        }
+
+        .userSearchResult {
+            display: flex;
+            gap: 1rem;
+
+            height: 6rem;
+
+            spacer {
+                flex: 1;
+            }
+
+            .userDisplay {
+                width: 100%;
+
+                display: flex;
+                gap: 1rem;
+                align-items: center;
+            }
+
+            .profilePicture {
+                width: 4rem;
+                height: 4rem;
+
+                background-size: cover;
+                background-position: center;
+                background-color: white;
+
+                clip-path: var(--hexagon-path);
+            }
+
+            .textContainer {
+                height: 100%;
+                flex: 1;
+
+                display: flex;
+                flex-direction: column;
+                justify-content: space-evenly;
+
+                overflow: hidden;
+
+                p {
+                    width: 100%;
+
+                    overflow: hidden;
+                    white-space: nowrap;
+                    text-overflow: ellipsis;
+
+                    color: var(--gray);
+                }
+            }
+
+            .top {
+                display: flex;
+                gap: 1rem;
+
+                h4 {
+                    color: var(--green);
+                    font-size: 1rem;
+                    font-weight: 500;
+                    font-family: "K2D";
+
+                    transform: translateY(-.1rem);
+
+                    height: unset !important;
+                }
+    
+                h5 {
+                    font-style: normal;
+                    font-family: .75rem;
+
+                    height: unset !important;
+                }
+            }
+
+            button {
+                height: 100%;
+            }
+        }
+    }
+
+    .content.grid {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
     }
 }

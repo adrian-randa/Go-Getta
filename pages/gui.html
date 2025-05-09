@@ -12,6 +12,7 @@
     <script defer src="createRepost.js"></script>
     <script defer src="displayRoom.js"></script>
     <script defer src="gui.js"></script>
+    <script defer src="search.js"></script>
     <script defer src="createRoom.js"></script>
     <script defer src="modal.js"></script>
 
@@ -153,9 +154,9 @@
                 <div class="appendages">
                 </div>
                 <div class="referencedPostContainer">
-                    <div class="referencedPost">
+                    <a class="referencedPost">
 
-                    </div>
+                    </a>
                 </div>
                 <div class="interactionBar">
                     <div class="rating">
@@ -510,6 +511,52 @@
             <separator></separator>
             <div class="posts">
 
+            </div>
+        </screen>
+
+        <screen id="search" style="display: none;">
+            <div class="searchBar">
+                <svg viewBox="0 0 15 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M1 17L6.20984 9.70622M6.20984 9.70622C6.99614 10.2689 7.9594 10.6 9 10.6C11.651 10.6 13.8 8.45097 13.8 5.8C13.8 3.14903 11.651 1 9 1C6.34903 1 4.2 3.14903 4.2 5.8C4.2 7.41037 4.99302 8.83551 6.20984 9.70622Z" stroke="var(--gray)" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                
+                <input placeholder="Search..." type="text" name="searchTerm" id="searchBarLarge">
+            </div>
+
+            <div class="searchCategorySelection">
+                <button class="searchPeopleButton active">People</button>
+                <button class="searchRoomsButton">Rooms</button>
+                <button class="searchPostsButton">Posts</button>
+            </div>
+
+            <template id="roomSearchResult">
+                <div class="roomSearchResult">
+                    <div class="banner"></div>
+                    <div class="context">
+                        <h3>Room Name</h3>
+                        <p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Consequuntur, tenetur.</p>
+                        <button class="join">Join</button>
+                    </div>
+                </div>
+            </template>
+
+            <template id="userSearchResult">
+                <div class="userSearchResult">
+                    <a class="userDisplay" href="#">
+                        <div class="profilePicture"></div>
+                        <div class="textContainer">
+                            <div class="top">
+                                <h4>User</h4>
+                                <h5>@user</h5>
+                            </div>
+                            <p></p>
+                        </div>
+                        
+                    </a>
+                </div>
+            </template>
+            
+            <div class="content">
             </div>
         </screen>
     </div>

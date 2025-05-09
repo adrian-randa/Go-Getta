@@ -1,3 +1,5 @@
+#![recursion_limit = "256"]
+
 use diesel::{associations::HasTable, prelude::*};
 use dotenvy::dotenv;
 use tokio::select;
@@ -7,7 +9,7 @@ use uuid::*;
 
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 
-use go_getta::{api::{bookmark::{bookmark_post, fetch_bookmarked_posts, unbookmark_post}, file_upload::{file_upload, update_profile_picture, update_room_banner}, post::{create_post, delete_post, get_post, register_post_share}, public_space::public_space_query, rating::set_rating_state, room::{add_user_to_room, ban_user_from_room, create_room, delete_room, fetch_banned_users, fetch_joined_users, get_joined_rooms, kick_user_from_room, leave_room, room_posts_query, search_for_banned_user, search_for_room_member, unban_user_from_room, update_room_color, update_room_description, update_room_name}, thread::{comment_query, get_thread}, user_data::{get_user_data, update_biography, update_public_name, users_posts_query}, who_am_i}, clean_database, create_account::create_account, db::{establish_connection, scan_for_keys, with_db_connection}, login::*, models::*, pages::{with_page_store, PageStore}, render::render, schema::sessions::{self, timestamp}, session_gate};
+use go_getta::{api::{bookmark::{bookmark_post, fetch_bookmarked_posts, unbookmark_post}, file_upload::{file_upload, update_profile_picture, update_room_banner}, post::{create_post, delete_post, get_post, register_post_share}, public_space::public_space_query, rating::set_rating_state, room::{add_user_to_room, ban_user_from_room, create_room, delete_room, fetch_banned_users, fetch_joined_users, get_joined_rooms, join_room, kick_user_from_room, leave_room, room_posts_query, search_for_banned_user, search_for_room_member, unban_user_from_room, update_room_color, update_room_description, update_room_name}, search::{fetch_search_posts, fetch_search_rooms, fetch_search_users}, thread::{comment_query, get_thread}, user_data::{get_user_data, update_biography, update_public_name, users_posts_query}, who_am_i}, clean_database, create_account::create_account, db::{establish_connection, scan_for_keys, with_db_connection}, login::*, models::*, pages::{with_page_store, PageStore}, render::render, schema::sessions::{self, timestamp}, session_gate};
 
 
 pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("./migrations/");
@@ -238,6 +240,12 @@ async fn main() {
         .and(warp::path!("api" / "leave_room" / String))
         .and_then(leave_room);
 
+    let join_room_route = warp::post()
+        .and(warp::header::headers_cloned())
+        .and(with_db_connection(connection.clone()))
+        .and(warp::path!("api" / "join_room" / String))
+        .and_then(join_room);
+
     let get_joined_rooms_route = warp::get()
         .and(warp::path("api"))
         .and(warp::path("get_joined_rooms"))
@@ -305,6 +313,27 @@ async fn main() {
         .and(warp::path!("api" / "search_for_banned_user" / String))
         .and_then(search_for_banned_user);
 
+    let search_posts_route = warp::get()
+        .and(warp::header::headers_cloned())
+        .and(with_db_connection(connection.clone()))
+        .and(warp::query::<HashMap<String, String>>())
+        .and(warp::path!("api" / "search" / "posts"))
+        .and_then(fetch_search_posts);
+
+    let search_rooms_route = warp::get()
+        .and(warp::header::headers_cloned())
+        .and(with_db_connection(connection.clone()))
+        .and(warp::query::<HashMap<String, String>>())
+        .and(warp::path!("api" / "search" / "rooms"))
+        .and_then(fetch_search_rooms);
+
+    let search_users_route = warp::get()
+        .and(warp::header::headers_cloned())
+        .and(with_db_connection(connection.clone()))
+        .and(warp::query::<HashMap<String, String>>())
+        .and(warp::path!("api" / "search" / "users"))
+        .and_then(fetch_search_users);
+
     let storage_route = warp::get()
         .and(warp::path("storage"))
         .and(warp::header::headers_cloned())
@@ -340,6 +369,7 @@ async fn main() {
         .or(update_room_color_route)
         .or(delete_room_route)
         .or(leave_room_route)
+        .or(join_room_route)
         .or(get_joined_rooms_route)
         .or(fetch_room_posts_route)
         .or(fetch_room_members_route)
@@ -353,6 +383,9 @@ async fn main() {
         .or(bookmark_post_route)
         .or(unbookmark_post_route)
         .or(fetch_bookmarked_posts_route)
+        .or(search_posts_route)
+        .or(search_rooms_route)
+        .or(search_users_route)
         .or(storage_route);
 
     select! {

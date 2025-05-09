@@ -6,6 +6,8 @@ use warp::filters::multipart::FormData;
 
 use crate::{api::PostQueryResponse, db::DBConnection, error::{ContentTooLargeError, EmptyContentError, InsufficientPermissionsError, InternalServerError, InvalidQueryError, InvalidSessionError, RoomBoundaryViolationError, RoomDoesNotExistError, UserDoesNotExistError, UserIsBannedError}, models::{Ban, Membership, Post, Room, User}, schema::{bans, memberships::{self}, posts::{self, timestamp}, rooms, users}, validate_session_from_headers};
 
+use super::UserQueryResponse;
+
 #[derive(Debug, Deserialize)]
 pub struct RoomCreationData {
     pub name: String,
@@ -247,13 +249,6 @@ pub async fn leave_room(headers: warp::http::HeaderMap, connection: DBConnection
     Ok(warp::reply())
 }
 
-
-#[derive(Debug, Serialize)]
-struct JoinedUserResponse {
-    username: String,
-    public_name: String,
-}
-
 pub async fn fetch_joined_users(headers: warp::http::HeaderMap, connection: DBConnection, query: HashMap<String, String>, room_id: String) -> Result<impl warp::Reply, warp::Rejection> {
 
     let _user = validate_session_from_headers(&headers, connection.clone()).await.ok_or(InvalidSessionError)?;
@@ -261,7 +256,7 @@ pub async fn fetch_joined_users(headers: warp::http::HeaderMap, connection: DBCo
     let page = query.get("page").ok_or(InvalidQueryError)?.parse::<i64>().map_err(|_| InvalidQueryError)?;
     
     use crate::schema::memberships::room;
-    let response: Vec<_> = memberships::table
+    let response: Vec<UserQueryResponse> = memberships::table
         .filter(room.eq(&room_id))
         .offset(20 * page)
         .limit(20)
@@ -270,7 +265,7 @@ pub async fn fetch_joined_users(headers: warp::http::HeaderMap, connection: DBCo
         .map_err(|_| InternalServerError)?
         .filter_map(|r: QueryResult<(Membership, User)>| {
             let (_, u) = r.ok()?;
-            Some(JoinedUserResponse { username: u.get_username(), public_name: u.get_public_name() })
+            Some(u.into())
         })
         .collect();
 
@@ -284,14 +279,14 @@ pub async fn search_for_room_member(headers: warp::http::HeaderMap, connection: 
     let search_term = query.get("query").ok_or(InvalidQueryError)?;
 
     use crate::schema::memberships::room;
-    let matches: Vec<_> = memberships::table
+    let matches: Vec<UserQueryResponse> = memberships::table
         .filter(room.eq(room_id).and(memberships::user.like(format!("%{}%", search_term))))
         .inner_join(users::table)
         .load_iter(connection.lock().await.deref_mut())
         .map_err(|_| InternalServerError)?
         .filter_map(|r: QueryResult<(Membership, User)>| {
             let (_, u) = r.ok()?;
-            Some(JoinedUserResponse { username: u.get_username(), public_name: u.get_public_name() })
+            Some(u.into())
         })
         .collect();
 
@@ -391,7 +386,7 @@ pub async fn fetch_banned_users(headers: warp::http::HeaderMap, connection: DBCo
 
     let page = query.get("page").ok_or(InvalidQueryError)?.parse::<i64>().map_err(|_| InvalidQueryError)?;
     
-    let response: Vec<_> = bans::table
+    let response: Vec<UserQueryResponse> = bans::table
         .filter(bans::room.eq(&room_id))
         .offset(20 * page)
         .limit(20)
@@ -400,7 +395,7 @@ pub async fn fetch_banned_users(headers: warp::http::HeaderMap, connection: DBCo
         .map_err(|_| InternalServerError)?
         .filter_map(|r: QueryResult<(Ban, User)>| {
             let (_, u) = r.ok()?;
-            Some(JoinedUserResponse { username: u.get_username(), public_name: u.get_public_name() })
+            Some(u.into())
         })
         .collect();
 
@@ -422,14 +417,14 @@ pub async fn search_for_banned_user(headers: warp::http::HeaderMap, connection: 
 
     let search_term = query.get("query").ok_or(InvalidQueryError)?;
 
-    let matches: Vec<_> = bans::table
+    let matches: Vec<UserQueryResponse> = bans::table
         .filter(bans::room.eq(room_id).and(bans::user.like(format!("%{}%", search_term))))
         .inner_join(users::table)
         .load_iter(connection.lock().await.deref_mut())
         .map_err(|_| InternalServerError)?
         .filter_map(|r: QueryResult<(Ban, User)>| {
             let (_, u) = r.ok()?;
-            Some(JoinedUserResponse { username: u.get_username(), public_name: u.get_public_name() })
+            Some(u.into())
         })
         .collect();
 
@@ -473,6 +468,29 @@ pub async fn add_user_to_room(headers: warp::http::HeaderMap, connection: DBConn
 
     diesel::replace_into(memberships::table)
         .values(Membership::new(&added_user, &room))
+        .execute(connection.lock().await.deref_mut())
+        .map_err(|_| InternalServerError)?;
+
+    Ok(warp::reply())
+}
+
+pub async fn join_room(headers: warp::http::HeaderMap, connection: DBConnection, room_id: String) -> Result<impl warp::Reply, warp::Rejection> {
+
+    let user = validate_session_from_headers(&headers, connection.clone()).await.ok_or(InvalidSessionError)?;
+
+    let room: Room = rooms::table
+        .find(room_id)
+        .first(connection.lock().await.deref_mut())
+        .map_err(|_| RoomDoesNotExistError)?;
+
+    if room.is_private() {
+        Err(InsufficientPermissionsError)?;
+    }
+
+    let membership = Membership::new(&user, &room);
+
+    diesel::replace_into(memberships::table)
+        .values(membership)
         .execute(connection.lock().await.deref_mut())
         .map_err(|_| InternalServerError)?;
 

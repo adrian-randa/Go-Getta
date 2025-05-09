@@ -4,7 +4,7 @@ use diesel::{result::Error::NotFound, QueryDsl, RunQueryDsl};
 use serde::{Deserialize, Serialize};
 use warp::Filter;
 
-use crate::{db::{with_db_connection, DBConnection}, error::{InternalServerError, InvalidSessionError, PostDoesNotExistError}, models::{Bookmark, Post, Rating, User}, schema::{bookmarks, posts, ratings}, validate_session_from_headers};
+use crate::{db::{with_db_connection, DBConnection}, error::{InternalServerError, InvalidSessionError, PostDoesNotExistError}, models::{Bookmark, Membership, Post, Rating, Room, User}, schema::{bookmarks, memberships, posts, ratings}, validate_session_from_headers};
 
 pub mod post;
 pub mod public_space;
@@ -14,6 +14,7 @@ pub mod rating;
 pub mod thread;
 pub mod room;
 pub mod bookmark;
+pub mod search;
 
 #[derive(Debug, Serialize)]
 struct WhoAmIResponse {
@@ -125,5 +126,42 @@ impl RatingInteraction {
         };
 
         new - old
+    }
+}
+
+#[derive(Debug, Serialize)]
+struct UserQueryResponse {
+    username: String,
+    public_name: String,
+    biography: String,
+}
+
+impl From<User> for UserQueryResponse {
+    fn from(user: User) -> Self {
+        Self {
+            username: user.get_username(),
+            public_name: user.get_public_name(),
+            biography: user.get_biography(),
+        }
+    }
+}
+
+#[derive(Debug, Serialize)]
+struct RoomQueryResponse {
+    room: Room,
+    joined: bool,
+}
+
+impl RoomQueryResponse {
+    pub async fn from_room_for_user(room: Room, user: &User, connection: DBConnection) -> Self {
+        let joined = memberships::table
+            .find((user.get_username(), room.get_id()))
+            .first::<Membership>(connection.lock().await.deref_mut())
+            .is_ok();
+
+        Self {
+            room,
+            joined
+        }
     }
 }

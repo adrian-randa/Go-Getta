@@ -601,3 +601,14 @@ function mountBannedUsers(roomID, screen) {
         });
     }
 }
+
+async function joinRoom(roomID) {
+    let response = await fetch(`/api/join_room/${roomID}`, {method: "POST"});
+
+    if (!response.ok) {
+        response.text().then(alert);
+        return;
+    }
+
+    window.location.reload();
+}
