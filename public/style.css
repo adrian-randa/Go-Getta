@@ -1698,6 +1698,11 @@ button {
                 margin-top: 1rem;
                 background-color: var(--gray-25);
             }
+
+            button[disabled] {
+                cursor: unset;
+                opacity: .5;
+            }
         }
 
         .userSearchResult {

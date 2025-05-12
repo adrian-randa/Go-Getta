@@ -27,8 +27,7 @@ async function applyPostDataToNode(data, node, showDeleteButton = false) {
 
     if (node instanceof DocumentFragment) node.querySelector(".post").setAttribute("id", `post-${post.id}`);
 
-    let userDataResponse = await fetch(`/api/get_user_data/${post.creator}`);
-    let userData = await userDataResponse.json();
+    let userData = await UserDataStore.get(post.creator);
 
     let creatorDisplay = node.querySelector(".userDisplay");
     creatorDisplay.setAttribute("href", `?view=profile&id=${post.creator}`);
@@ -227,8 +226,7 @@ async function applyPostDataToNode(data, node, showDeleteButton = false) {
 async function makeChildPostNode(post) {
     let node = postTemplate.content.cloneNode(true);
 
-    let userDataResponse = await fetch(`/api/get_user_data/${post.creator}`);
-    let userData = await userDataResponse.json();
+    let userData = await UserDataStore.get(post.creator);
 
     let creatorDisplay = node.querySelector(".userDisplay");
     creatorDisplay.setAttribute("href", `?view=profile&id=${post.creator}`);
