@@ -21,6 +21,7 @@ new_rejections!(
     UserAlreadyExistsError,
     UserDoesNotExistError,
     UserIsBannedError,
+    UserIsAlreadyFollowedError,
     PostDoesNotExistError,
     RoomDoesNotExistError,
     InternalServerError,

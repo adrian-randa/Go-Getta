@@ -15,17 +15,26 @@ pub mod thread;
 pub mod room;
 pub mod bookmark;
 pub mod search;
+pub mod follow;
 
 #[derive(Debug, Serialize)]
 struct WhoAmIResponse {
     username: String,
     public_name: String,
     biography: String,
+    followers: i32,
+    followed: i32
 }
 
 impl WhoAmIResponse {
     fn from_user(user: User) -> Self {
-        Self { username: user.get_username(), public_name: user.get_public_name(), biography: user.get_biography() }
+        Self {
+            username: user.get_username(),
+            public_name: user.get_public_name(),
+            biography: user.get_biography(),
+            followers: user.get_follower_count(),
+            followed: user.get_followed_count(),
+        }
     }
 }
 

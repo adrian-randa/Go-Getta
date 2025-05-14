@@ -1,30 +1,44 @@
 use std::{collections::HashMap, ops::DerefMut};
 
-use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl, SaveChangesDsl};
+use diesel::{result::Error::NotFound, ExpressionMethods, QueryDsl, RunQueryDsl, SaveChangesDsl};
 use serde::{Serialize, Deserialize};
 
-use crate::{db::DBConnection, error::{InternalServerError, InvalidQueryError, InvalidSessionError, UserDoesNotExistError, InvalidPublicNameError, InvalidBiographyError}, models::{Post, User}, schema::{posts::{self, creator, timestamp}, users}, validate_session_from_headers};
+use crate::{db::DBConnection, error::{InternalServerError, InvalidBiographyError, InvalidPublicNameError, InvalidQueryError, InvalidSessionError, UserDoesNotExistError}, models::{Following, Post, User}, schema::{follows, posts::{self, creator, timestamp}, users}, validate_session_from_headers};
 
 use super::PostQueryResponse;
 
 #[derive(Serialize)]
 struct GetUserDataResponse {
     public_name: String,
-    biography: String
+    biography: String,
+    is_followed: bool,
+    followers: i32,
+    followed: i32,
 }
 
 
 pub async fn get_user_data(headers: warp::http::HeaderMap, connection: DBConnection, username: String) -> Result<impl warp::Reply, warp::Rejection> {
     
-    let _user = validate_session_from_headers(&headers, connection.clone()).await.ok_or(InvalidSessionError)?;
+    let user = validate_session_from_headers(&headers, connection.clone()).await.ok_or(InvalidSessionError)?;
 
     let queried_user: User = users::table
-        .find(username)
+        .find(&username)
         .first(connection.lock().await.deref_mut()).map_err(|_| UserDoesNotExistError)?;
+
+    let is_followed = match follows::table
+        .find((user.borrow_username(), &username))
+        .first::<Following>(connection.lock().await.deref_mut()) {
+            Ok(_) => true,
+            Err(NotFound) => false,
+            Err(_) => {Err(InternalServerError)?}
+        };
 
     Ok(warp::reply::json(&GetUserDataResponse {
         public_name: queried_user.get_public_name(),
-        biography: queried_user.get_biography()
+        biography: queried_user.get_biography(),
+        is_followed,
+        followers: user.get_follower_count(),
+        followed: user.get_followed_count(),
     }))
 }
 

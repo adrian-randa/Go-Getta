@@ -71,6 +71,9 @@ const profileScreen = document.querySelector("#profile");
 const roomCreationScreen = document.querySelector("#roomCreation");
 const searchScreen = document.querySelector("#search");
 
+const showPublicSpaceButton = document.querySelector("#showPublicSpaceButton");
+const showFollowingFeedButton = document.querySelector("#showFollowingFeedButton");
+
 const noPaginator = () => {};
 let currentPaginator = noPaginator;
 document.addEventListener("scrolledToBottom", () => {currentPaginator()});
@@ -166,14 +169,23 @@ function showRoomCreationScreen() {
 function showPublicSpaceScreen() {
     window.history.pushState({}, "", window.location.origin);
 
+    showPublicSpaceButton.setAttribute("selected", "");
+    showFollowingFeedButton.removeAttribute("selected")
+
+
     showPostScreen();
     currentPaginator = initPublicSpacePaginator(mountPosts(postScreen));
     currentPaginator();
 }
 
 function showFollowingScreen() {
+
+    showFollowingFeedButton.setAttribute("selected", "");
+    showPublicSpaceButton.removeAttribute("selected");
+
     showPostScreen();
-    //TODO
+    currentPaginator = initFollowedFeedPaginator(mountPosts(postScreen));
+    currentPaginator();
 }
 
 function showBookmarkedScreen() {

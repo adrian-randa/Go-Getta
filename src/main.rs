@@ -9,7 +9,7 @@ use uuid::*;
 
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 
-use go_getta::{api::{bookmark::{bookmark_post, fetch_bookmarked_posts, unbookmark_post}, file_upload::{file_upload, update_profile_picture, update_room_banner}, post::{create_post, delete_post, get_post, register_post_share}, public_space::public_space_query, rating::set_rating_state, room::{add_user_to_room, ban_user_from_room, create_room, delete_room, fetch_banned_users, fetch_joined_users, get_joined_rooms, join_room, kick_user_from_room, leave_room, room_posts_query, search_for_banned_user, search_for_room_member, unban_user_from_room, update_room_color, update_room_description, update_room_name}, search::{fetch_search_posts, fetch_search_rooms, fetch_search_users}, thread::{comment_query, get_thread}, user_data::{get_user_data, update_biography, update_public_name, users_posts_query}, who_am_i}, clean_database, create_account::create_account, db::{establish_connection, scan_for_keys, with_db_connection}, login::*, models::*, pages::{with_page_store, PageStore}, render::render, schema::sessions::{self, timestamp}, session_gate};
+use go_getta::{api::{bookmark::{bookmark_post, fetch_bookmarked_posts, unbookmark_post}, file_upload::{file_upload, update_profile_picture, update_room_banner}, follow::{fetch_followed, fetch_followed_feed, fetch_followers, follow, is_following, unfollow}, post::{create_post, delete_post, get_post, register_post_share}, public_space::public_space_query, rating::set_rating_state, room::{add_user_to_room, ban_user_from_room, create_room, delete_room, fetch_banned_users, fetch_joined_users, get_joined_rooms, join_room, kick_user_from_room, leave_room, room_posts_query, search_for_banned_user, search_for_room_member, unban_user_from_room, update_room_color, update_room_description, update_room_name}, search::{fetch_search_posts, fetch_search_rooms, fetch_search_users}, thread::{comment_query, get_thread}, user_data::{get_user_data, update_biography, update_public_name, users_posts_query}, who_am_i}, clean_database, create_account::create_account, db::{establish_connection, scan_for_keys, with_db_connection}, login::*, models::*, pages::{with_page_store, PageStore}, render::render, schema::sessions::{self, timestamp}, session_gate};
 
 
 pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("./migrations/");
@@ -341,52 +341,97 @@ async fn main() {
         .and_then(session_gate)
         .and(warp::fs::dir(env::var("STORAGE_URL").unwrap()))
         .map(|_, file| file);
+
+    let follow_route = warp::post()
+        .and(warp::header::headers_cloned())
+        .and(with_db_connection(connection.clone()))
+        .and(warp::path!("api" / "follow" / String))
+        .and_then(follow);
+
+    let unfollow_route = warp::delete()
+        .and(warp::header::headers_cloned())
+        .and(with_db_connection(connection.clone()))
+        .and(warp::path!("api" / "unfollow" / String))
+        .and_then(unfollow);
+
+    let is_following_route = warp::get()
+        .and(warp::header::headers_cloned())
+        .and(with_db_connection(connection.clone()))
+        .and(warp::path!("api" / "is_following" / String))
+        .and_then(is_following);
+
+    let fetch_followed_feed_route = warp::get()
+        .and(warp::path!("api" / "fetch_followed_feed"))
+        .and(warp::header::headers_cloned())
+        .and(with_db_connection(connection.clone()))
+        .and(warp::query::<HashMap<String, String>>())
+        .and_then(fetch_followed_feed);
+
+    let fetch_followers_route = warp::get()
+        .and(warp::path!("api" / "fetch_followers"))
+        .and(warp::header::headers_cloned())
+        .and(with_db_connection(connection.clone()))
+        .and(warp::query::<HashMap<String, String>>())
+        .and_then(fetch_followers);
+
+    let fetch_followed_route = warp::get()
+        .and(warp::path!("api" / "fetch_followed"))
+        .and(warp::header::headers_cloned())
+        .and(with_db_connection(connection.clone()))
+        .and(warp::query::<HashMap<String, String>>())
+        .and_then(fetch_followed);
     
-    let routes = public_route
-        .or(main_route)
-        .or(login_route)
-        .or(logout_route)
-        .or(create_account_route)
-        .or(who_am_i_route)
-        .or(create_post_route)
-        .or(delete_post_route)
-        .or(public_space_route)
-        .or(file_upload_route)
-        .or(update_profile_picture_route)
-        .or(get_user_data_route)
-        .or(users_posts_query)
-        .or(set_rating_state_route)
-        .or(register_post_share_route)
-        .or(get_thread_route)
-        .or(fetch_comments_route)
-        .or(update_public_name_route)
-        .or(update_biography_route)
-        .or(get_post_route)
-        .or(create_room_route)
-        .or(update_room_banner_route)
-        .or(update_room_name_route)
-        .or(update_room_description_route)
-        .or(update_room_color_route)
-        .or(delete_room_route)
-        .or(leave_room_route)
-        .or(join_room_route)
-        .or(get_joined_rooms_route)
-        .or(fetch_room_posts_route)
-        .or(fetch_room_members_route)
-        .or(search_for_room_member_route)
-        .or(add_user_to_room_route)
-        .or(kick_user_from_room_route)
-        .or(ban_user_from_room_route)
-        .or(unban_user_from_room_route)
-        .or(fetch_banned_users_route)
-        .or(search_for_banned_user_route)
-        .or(bookmark_post_route)
-        .or(unbookmark_post_route)
-        .or(fetch_bookmarked_posts_route)
-        .or(search_posts_route)
-        .or(search_rooms_route)
-        .or(search_users_route)
-        .or(storage_route);
+    let routes = public_route.boxed()
+        .or(main_route.boxed())
+        .or(login_route.boxed())
+        .or(logout_route.boxed())
+        .or(create_account_route.boxed())
+        .or(who_am_i_route.boxed())
+        .or(create_post_route.boxed())
+        .or(delete_post_route.boxed())
+        .or(public_space_route.boxed())
+        .or(file_upload_route.boxed())
+        .or(update_profile_picture_route.boxed())
+        .or(get_user_data_route.boxed())
+        .or(users_posts_query.boxed())
+        .or(set_rating_state_route.boxed())
+        .or(register_post_share_route.boxed())
+        .or(get_thread_route.boxed())
+        .or(fetch_comments_route.boxed())
+        .or(update_public_name_route.boxed())
+        .or(update_biography_route.boxed())
+        .or(get_post_route.boxed())
+        .or(create_room_route.boxed())
+        .or(update_room_banner_route.boxed())
+        .or(update_room_name_route.boxed())
+        .or(update_room_description_route.boxed())
+        .or(update_room_color_route.boxed())
+        .or(delete_room_route.boxed())
+        .or(leave_room_route.boxed())
+        .or(join_room_route.boxed())
+        .or(get_joined_rooms_route.boxed())
+        .or(fetch_room_posts_route.boxed())
+        .or(fetch_room_members_route.boxed())
+        .or(search_for_room_member_route.boxed())
+        .or(add_user_to_room_route.boxed())
+        .or(kick_user_from_room_route.boxed())
+        .or(ban_user_from_room_route.boxed())
+        .or(unban_user_from_room_route.boxed())
+        .or(fetch_banned_users_route.boxed())
+        .or(search_for_banned_user_route.boxed())
+        .or(bookmark_post_route.boxed())
+        .or(unbookmark_post_route.boxed())
+        .or(fetch_bookmarked_posts_route.boxed())
+        .or(search_posts_route.boxed())
+        .or(search_rooms_route.boxed())
+        .or(search_users_route.boxed())
+        .or(follow_route.boxed())
+        .or(unfollow_route.boxed())
+        .or(is_following_route.boxed())
+        .or(storage_route.boxed())
+        .or(fetch_followed_feed_route.boxed())
+        .or(fetch_followed_route.boxed())
+        .or(fetch_followers_route.boxed());
 
     select! {
         _ = warp::serve(routes).run(([0, 0, 0, 0], 7500)) => (),

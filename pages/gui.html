@@ -6,6 +6,7 @@
     
     <link rel="stylesheet" href="style.css">
     <script src="userData.js"></script>
+    <script src="followedFeed.js"></script>
     <script defer src="displayPost.js"></script>
     <script defer src="profilePosts.js"></script>
     <script defer src="personalProfile.js"></script>
@@ -37,8 +38,8 @@
         <separator></separator>
     
         <div class="feedSelector">
-            <button selected type="button" onclick="showPublicSpaceScreen()">Public Space</button>
-            <button type="button" onclick="showFollowingScreen()">Following</button>
+            <button id="showPublicSpaceButton" type="button" onclick="showPublicSpaceScreen()">Public Space</button>
+            <button id="showFollowingFeedButton" type="button" onclick="showFollowingScreen()">Following</button>
         </div>
 
         <separator></separator>
@@ -475,6 +476,12 @@
                         </svg>
                         View my bookmarked posts                        
                     </button>
+                    <button class="viewFollowers">
+                        16 followers
+                    </button>
+                    <button class="viewFollowed">
+                        214 followed
+                    </button>
                 </div>
             </div>
             <separator></separator>
@@ -504,6 +511,11 @@
                     <h3></h3>
                 </div>
                 <h4></h4>
+                <button class="follow">Follow</button>
+                <div class="followStats">
+                    <h5>12312 followers</h5>
+                    <h5>1231 followed</h5>
+                </div>
             </div>
             <separator></separator>
             <div class="biography">
@@ -561,6 +573,40 @@
             </div>
         </screen>
     </div>
+
+    <screen id="manageFollowsModal" style="display: none;">
+        <div class="modalWindow">
+            <button class="close">Close</button>
+            <h1>Followers</h1>
+            <div class="usersContainer">
+            </div>
+            <template class="followerTemplate">
+                <div class="user">
+                    <a class="userDisplay" href="#">
+                        <div class="profilePicture"></div>
+                        <div class="textContainer">
+                            <h4>User</h4>
+                            <h5>@user</h5>
+                        </div>
+                    </a>
+                    <spacer></spacer>
+                </div>
+            </template>
+            <template class="followedTemplate">
+                <div class="user">
+                    <a class="userDisplay" href="#">
+                        <div class="profilePicture"></div>
+                        <div class="textContainer">
+                            <h4>User</h4>
+                            <h5>@user</h5>
+                        </div>
+                    </a>
+                    <spacer></spacer>
+                    <button class="unfollow">Unfollow</button>
+                </div>
+            </template>
+        </div>
+    </screen>
 
     <screen id="manageRoomUsersModal" style="display: none;">
         <div class="modalWindow">

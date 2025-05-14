@@ -423,7 +423,7 @@ button {
     border-left: 1px solid var(--gray-25);
 }
 
-#modal, #manageRoomUsersModal {
+#modal, #manageRoomUsersModal, #manageFollowsModal {
     z-index: 1000;
 
     position: fixed;
@@ -497,7 +497,7 @@ button {
     }
 }
 
-#manageRoomUsersModal {
+#manageRoomUsersModal, #manageFollowsModal {
     .close {
         position: absolute;
         top: 1rem;
@@ -1556,6 +1556,18 @@ button {
                 svg {
                     height: 1rem;
                 }
+            }
+        }
+
+        .followStats {
+            margin-top: 2rem;
+
+            display: flex;
+            gap: 2rem;
+
+            h5 {
+                font-size: 1rem;
+                font-weight: 400;
             }
         }
     }

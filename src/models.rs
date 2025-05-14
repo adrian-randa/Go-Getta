@@ -38,11 +38,13 @@ pub struct User {
     password: String,
     public_name: String,
     biography: String,
+    followers: i32,
+    followed: i32,
 }
 
 impl User {
     pub fn new(username: String, password: String, public_name: String, biography: String) -> Self {
-        Self { username, password, public_name, biography }
+        Self { username, password, public_name, biography, followers: 0, followed: 0 }
     }
 
     pub fn verify_password(&self, password: String) -> Result<bool, bcrypt::BcryptError> {
@@ -51,6 +53,10 @@ impl User {
 
     pub fn get_username(&self) -> String {
         self.username.clone()
+    }
+
+    pub fn borrow_username(&self) -> &String {
+        &self.username
     }
 
     pub fn get_public_name(&self) -> String {
@@ -67,6 +73,22 @@ impl User {
 
     pub fn set_biography_unchecked(&mut self, biography: String) {
         self.biography = biography;
+    }
+
+    pub fn get_follower_count(&self) -> i32 {
+        self.followers
+    }
+
+    pub fn set_follower_count_unchecked(&mut self, followers: i32) {
+        self.followers = followers;
+    }
+
+    pub fn get_followed_count(&self) -> i32 {
+        self.followed
+    }
+
+    pub fn set_followed_count_unchecked(&mut self, followed: i32) {
+        self.followed = followed;
     }
 }
 
@@ -365,4 +387,22 @@ impl Bookmark {
         }
     }
 
+}
+
+
+#[derive(Debug, Queryable, Insertable, Selectable, Identifiable)]
+#[diesel(primary_key(follower, followed))]
+#[diesel(table_name = crate::schema::follows)]
+pub struct Following {
+    follower: String,
+    followed: String,
+}
+
+impl Following {
+    pub fn new(follower: &User, followed: &User) -> Self {
+        Self {
+            follower: follower.get_username(),
+            followed: followed.get_username(),
+        }
+    }
 }

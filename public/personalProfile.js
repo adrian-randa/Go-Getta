@@ -1,3 +1,7 @@
+let manageFollowPaginator = () => {};
+
+const manageFollowModal = document.querySelector("#manageFollowsModal");
+
 async function initPersonalProfilePage() {
     const heading = personalProfileScreen.querySelector(".heading");
     const profilePicture = heading.querySelector(".profilePicture");
@@ -114,7 +118,49 @@ async function initPersonalProfilePage() {
     viewBookmarkedPostsButton.addEventListener("click", () => {
         showBookmarkedScreen();
     });
+
+
+    const viewFollowersButton = personalProfileScreen.querySelector(".viewFollowers");
+    const viewFollowedButton = personalProfileScreen.querySelector(".viewFollowed");
+    const manageFollowUsersContainer = manageFollowModal.querySelector(".usersContainer");
+
+    viewFollowersButton.textContent = `${userData.followers} followers`;
+    viewFollowersButton.onclick = () => {
+        manageFollowModal.querySelector("h1").textContent = "Followers";
+
+        manageFollowUsersContainer.innerHTML = "";
+
+        manageFollowPaginator = initFollowerPaginator(mountFollowers(manageFollowUsersContainer));
+        manageFollowPaginator();
+
+        manageFollowModal.style.display = "grid";
+    }
+
+    viewFollowedButton.textContent = `${userData.followed} followed`;
+    viewFollowedButton.onclick = () => {
+        manageFollowModal.querySelector("h1").textContent = "Followed";
+
+        manageFollowUsersContainer.innerHTML = "";
+
+        manageFollowPaginator = initFollowedPaginator(mountFollowed(manageFollowUsersContainer));
+        manageFollowPaginator();
+
+        manageFollowModal.style.display = "grid";
+    }
 }
+
+document.querySelector("#manageFollowsModal").querySelector(".usersContainer").addEventListener("scrollend", (event) => {
+    let usersContainer = event.target;
+    
+    const scrollPos = usersContainer.scrollTop;
+    const maxScroll = usersContainer.scrollHeight - usersContainer.offsetHeight;
+
+    const tolerance = 50;
+
+    if (maxScroll - scrollPos < tolerance) {
+        manageFollowPaginator();
+    }
+});
 
 function handleProfilePictureUpdate(input) {
 
@@ -205,3 +251,86 @@ function initBookmarkedPaginator(handler) {
         response.json().then(handler);
     }
 }
+
+function initFollowerPaginator(handler) {
+    
+    var counter = 0;
+
+    return async () => {
+        let response = await fetch(`/api/fetch_followers?page=${counter++}`);
+
+        if (!response.ok) {
+            response.text().then(alert);
+            return;
+        }
+
+        response.json().then(handler);
+    }
+}
+
+function initFollowedPaginator(handler) {
+    
+    var counter = 0;
+
+    return async () => {
+        let response = await fetch(`/api/fetch_followed?page=${counter++}`);
+
+        if (!response.ok) {
+            response.text().then(alert);
+            return;
+        }
+
+        response.json().then(handler);
+    }
+}
+function mountFollowers(screen) {
+    console.log(manageFollowModal);
+    const followerTemplate = manageFollowModal.querySelector(".followerTemplate");
+
+    return (users) => {
+        for (let i = 0; i < users.length; i++) {
+            let node = followerTemplate.content.cloneNode(true);
+
+            node.querySelector("a").setAttribute("href", `?view=profile&id=${users[i].username}`);
+
+            node.querySelector(".profilePicture").style.backgroundImage = `url("/storage/profile_picture/${users[i].username}")`;
+            node.querySelector("h4").textContent = users[i].public_name;
+            node.querySelector("h5").textContent = users[i].username;
+
+            screen.appendChild(node);
+        }
+    }
+}
+
+function mountFollowed(screen) {
+    const followedTemplate = manageFollowModal.querySelector(".followedTemplate");
+
+    return (users) => {
+        for (let i = 0; i < users.length; i++) {
+            let node = followedTemplate.content.cloneNode(true);
+
+            node.querySelector("a").setAttribute("href", `?view=profile&id=${users[i].username}`);
+
+            node.querySelector(".profilePicture").style.backgroundImage = `url("/storage/profile_picture/${users[i].username}")`;
+            node.querySelector("h4").textContent = users[i].public_name;
+            node.querySelector("h5").textContent = users[i].username;
+
+            node.querySelector(".unfollow").addEventListener("click", async () => {
+                let response = await fetch(`/api/unfollow/${users[i].username}`, { method: "DELETE" });
+
+                if (!response.ok) {
+                    response.text().then(alert);
+                    return;
+                }
+
+                window.location.reload();
+            })
+
+            screen.appendChild(node);
+        }
+    }
+}
+
+document.querySelector("#manageFollowsModal").querySelector(".close").addEventListener("click", () => {
+    document.querySelector("#manageFollowsModal").style.display = "none";
+});

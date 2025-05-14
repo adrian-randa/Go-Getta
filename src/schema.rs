@@ -22,6 +22,13 @@ diesel::table! {
 }
 
 diesel::table! {
+    follows (follower, followed) {
+        follower -> Text,
+        followed -> Text,
+    }
+}
+
+diesel::table! {
     memberships (user, room) {
         user -> Text,
         room -> Text,
@@ -81,6 +88,8 @@ diesel::table! {
         password -> Text,
         public_name -> Text,
         biography -> Text,
+        followers -> Integer,
+        followed -> Integer,
     }
 }
 
@@ -101,6 +110,7 @@ diesel::allow_tables_to_appear_in_same_query!(
     account_keys,
     bans,
     bookmarks,
+    follows,
     memberships,
     posts,
     ratings,
