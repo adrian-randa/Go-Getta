@@ -16,6 +16,7 @@ pub mod room;
 pub mod bookmark;
 pub mod search;
 pub mod follow;
+pub mod notification;
 
 #[derive(Debug, Serialize)]
 struct WhoAmIResponse {

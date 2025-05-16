@@ -316,6 +316,14 @@ button {
 
         }
 
+        >button {
+            margin: 0 2rem;
+            margin-bottom: 1rem;
+
+            background-color: var(--gray-125);
+            color: var(--gray);
+        }
+
         .notification {
 
             margin: .5rem;

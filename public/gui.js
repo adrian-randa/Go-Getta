@@ -289,6 +289,119 @@ async function showRoomScreen(roomData) {
     currentPaginator();
 }
 
+
+const notificationsScreen = document.querySelector(".notifications");
+const notificationTemplate = document.querySelector("#notificationTemplate");
+let notificationsPaginator = initNotificationsPaginator(storeNotifications(mountNotifications(notificationsScreen)));
+notificationsPaginator();
+
+class NotificationStore {
+    
+    static notifications = [];
+
+    static append(notifications) {
+        this.notifications = this.notifications.concat(notifications);
+    }
+
+    static async dispatchDelete() {
+        let ids = this.notifications.map((n) => {return n.id});
+
+        let response = await fetch(`/api/delete_notifications`, {
+            method: "DELETE",
+            body: JSON.stringify({
+                "ids": ids
+            }),
+            headers: { "Content-Type": "application/json" },
+        });
+
+        if (!response.ok) {
+            response.text().then(alert);
+            return;
+        }
+
+        notificationsScreen.querySelectorAll(".notification").forEach((node) => {
+            node.remove();
+        });
+    }
+}
+
+function mountNotifications(screen) {
+    return (notifications) => {
+        for (let i = 0; i < notifications.length; i++) {
+            let node = notificationTemplate.content.cloneNode(true);
+
+            let timestamp = new Date(notifications[i].timestamp * 1000);
+            let [date, fullTime] = timestamp.toISOString().split("T");
+            let [hour, minute] = fullTime.split(":");
+
+            node.querySelector("h6").textContent = `${date} ${hour}:${minute}`;
+
+            let content = node.querySelector("a");
+            content.setAttribute("href", notifications[i].href);
+            content.textContent = notifications[i].message;
+
+            let element = node.querySelector(".notification");
+
+            node.querySelector(".delete").addEventListener("click", async () => {
+                let response = await fetch(`/api/delete_notifications`, {
+                    method: "DELETE",
+                    body: JSON.stringify({
+                        "ids": [notifications[i].id]
+                    }),
+                    headers: { "Content-Type": "application/json" },
+                });
+
+                if (!response.ok) {
+                    response.text().then(alert);
+                    return;
+                }
+
+                element.style.display = "none";
+            })
+
+            screen.appendChild(node);
+        }
+    }
+}
+
+function initNotificationsPaginator(handler) {
+    
+    var counter = 0;
+
+    return async () => {
+        let response = await fetch(`/api/fetch_notifications?page=${counter++}`);
+
+        if (!response.ok) {
+            response.text().then(alert);
+            return;
+        }
+
+        response.json().then(handler);
+    }
+}
+
+
+function storeNotifications(handler) {
+    return (notifs) => {
+        NotificationStore.append(notifs);
+
+        handler(notifs);
+    }
+}
+
+notificationsScreen.addEventListener("scrollend", (event) => {
+    const scrollPos = notificationsScreen.scrollTop;
+    const maxScroll = mainContent.offsetHeight - notificationsScreen.offsetHeight;
+
+    const tolerance = 50;
+
+    if (maxScroll - scrollPos <= tolerance) {
+        notificationsPaginator();
+    }
+})
+
+
+
 // Scroll to bottom event
 document.addEventListener("scrollend", (event) => {
     const scrollPos = document.documentElement.scrollTop;

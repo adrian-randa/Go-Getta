@@ -37,6 +37,16 @@ diesel::table! {
 }
 
 diesel::table! {
+    notifications (id, user) {
+        id -> Text,
+        user -> Text,
+        message -> Text,
+        href -> Text,
+        timestamp -> BigInt,
+    }
+}
+
+diesel::table! {
     posts (id) {
         id -> Text,
         creator -> Text,
@@ -99,6 +109,7 @@ diesel::joinable!(bookmarks -> posts (post));
 diesel::joinable!(bookmarks -> users (user));
 diesel::joinable!(memberships -> rooms (room));
 diesel::joinable!(memberships -> users (user));
+diesel::joinable!(notifications -> users (user));
 diesel::joinable!(posts -> rooms (room));
 diesel::joinable!(posts -> users (creator));
 diesel::joinable!(ratings -> posts (post));
@@ -112,6 +123,7 @@ diesel::allow_tables_to_appear_in_same_query!(
     bookmarks,
     follows,
     memberships,
+    notifications,
     posts,
     ratings,
     rooms,

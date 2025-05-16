@@ -94,14 +94,17 @@
                 </svg>
                 <h5>Notifications</h5>
             </div>
+            <button onclick="NotificationStore.dispatchDelete()">Delete all</button>
 
             <template id="notificationTemplate">
                 <div class="notification">
                     <div class="topBar">
                         <h6>1900/01/01 00:00</h6>
-                        <svg viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M1 1L5 5L9 9M9 1L1 9" stroke="var(--gray)" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
+                        <button class="delete">
+                            <svg viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M1 1L5 5L9 9M9 1L1 9" stroke="var(--gray)" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </button>
                     </div>
     
                     <a href="#">Notification text</a>

@@ -4,7 +4,7 @@ use diesel::{prelude::*, sqlite};
 use serde::{Serialize, Deserialize};
 use uuid::Uuid;
 
-use crate::{api::room::RoomCreationData, db::DBConnection, error::ContentTooLargeError, schema::posts};
+use crate::{api::room::RoomCreationData, db::DBConnection, error::{ContentTooLargeError, InternalServerError}, schema::{notifications, posts}};
 
 #[derive(Debug, Queryable, Selectable, Insertable)]
 #[diesel(table_name = crate::schema::account_keys)]
@@ -404,5 +404,45 @@ impl Following {
             follower: follower.get_username(),
             followed: followed.get_username(),
         }
+    }
+}
+
+
+#[derive(Debug, Queryable, Insertable, Selectable, Identifiable, Associations, Serialize)]
+#[diesel(primary_key(id, user))]
+#[diesel(belongs_to(User, foreign_key = user))]
+#[diesel(table_name = crate::schema::notifications)]
+pub struct Notification {
+    id: String,
+    user: String,
+    message: String,
+    href: String,
+    timestamp: i64,
+}
+
+impl Notification {
+    pub async fn push(user: &User, message: String, href: String, connection: DBConnection) -> Result<(), warp::Rejection> {
+        Self::push_unchecked(user.get_username(), message, href, connection).await
+    }
+
+    pub async fn push_unchecked(username: String, message: String, href: String, connection: DBConnection) -> Result<(), warp::Rejection> {
+
+        let timestamp = time::UNIX_EPOCH.elapsed().unwrap().as_secs().try_into().unwrap();
+        let id = Uuid::new_v4().into();
+        
+        let notification = Self {
+            id,
+            user: username,
+            message,
+            href,
+            timestamp,
+        };
+
+        diesel::insert_into(notifications::table)
+            .values(notification)
+            .execute(connection.lock().await.deref_mut())
+            .map_err(|_| InternalServerError)?;
+        
+        Ok(())
     }
 }

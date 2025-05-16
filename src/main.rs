@@ -9,7 +9,7 @@ use uuid::*;
 
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 
-use go_getta::{api::{bookmark::{bookmark_post, fetch_bookmarked_posts, unbookmark_post}, file_upload::{file_upload, update_profile_picture, update_room_banner}, follow::{fetch_followed, fetch_followed_feed, fetch_followers, follow, is_following, unfollow}, post::{create_post, delete_post, get_post, register_post_share}, public_space::public_space_query, rating::set_rating_state, room::{add_user_to_room, ban_user_from_room, create_room, delete_room, fetch_banned_users, fetch_joined_users, get_joined_rooms, join_room, kick_user_from_room, leave_room, room_posts_query, search_for_banned_user, search_for_room_member, unban_user_from_room, update_room_color, update_room_description, update_room_name}, search::{fetch_search_posts, fetch_search_rooms, fetch_search_users}, thread::{comment_query, get_thread}, user_data::{get_user_data, update_biography, update_public_name, users_posts_query}, who_am_i}, clean_database, create_account::create_account, db::{establish_connection, scan_for_keys, with_db_connection}, login::*, models::*, pages::{with_page_store, PageStore}, render::render, schema::sessions::{self, timestamp}, session_gate};
+use go_getta::{api::{bookmark::{bookmark_post, fetch_bookmarked_posts, unbookmark_post}, file_upload::{file_upload, update_profile_picture, update_room_banner}, follow::{fetch_followed, fetch_followed_feed, fetch_followers, follow, is_following, unfollow}, notification::{delete_notifications, fetch_notifications}, post::{create_post, delete_post, get_post, register_post_share}, public_space::public_space_query, rating::set_rating_state, room::{add_user_to_room, ban_user_from_room, create_room, delete_room, fetch_banned_users, fetch_joined_users, get_joined_rooms, join_room, kick_user_from_room, leave_room, room_posts_query, search_for_banned_user, search_for_room_member, unban_user_from_room, update_room_color, update_room_description, update_room_name}, search::{fetch_search_posts, fetch_search_rooms, fetch_search_users}, thread::{comment_query, get_thread}, user_data::{get_user_data, update_biography, update_public_name, users_posts_query}, who_am_i}, clean_database, create_account::create_account, db::{establish_connection, scan_for_keys, with_db_connection}, login::*, models::*, pages::{with_page_store, PageStore}, render::render, schema::sessions::{self, timestamp}, session_gate};
 
 
 pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("./migrations/");
@@ -380,6 +380,20 @@ async fn main() {
         .and(with_db_connection(connection.clone()))
         .and(warp::query::<HashMap<String, String>>())
         .and_then(fetch_followed);
+
+    let fetch_notifications_route = warp::get()
+        .and(warp::path!("api" / "fetch_notifications"))
+        .and(warp::header::headers_cloned())
+        .and(with_db_connection(connection.clone()))
+        .and(warp::query::<HashMap<String, String>>())
+        .and_then(fetch_notifications);
+
+    let delete_notifications_route = warp::delete()
+        .and(warp::path!("api" / "delete_notifications"))
+        .and(warp::header::headers_cloned())
+        .and(with_db_connection(connection.clone()))
+        .and(warp::body::json())
+        .and_then(delete_notifications);
     
     let routes = public_route.boxed()
         .or(main_route.boxed())
@@ -431,7 +445,9 @@ async fn main() {
         .or(storage_route.boxed())
         .or(fetch_followed_feed_route.boxed())
         .or(fetch_followed_route.boxed())
-        .or(fetch_followers_route.boxed());
+        .or(fetch_followers_route.boxed())
+        .or(fetch_notifications_route.boxed())
+        .or(delete_notifications_route.boxed());
 
     select! {
         _ = warp::serve(routes).run(([0, 0, 0, 0], 7500)) => (),

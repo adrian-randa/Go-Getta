@@ -1,6 +1,6 @@
 use std::ops::DerefMut;
 
-use crate::{db::DBConnection, error::{ContentTooLargeError, EmptyContentError, InsufficientPermissionsError, InternalServerError, InvalidSessionError, PostDoesNotExistError, RoomBoundaryViolationError, RoomDoesNotExistError}, models::{Membership, Post, Room}, schema::{memberships, posts, ratings::{self, post}, rooms}, validate_session_from_headers};
+use crate::{db::DBConnection, error::{ContentTooLargeError, EmptyContentError, InsufficientPermissionsError, InternalServerError, InvalidSessionError, PostDoesNotExistError, RoomBoundaryViolationError, RoomDoesNotExistError}, models::{Membership, Notification, Post, Room, User}, schema::{follows, memberships, posts, ratings::{self, post}, rooms}, validate_session_from_headers};
 
 use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl, SaveChangesDsl};
 use serde::{Deserialize, Serialize};
@@ -84,7 +84,7 @@ pub async fn create_post(headers: warp::http::HeaderMap, connection: DBConnectio
     let post_id = new_post.get_id();
 
     diesel::insert_into(posts::table)
-        .values(new_post)
+        .values(&new_post)
         .execute(connection.lock().await.deref_mut())
         .map_err(|_| InternalServerError)?;
 
@@ -104,9 +104,42 @@ pub async fn create_post(headers: warp::http::HeaderMap, connection: DBConnectio
         let _: Result<Post, _> = child_post.save_changes(connection.lock().await.deref_mut());
     }
 
+    tokio::spawn(post_creation_notification_rollout(user, new_post, connection));
+
     Ok(warp::reply::json(&PostCreationResponse {
         post_id
     }))
+}
+
+async fn post_creation_notification_rollout(user: User, created_post: Post, connection: DBConnection) {
+
+    let people_to_notify = match follows::table
+        .filter(follows::followed.eq(user.borrow_username()))
+        .select(follows::follower)
+        .load::<String>(connection.lock().await.deref_mut()) {
+            Ok(usernames) => usernames,
+            Err(_) => {return},
+        };
+
+    let message = format!(
+        "{} uploaded a new post!",
+        created_post.get_creator(),
+    );
+
+    let href = format!(
+        "?view=post&id={}",
+        created_post.get_id()
+    );
+
+    for user in people_to_notify {
+        let _ = Notification::push_unchecked(
+            user,
+            message.clone(),
+            href.clone(),
+            connection.clone()
+        ).await;
+    }
+        
 }
 
 pub async fn delete_post(headers: warp::http::HeaderMap, connection: DBConnection, post_id: String) -> Result<impl warp::Reply, warp::Rejection> {
