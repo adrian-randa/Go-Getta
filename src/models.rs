@@ -4,7 +4,7 @@ use diesel::{prelude::*, sqlite};
 use serde::{Serialize, Deserialize};
 use uuid::Uuid;
 
-use crate::{api::room::RoomCreationData, db::DBConnection, error::{ContentTooLargeError, InternalServerError}, schema::{notifications, posts}};
+use crate::{api::room::RoomCreationData, db::DBConnection, error::{ContentTooLargeError, InternalServerError, CooldownActiveError}, schema::{notifications, posts, notification_timeouts}};
 
 #[derive(Debug, Queryable, Selectable, Insertable)]
 #[diesel(table_name = crate::schema::account_keys)]
@@ -29,7 +29,7 @@ impl AccountKey {
 }
 
 
-#[derive(Debug, Queryable, Selectable, Insertable, Identifiable, AsChangeset)]
+#[derive(Debug, Clone, Queryable, Selectable, Insertable, Identifiable, AsChangeset)]
 #[diesel(table_name = crate::schema::users)]
 #[diesel(primary_key(username))]
 #[diesel(check_for_backend(sqlite::Sqlite))]
@@ -130,7 +130,7 @@ impl Session {
     }
 }
 
-#[derive(Debug, Queryable, Insertable, Selectable, Associations, Identifiable, Serialize, Deserialize, AsChangeset)]
+#[derive(Debug, Clone, Queryable, Insertable, Selectable, Associations, Identifiable, Serialize, Deserialize, AsChangeset)]
 #[diesel(belongs_to(User, foreign_key = creator))]
 #[diesel(belongs_to(Room, foreign_key = room))]
 #[diesel(primary_key(id))]
@@ -421,13 +421,42 @@ pub struct Notification {
 }
 
 impl Notification {
-    pub async fn push(user: &User, message: String, href: String, connection: DBConnection) -> Result<(), warp::Rejection> {
-        Self::push_unchecked(user.get_username(), message, href, connection).await
+    pub async fn push(notification_type: String, emitter: &User, user: &User, message: String, href: String, connection: DBConnection) -> Result<(), warp::Rejection> {
+        Self::push_unchecked(notification_type, emitter, user.get_username(), message, href, connection).await
     }
 
-    pub async fn push_unchecked(username: String, message: String, href: String, connection: DBConnection) -> Result<(), warp::Rejection> {
+    pub async fn push_unchecked(notification_type: String, emitter: &User, username: String, message: String, href: String, connection: DBConnection) -> Result<(), warp::Rejection> {
 
         let timestamp = time::UNIX_EPOCH.elapsed().unwrap().as_secs().try_into().unwrap();
+
+        match notification_timeouts::table
+            .find((&notification_type, emitter.borrow_username(), &username))
+            .first::<NotificationTimeout>(connection.lock().await.deref_mut()) {
+                Ok(mut t) => {
+                    if timestamp - t.timestamp_emitted < 3600 {
+                        Err(CooldownActiveError)?;
+                    } else {
+                        t.renew(timestamp);
+                        let _: Result<NotificationTimeout, _> = t.save_changes(connection.lock().await.deref_mut());
+                    }
+                },
+                Err(diesel::NotFound) => {
+                    
+                },
+                Err(_) => {
+                    Err(InternalServerError)?;
+                },
+            }
+
+        let _ = diesel::replace_into(notification_timeouts::table)
+            .values(NotificationTimeout {
+                notification_type,
+                emitter: emitter.get_username(),
+                receiver: username.clone(),
+                timestamp_emitted: timestamp
+            })
+            .execute(connection.lock().await.deref_mut());
+
         let id = Uuid::new_v4().into();
         
         let notification = Self {
@@ -445,4 +474,23 @@ impl Notification {
         
         Ok(())
     }
+}
+
+
+#[derive(Debug, Queryable, Insertable, Selectable, Identifiable, Serialize, AsChangeset)]
+#[diesel(primary_key(notification_type, emitter, receiver))]
+#[diesel(table_name = crate::schema::notification_timeouts)]
+pub struct NotificationTimeout {
+    notification_type: String,
+    emitter: String,
+    receiver: String,
+    timestamp_emitted: i64,
+}
+
+impl NotificationTimeout {
+
+    pub fn renew(&mut self, new_timestamp: i64) {
+        self.timestamp_emitted = new_timestamp;
+    }
+
 }

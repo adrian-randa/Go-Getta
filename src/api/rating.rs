@@ -1,7 +1,7 @@
 use diesel::{QueryDsl, RunQueryDsl, SaveChangesDsl};
 use serde::Deserialize;
 
-use crate::{db::DBConnection, error::*, models::{Post, Rating}, schema::{posts, ratings}, validate_session_from_headers};
+use crate::{db::DBConnection, error::*, models::{Notification, Post, Rating, User}, schema::{posts, ratings}, validate_session_from_headers};
 
 use super::{PostQueryResponse, RatingInteraction};
 
@@ -39,5 +39,27 @@ pub async fn set_rating_state(headers: warp::http::HeaderMap, connection: DBConn
         Ok(post)
     }).map_err(|_: diesel::result::Error| InternalServerError)?;
 
-    Ok(warp::reply::json(&PostQueryResponse::from_post_for_user(new_post, &user, connection).await?))
+    let post_creator = new_post.get_creator();
+    let post_id = new_post.get_id();
+
+    let response = PostQueryResponse::from_post_for_user(new_post, &user, connection.clone()).await?;
+
+    if user.borrow_username() != &post_creator {
+        tokio::spawn(rating_state_notification_rollout(user, post_creator, post_id, data.new_rating, connection));
+    }
+
+    Ok(warp::reply::json(&response))
+}
+
+async fn rating_state_notification_rollout(emitter: User, receiver: String, post_id: String, rating: RatingInteraction, connection: DBConnection) {
+    if rating == RatingInteraction::Upvote {
+        let _ = Notification::push_unchecked(
+            "Upvote".into(),
+            &emitter,
+            receiver,
+            format!("{} liked your post!", emitter.get_public_name()),
+            format!("?view=post&id={}", post_id),
+            connection
+        ).await;
+    }
 }

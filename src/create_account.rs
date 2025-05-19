@@ -1,9 +1,9 @@
 use std::ops::DerefMut;
 
 use diesel::{query_dsl::methods::{FilterDsl, FindDsl}, ExpressionMethods, QueryResult, RunQueryDsl};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
-use crate::{db::DBConnection, error::{InternalServerError, InvalidKeyError, UserAlreadyExistsError, InvalidUsernameError}, models::{AccountKey, User}, schema::{account_keys::{self, key, used}, users}};
+use crate::{db::DBConnection, error::{InternalServerError, InvalidKeyError, InvalidUsernameError, UserAlreadyExistsError}, login::{login, LoginCredentials}, models::{AccountKey, Session, User}, schema::{account_keys::{self, key, used}, sessions, users}};
 
 
 #[derive(Debug, Deserialize)]
@@ -11,6 +11,11 @@ pub struct AccountCreationCredentials {
     key: String,
     username: String,
     password: String,
+}
+
+#[derive(Debug, Serialize)]
+struct CreateAccountResponse {
+    session_id: String
 }
 
 pub async fn create_account(credentials: AccountCreationCredentials, connection: DBConnection) -> Result<impl warp::Reply, warp::Rejection> {
@@ -43,9 +48,18 @@ pub async fn create_account(credentials: AccountCreationCredentials, connection:
     );
 
     
-    let _ = diesel::insert_into(users::table).values(created_user).execute(connection_lock);
+    let _ = diesel::insert_into(users::table).values(&created_user).execute(connection_lock);
 
     let _ = diesel::update(account_keys::table.filter(key.eq(credentials.key))).set(used.eq(true)).execute(connection_lock);
 
-    Ok(warp::reply())
+    let session = Session::open_for_user(created_user, true);
+    let session_id = session.get_id();
+
+    let _ = diesel::insert_into(sessions::table)
+        .values(session)
+        .execute(connection.lock().await.deref_mut());
+
+    Ok(warp::reply::with_header(warp::reply::json(
+        &CreateAccountResponse { session_id }
+    ), "Access-Control-Allow-Origin", "*"))
 }

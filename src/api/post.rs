@@ -80,7 +80,14 @@ pub async fn create_post(headers: warp::http::HeaderMap, connection: DBConnectio
             .map_err(|_| InternalServerError)?);
     };
 
-    let new_post = Post::new(&user, post_data.body, post_data.appendage_id, contained_room.as_ref(), parent_post.as_ref(), child_post.as_ref());
+    let new_post = Post::new(
+        &user,
+        post_data.body,
+        post_data.appendage_id,
+        contained_room.as_ref(),
+        parent_post.as_ref(),
+        child_post.as_ref()
+    );
     let post_id = new_post.get_id();
 
     diesel::insert_into(posts::table)
@@ -92,6 +99,10 @@ pub async fn create_post(headers: warp::http::HeaderMap, connection: DBConnectio
         parent_post.set_comments_amount_unchecked(
             parent_post.get_comments_amount() + 1
         );
+
+        if user.borrow_username() != &parent_post.get_creator() {
+            tokio::spawn(comment_creation_notification_rollout(user.clone(), new_post.clone(), connection.clone()));
+        }
 
         let _: Result<Post, _> = parent_post.save_changes(connection.lock().await.deref_mut());
     }
@@ -131,15 +142,28 @@ async fn post_creation_notification_rollout(user: User, created_post: Post, conn
         created_post.get_id()
     );
 
-    for user in people_to_notify {
+    for follower in people_to_notify {
         let _ = Notification::push_unchecked(
-            user,
+            "CreatePost".into(),
+            &user,
+            follower,
             message.clone(),
             href.clone(),
             connection.clone()
         ).await;
     }
         
+}
+
+async fn comment_creation_notification_rollout(user: User, created_post: Post, connection: DBConnection) {
+    let _ = Notification::push_unchecked(
+        "Comment".into(), 
+        &user, 
+        created_post.get_creator(), 
+        format!("{} commented on your post(s)!", user.get_public_name()), 
+        format!("?view=post&id={}", created_post.get_id()),
+        connection.clone()
+    ).await;
 }
 
 pub async fn delete_post(headers: warp::http::HeaderMap, connection: DBConnection, post_id: String) -> Result<impl warp::Reply, warp::Rejection> {
@@ -202,19 +226,22 @@ pub async fn get_post(headers: warp::http::HeaderMap, connection: DBConnection, 
 
     let user = validate_session_from_headers(&headers, connection.clone()).await.ok_or(InvalidSessionError)?;
     
-    let (queried_post, contained_room): (Post, Room) = posts::table
+    let (queried_post, contained_room): (Post, Option<Room>) = posts::table
         .find(post_id)
-        .inner_join(rooms::table)
+        .left_outer_join(rooms::table)
         .first(connection.lock().await.deref_mut())
         .map_err(|_| PostDoesNotExistError)?;
 
-    if contained_room.is_private() {
-        if memberships::table
-            .find((user.get_username(), contained_room.get_id()))
-            .first::<Membership>(connection.lock().await.deref_mut())
-            .is_err() {
-                Err(RoomBoundaryViolationError)?;
-            }
+
+    if let Some(r) = contained_room {
+        if r.is_private() {
+            if memberships::table
+                .find((user.get_username(), r.get_id()))
+                .first::<Membership>(connection.lock().await.deref_mut())
+                .is_err() {
+                    Err(RoomBoundaryViolationError)?;
+                }
+        }
     }
 
     Ok(warp::reply::json(&PostQueryResponse::from_post_for_user(queried_post, &user, connection).await?))

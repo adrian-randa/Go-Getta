@@ -105,11 +105,30 @@ button {
         }
 
         h1 {
+            position: relative;
+
             margin-left: 1rem;
 
             span {
                 color: var(--gray);
             }
+        }
+
+        h1:after {
+            position: absolute;
+
+            top: 50%;
+            right: 0;
+
+            transform: translate(100%, -50%) rotate(15deg);
+
+            content: 'BETA';
+
+            padding: .25rem .5rem;
+
+            color: var(--black);
+            background-color: var(--red);
+            font-size: .75rem;
         }
     }
 
@@ -729,6 +748,8 @@ button {
         padding: .25rem;
         width: calc(100% - .5rem);
         white-space: pre-line;
+        
+        color: var(--white);
     }
 
     .appendages {
@@ -1357,14 +1378,43 @@ button {
     }
 
     .parentPosts {
-        .post {
-            opacity: .5;
+
+        display: flex;
+        flex-direction: row;
+
+        align-items: stretch;
+
+        .threadLineContainer {
+            margin: 0 .25rem;
+            width: 2rem;
+
+            display: grid;
+            place-items: center;
+            
+            .threadLine {
+                width: 2px;
+                height: 100%;
+                border-radius: 1px;
+    
+                background-color: var(--gray);
+            }
         }
 
-        .post:last-child {
-            margin-top: 2rem;
-            opacity: 1;
+
+        .parentPostsContainer {
+            margin-right: 1rem;
+
+            flex: 1;
+
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            
+            .post {
+                opacity: .5;
+            }
         }
+
     }
 
     .commentCreation {
@@ -1808,5 +1858,106 @@ button {
         flex-direction: row;
         flex-wrap: wrap;
         justify-content: center;
+    }
+}
+
+
+.errorContainer {
+    position: fixed;
+    bottom: 1rem;
+    right: 1rem;
+
+    width: 24rem;
+    max-height: 30vh;
+
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 1rem;
+
+    overflow-y: scroll;
+
+    .error {
+        height: fit-content;
+        width: calc(100% - 2rem);
+
+        padding: 1rem;
+
+        background-color: var(--red);
+        border-radius: 1rem;
+
+        display: flex;
+        flex-direction: column;
+        
+        gap: .5rem;
+
+        h4 {
+            font-size: 1.2rem;
+            font-weight: 700;
+
+            color: var(--white);
+        }
+
+        p {
+            font-family: 1rem;
+
+            color: var(--white);
+        }
+    }
+}@keyframes errorAnimation {
+    from {
+        transform: translateX(calc(100% + 1rem));
+    }
+    10%, 90% {
+        transform: translateX(0);
+    }
+    to {
+        transform: translateX(calc(100% + 1rem));
+    }
+}
+
+.errorContainer {
+    position: fixed;
+    bottom: 1rem;
+    right: 1rem;
+
+    width: 24rem;
+    max-height: 30vh;
+
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 1rem;
+
+    overflow-y: scroll;
+    overflow-x: hidden;
+    
+
+    .error {
+        height: fit-content;
+        width: calc(100% - 2rem);
+
+        padding: 1rem;
+
+        background-color: var(--red);
+        border-radius: 1rem;
+
+        display: flex;
+        flex-direction: column;
+        
+        gap: .5rem;
+
+        animation: errorAnimation 5s ease-in-out both;
+
+        h4 {
+            font-size: 1.2rem;
+            font-weight: 700;
+
+            color: var(--white);
+        }
+
+        p {
+            font-family: 1rem;
+
+            color: var(--white);
+        }
     }
 }

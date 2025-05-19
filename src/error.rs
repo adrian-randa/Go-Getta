@@ -1,4 +1,4 @@
-use warp::reject::{Reject, Rejection};
+use warp::reject::Reject;
 
 macro_rules! new_rejections {
     ($i0:ident $(, $i:ident)*) => {
@@ -28,5 +28,6 @@ new_rejections!(
     InsufficientPermissionsError,
     EmptyContentError,
     ContentTooLargeError,
-    RoomBoundaryViolationError
+    RoomBoundaryViolationError,
+    CooldownActiveError
 );

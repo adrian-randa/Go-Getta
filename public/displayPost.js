@@ -67,7 +67,11 @@ async function applyPostDataToNode(data, node, showDeleteButton = false) {
         }
     }
 
-    node.querySelector(".content").textContent = post.body;
+    let content = node.querySelector(".content");
+    content.textContent = post.body;
+    
+    let body = node.querySelector(".body");
+    body.setAttribute("href", `?view=post&id=${post.id}`);
 
     const referencedPost = node.querySelector(".referencedPost");
     if (post.child) {
@@ -160,6 +164,7 @@ async function applyPostDataToNode(data, node, showDeleteButton = false) {
     let repostButton = node.querySelector(".repost");
     repostButton.querySelector("h5").textContent = post.reposts;
     repostButton.addEventListener("click", () => {
+        console.log(post.id);
         showRepostCreationScreen(post.id);
     });
 

@@ -64,7 +64,8 @@ const postScreen = document.querySelector("#postScreen");
 const postCreationScreen = document.querySelector("#postCreation");
 const repostCreationScreen = document.querySelector("#repostCreation");
 const postThreadScreen = document.querySelector("#postThread");
-const postThreadParentsSection = postThreadScreen.querySelector(".parentPosts");
+const postThreadParentsSection = postThreadScreen.querySelector(".parentPostsContainer");
+const postThreadFocusedSlot = postThreadScreen.querySelector(".focusedPost");
 const postThreadCommentSection = postThreadScreen.querySelector(".childPosts");
 const personalProfileScreen = document.querySelector("#personalProfile");
 const profileScreen = document.querySelector("#profile");
@@ -94,7 +95,10 @@ function showPostCreationScreen() {
 const referencedPostContainer = repostCreationScreen.querySelector(".referencedPost");
 async function showRepostCreationScreen(childPostID) {
     let response = await fetch(`/api/get_post/${childPostID}`);
-    if (!response.ok) alert(await response.text());
+    if (!response.ok) {
+        response.text().then(alert);
+        return;
+    }
     let referencedPostData = await response.json();
     
     console.log(referencedPostData);
@@ -231,13 +235,16 @@ function showProfileScreen(username) {
 async function showPostThreadScreen(postID) {
     postThreadParentsSection.innerHTML = "";
     postThreadCommentSection.innerHTML = "";
+    postThreadFocusedSlot.innerHTML = "";
 
     let parentThreadResponse = await fetch(`/api/get_thread/${postID}`);
     let parentThread = await parentThreadResponse.json();
 
-    for (let i = 0; i < parentThread.length; i++) {
+    for (let i = 0; i < parentThread.length - 1; i++) {
         postThreadParentsSection.appendChild(await makePostNode(parentThread[i]));
     }
+
+    postThreadFocusedSlot.appendChild(await makePostNode(parentThread[parentThread.length - 1]));
 
     currentPaginator = initCommentPaginator(postID, mountPosts(postThreadCommentSection));
     currentPaginator();

@@ -1,6 +1,6 @@
 use std::{collections::HashMap, ops::DerefMut};
 
-use crate::{db::{with_db_connection, DBConnection}, error::{InternalServerError, InvalidQueryError, InvalidSessionError, UserDoesNotExistError, UserIsAlreadyFollowedError}, models::{Following, Post, User}, schema::{follows::{self, followed, follower}, memberships, posts::{self, creator, timestamp}, rooms, users}, validate_session_from_headers};
+use crate::{db::{with_db_connection, DBConnection}, error::{InternalServerError, InvalidQueryError, InvalidSessionError, UserDoesNotExistError, UserIsAlreadyFollowedError}, models::{Following, Notification, Post, User}, schema::{follows::{self, followed, follower}, memberships, posts::{self, creator, timestamp}, rooms, users}, validate_session_from_headers};
 
 use diesel::{result::Error::NotFound, BoolExpressionMethods, ExpressionMethods, QueryDsl, RunQueryDsl, SaveChangesDsl, SelectableHelper};
 use serde::Serialize;
@@ -36,12 +36,25 @@ pub async fn follow(headers: warp::http::HeaderMap, connection: DBConnection, us
         let _: User = user_to_follow.save_changes(conn)?;
         let _: User = user.save_changes(conn)?;
 
+        tokio::spawn(follow_notification_rollout(user.clone(), user_to_follow.get_username(), connection.clone()));
+
         Ok(())
     }).map_err(|_: diesel::result::Error| InternalServerError)?;
 
         
 
     Ok(warp::reply())
+}
+
+async fn follow_notification_rollout(emitter: User, username: String, connection: DBConnection) {
+    let _ = Notification::push_unchecked(
+        "Follow".into(), 
+        &emitter, 
+        username, 
+        format!("{} is now following you!", emitter.get_public_name()),
+        format!("?view=profile&id={}", emitter.borrow_username()),
+        connection
+    ).await;
 }
 
 pub async fn unfollow(headers: warp::http::HeaderMap, connection: DBConnection, username: String) -> Result<impl warp::Reply, warp::Rejection> {

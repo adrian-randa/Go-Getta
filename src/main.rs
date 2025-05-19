@@ -14,6 +14,12 @@ use go_getta::{api::{bookmark::{bookmark_post, fetch_bookmarked_posts, unbookmar
 
 pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("./migrations/");
 
+macro_rules! combine_routes {
+    ($a:ident $(, $b:ident)+ $(,)?) => {
+        $a.boxed()$(.or($b.boxed()))+
+    };
+}
+
 #[tokio::main]
 async fn main() {
     let connection = establish_connection();
@@ -394,60 +400,63 @@ async fn main() {
         .and(with_db_connection(connection.clone()))
         .and(warp::body::json())
         .and_then(delete_notifications);
-    
-    let routes = public_route.boxed()
-        .or(main_route.boxed())
-        .or(login_route.boxed())
-        .or(logout_route.boxed())
-        .or(create_account_route.boxed())
-        .or(who_am_i_route.boxed())
-        .or(create_post_route.boxed())
-        .or(delete_post_route.boxed())
-        .or(public_space_route.boxed())
-        .or(file_upload_route.boxed())
-        .or(update_profile_picture_route.boxed())
-        .or(get_user_data_route.boxed())
-        .or(users_posts_query.boxed())
-        .or(set_rating_state_route.boxed())
-        .or(register_post_share_route.boxed())
-        .or(get_thread_route.boxed())
-        .or(fetch_comments_route.boxed())
-        .or(update_public_name_route.boxed())
-        .or(update_biography_route.boxed())
-        .or(get_post_route.boxed())
-        .or(create_room_route.boxed())
-        .or(update_room_banner_route.boxed())
-        .or(update_room_name_route.boxed())
-        .or(update_room_description_route.boxed())
-        .or(update_room_color_route.boxed())
-        .or(delete_room_route.boxed())
-        .or(leave_room_route.boxed())
-        .or(join_room_route.boxed())
-        .or(get_joined_rooms_route.boxed())
-        .or(fetch_room_posts_route.boxed())
-        .or(fetch_room_members_route.boxed())
-        .or(search_for_room_member_route.boxed())
-        .or(add_user_to_room_route.boxed())
-        .or(kick_user_from_room_route.boxed())
-        .or(ban_user_from_room_route.boxed())
-        .or(unban_user_from_room_route.boxed())
-        .or(fetch_banned_users_route.boxed())
-        .or(search_for_banned_user_route.boxed())
-        .or(bookmark_post_route.boxed())
-        .or(unbookmark_post_route.boxed())
-        .or(fetch_bookmarked_posts_route.boxed())
-        .or(search_posts_route.boxed())
-        .or(search_rooms_route.boxed())
-        .or(search_users_route.boxed())
-        .or(follow_route.boxed())
-        .or(unfollow_route.boxed())
-        .or(is_following_route.boxed())
-        .or(storage_route.boxed())
-        .or(fetch_followed_feed_route.boxed())
-        .or(fetch_followed_route.boxed())
-        .or(fetch_followers_route.boxed())
-        .or(fetch_notifications_route.boxed())
-        .or(delete_notifications_route.boxed());
+
+
+    let routes = combine_routes!(
+        public_route,
+        main_route,
+        login_route,
+        logout_route,
+        create_account_route,
+        who_am_i_route,
+        create_post_route,
+        delete_post_route,
+        public_space_route,
+        file_upload_route,
+        update_profile_picture_route,
+        get_user_data_route,
+        users_posts_query,
+        set_rating_state_route,
+        register_post_share_route,
+        get_thread_route,
+        fetch_comments_route,
+        update_public_name_route,
+        update_biography_route,
+        get_post_route,
+        create_room_route,
+        update_room_banner_route,
+        update_room_name_route,
+        update_room_description_route,
+        update_room_color_route,
+        delete_room_route,
+        leave_room_route,
+        join_room_route,
+        get_joined_rooms_route,
+        fetch_room_posts_route,
+        fetch_room_members_route,
+        search_for_room_member_route,
+        add_user_to_room_route,
+        kick_user_from_room_route,
+        ban_user_from_room_route,
+        unban_user_from_room_route,
+        fetch_banned_users_route,
+        search_for_banned_user_route,
+        bookmark_post_route,
+        unbookmark_post_route,
+        fetch_bookmarked_posts_route,
+        search_posts_route,
+        search_rooms_route,
+        search_users_route,
+        follow_route,
+        unfollow_route,
+        is_following_route,
+        storage_route,
+        fetch_followed_feed_route,
+        fetch_followed_route,
+        fetch_followers_route,
+        fetch_notifications_route,
+        delete_notifications_route,
+    );
 
     select! {
         _ = warp::serve(routes).run(([0, 0, 0, 0], 7500)) => (),

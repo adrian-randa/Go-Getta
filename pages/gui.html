@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
     <link rel="stylesheet" href="style.css">
+    <script defer src="error.js"></script>
+
     <script src="userData.js"></script>
     <script src="followedFeed.js"></script>
     <script defer src="displayPost.js"></script>
@@ -153,11 +155,13 @@
                         <h5>00:00</h5>
                     </div>
                 </div>
-                <div class="content">
-                    Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
-                </div>
-                <div class="appendages">
-                </div>
+                <a class="body">
+                    <div class="content">
+                        Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
+                    </div>
+                    <div class="appendages">
+                    </div>
+                </a>
                 <div class="referencedPostContainer">
                     <a class="referencedPost">
 
@@ -406,6 +410,14 @@
 
         <screen id="postThread" style="display: none;">
             <div class="parentPosts">
+                <div class="threadLineContainer">
+                    <div class="threadLine"></div>
+                </div>
+                <div class="parentPostsContainer">
+
+                </div>
+            </div>
+            <div class="focusedPost">
 
             </div>
             <div class="commentCreation">
@@ -666,5 +678,14 @@
             </div>
         </div>
     </screen>
+
+    <div class="errorContainer">
+        <template id="errorTemplate">
+            <div class="error">
+                <h4>Error Title</h4>
+                <p>Longer, more detailed error explaination. Lorem ipsum, dolor sit amet consectetur adipisicing elit. Ipsam cupiditate harum sequi blanditiis dicta culpa quibusdam unde maxime sunt quo.</p>
+            </div>
+        </template>
+    </div>
 </body>
 </html>

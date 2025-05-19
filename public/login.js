@@ -51,59 +51,43 @@ createAccountPasswordRepeatInput.addEventListener("input", (event) => {
     event.target.reportValidity();
 })
 
-loginForm.addEventListener("submit", (event) => {
+loginForm.addEventListener("submit", async (event) => {
     event.preventDefault();
     event.stopPropagation();
-
-    const req = new XMLHttpRequest();
-
-    req.open("POST", "/login");
-
-    req.setRequestHeader("Content-Type", "application/json; charset=UTF-8");
-
-    req.addEventListener("error", (event) => {
-        event.preventDefault();
-
-        alert(req.responseText);
-    })
-
-    req.onreadystatechange = () => {
-        if (req.readyState === XMLHttpRequest.DONE) {
-            if (req.status === 200) {
-                const res = JSON.parse(req.responseText);
-    
-                document.cookie = "session_id=" + res.session_id;
-                window.location.reload();
-            } else {
-                alert(req.responseText);
-            }
-        }
-      };
 
     let payload = Object.fromEntries(new FormData(event.target));
     payload.expires = !payload.expires;
-    req.send(JSON.stringify(payload));
+
+    let response = await loginErrorHandler.guard(fetch("/login", {
+        headers: {
+            "Content-Type": "application/json",
+        },
+        method: "POST",
+        body: JSON.stringify(payload),
+    }));
+
+    const res = await response.json();
+
+    document.cookie = "session_id=" + res.session_id;
+    window.location.reload();
 });
 
-createAccountForm.addEventListener("submit", (event) => {
+createAccountForm.addEventListener("submit", async (event) => {
     event.preventDefault();
     event.stopPropagation();
 
-    const req = new XMLHttpRequest();
+    let payload = Object.fromEntries(new FormData(event.target));
 
-    req.open("POST", "/create_account");
+    let response = await createAccountErrorHandler.guard(fetch("/create_account", {
+        headers: {
+            "Content-Type": "application/json",
+        },
+        method: "POST",
+        body: JSON.stringify(payload),
+    }));
 
-    req.setRequestHeader("Content-Type", "application/json; charset=UTF-8");
+    const res = await response.json();
 
-    req.onreadystatechange = () => {
-        if (req.readyState === XMLHttpRequest.DONE) {
-            if (req.status === 200) {
-                showLoginForm();
-            } else {
-                alert(req.responseText);
-            }
-        }
-      };
-
-    req.send(JSON.stringify(Object.fromEntries(new FormData(event.target))));
+    document.cookie = "session_id=" + res.session_id;
+    window.location.reload();
 });

@@ -7,6 +7,8 @@
 
     <link rel="stylesheet" href="login.css">
 
+    <script defer src="error.js"></script>
+
     <script defer src="login.js"></script>
 </head>
 <body>
@@ -49,5 +51,14 @@
         <button type="submit" class="highlighted weak">Create account</button>
         <button class="plain">Login with existing account instead</button>
     </form>
+
+    <div class="errorContainer">
+        <template id="errorTemplate">
+            <div class="error">
+                <h4>Error Title</h4>
+                <p>Longer, more detailed error explaination. Lorem ipsum, dolor sit amet consectetur adipisicing elit. Ipsam cupiditate harum sequi blanditiis dicta culpa quibusdam unde maxime sunt quo.</p>
+            </div>
+        </template>
+    </div>
 </body>
 </html>
