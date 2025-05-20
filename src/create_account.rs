@@ -19,23 +19,24 @@ struct CreateAccountResponse {
 }
 
 pub async fn create_account(credentials: AccountCreationCredentials, connection: DBConnection) -> Result<impl warp::Reply, warp::Rejection> {
-    // To avoid race conditions, we will lock the connection first and only release the lock at the very end
-    let mut connection_lock = connection.lock().await;
-    let connection_lock = connection_lock.deref_mut();
 
     if credentials.username.contains(['/', '\\']) {
         Err(InvalidUsernameError)?;
     }
 
-    let creation_key: AccountKey = account_keys::table
+    let creation_key: AccountKey = match account_keys::table
         .find(credentials.key.clone())
-        .first(connection_lock).map_err(|_| InvalidKeyError)?;
+        .first(connection.lock().await.deref_mut()) {
+            Ok(k) => {k},
+            Err(diesel::NotFound) => {Err(InvalidKeyError)?},
+            Err(_) => {Err(InternalServerError)?}
+        };
 
     if creation_key.is_used() {
         Err(InvalidKeyError)?;
     }
 
-    let queried_user: Result<User, diesel::result::Error> = users::table.find(credentials.username.clone()).first(connection_lock);
+    let queried_user: Result<User, diesel::result::Error> = users::table.find(credentials.username.clone()).first(connection.lock().await.deref_mut());
     if queried_user.is_ok() {
         return Err(UserAlreadyExistsError.into())
     }
@@ -48,9 +49,9 @@ pub async fn create_account(credentials: AccountCreationCredentials, connection:
     );
 
     
-    let _ = diesel::insert_into(users::table).values(&created_user).execute(connection_lock);
+    let _ = diesel::insert_into(users::table).values(&created_user).execute(connection.lock().await.deref_mut());
 
-    let _ = diesel::update(account_keys::table.filter(key.eq(credentials.key))).set(used.eq(true)).execute(connection_lock);
+    let _ = diesel::update(account_keys::table.filter(key.eq(credentials.key))).set(used.eq(true)).execute(connection.lock().await.deref_mut());
 
     let session = Session::open_for_user(created_user, true);
     let session_id = session.get_id();
@@ -59,7 +60,5 @@ pub async fn create_account(credentials: AccountCreationCredentials, connection:
         .values(session)
         .execute(connection.lock().await.deref_mut());
 
-    Ok(warp::reply::with_header(warp::reply::json(
-        &CreateAccountResponse { session_id }
-    ), "Access-Control-Allow-Origin", "*"))
+    Ok(warp::reply::json(&CreateAccountResponse{ session_id }))
 }
