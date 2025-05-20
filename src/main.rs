@@ -4,7 +4,7 @@ use diesel::{associations::HasTable, prelude::*};
 use dotenvy::dotenv;
 use tokio::select;
 use warp::Filter;
-use std::{collections::HashMap, env, fs, ops::DerefMut, sync::Arc};
+use std::{any::Any, collections::HashMap, env, fs, net::{SocketAddr, SocketAddrV4, SocketAddrV6}, ops::DerefMut, sync::Arc};
 use uuid::*;
 
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
@@ -458,8 +458,23 @@ async fn main() {
         delete_notifications_route,
     );
 
+    let socket_addr = env::var("SOCKET_ADDRESS").unwrap();
+
+    let socket_v4 = socket_addr.parse::<SocketAddrV4>();
+    let socket_v6 = socket_addr.parse::<SocketAddrV6>();
+
+    let socket: SocketAddr = if let Ok(s) = socket_v4 {
+        std::net::SocketAddr::V4(s)
+    } else if let Ok(s) = socket_v6 {
+        std::net::SocketAddr::V6(s)
+    } else {
+        panic!("Invalid Socket Address");
+    };
+
+    println!("Hosting Go Getta on {:?}", socket);
+
     select! {
-        _ = warp::serve(routes).run(([0, 0, 0, 0], 7500)) => (),
+        _ = warp::serve(routes).run(socket) => (),
         _ = tokio::signal::ctrl_c() => {},
     }
 }
