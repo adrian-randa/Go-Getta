@@ -60,7 +60,7 @@ async function openNewRoom() {
 
     await setRoomBanner(room_id, newRoomBannerInput);
 
-    window.location.reload();
+    window.location.href = `${window.location.origin}?view=room&id=${room_id}`;
 }
 
 async function setRoomBanner(roomID, fileInput) {
