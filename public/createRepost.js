@@ -1,5 +1,3 @@
-//const POST_CHARACTER_LIMIT = 300; // Set in createPost.js
-
 async function submitRepost(referencedPostID) {
     const body = document.querySelector("#newRepostBody").value;
     if (body.length > POST_CHARACTER_LIMIT) {

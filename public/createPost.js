@@ -1,7 +1,9 @@
 const POST_CHARACTER_LIMIT = 300;
 
 async function submitPost() {
-    const body = document.querySelector("#newPostBody").value;
+    const bodyInput = document.querySelector("#newPostBody");
+    const body = bodyInput.value;
+
     if (body.length > POST_CHARACTER_LIMIT) {
         return;
     }

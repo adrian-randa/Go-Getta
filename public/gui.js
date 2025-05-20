@@ -75,6 +75,20 @@ const noPaginator = () => {};
 let currentPaginator = noPaginator;
 document.addEventListener("scrolledToBottom", () => {currentPaginator()});
 
+
+const newPostRemainingCharactersDisplay = document.querySelector("#postCreation")
+        .querySelector(".bodyInput")
+        .querySelector("h5");
+
+const updateNewPostRemainingCharactersDisplay = (event) => {
+    let remaining = POST_CHARACTER_LIMIT - (event || {target: {value: {length: 0}}}).target.value.length;
+
+    newPostRemainingCharactersDisplay.textContent = remaining;
+
+    newPostRemainingCharactersDisplay.style.color = remaining < 40 ? "var(--red)" : "var(--gray)";
+}
+document.querySelector("#newPostBody").addEventListener("input", updateNewPostRemainingCharactersDisplay);
+
 function showPostCreationScreen() {
     postScreen.style.display = "none";
     postCreationScreen.style.display = "flex";
@@ -84,6 +98,8 @@ function showPostCreationScreen() {
     profileScreen.style.display = "none";
     roomCreationScreen.style.display = "none";
     searchScreen.style.display = "none";
+
+    updateNewPostRemainingCharactersDisplay();
 
     currentPaginator = noPaginator;
 }
@@ -135,6 +151,19 @@ async function showRepostCreationScreen(childPostID) {
 
     currentPaginator = noPaginator;
 }
+
+const newRepostRemainingCharactersDisplay = document.querySelector("#repostCreation")
+        .querySelector(".bodyInput")
+        .querySelector("h5");
+
+const updateNewRepostRemainingCharactersDisplay = (event) => {
+    let remaining = POST_CHARACTER_LIMIT - (event || {target: {value: {length: 0}}}).target.value.length;
+
+    newRepostRemainingCharactersDisplay.textContent = remaining;
+
+    newRepostRemainingCharactersDisplay.style.color = remaining < 40 ? "var(--red)" : "var(--gray)";
+}
+document.querySelector("#newRepostBody").addEventListener("input", updateNewRepostRemainingCharactersDisplay);
 
 function showPostScreen() {
     postScreen.innerHTML = "";

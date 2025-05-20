@@ -272,7 +272,10 @@
 
         <screen id="postCreation" style="display: none;">
             <h1>New Post</h1>
-            <textarea name="body" id="newPostBody" placeholder="Enter your thoughts here..." maxlength="300"></textarea>
+            <div class="bodyInput">
+                <textarea name="body" id="newPostBody" placeholder="Enter your thoughts here..." maxlength="300"></textarea>
+                <h5>300</h5>
+            </div>
             <form enctype="multipart/form-data" id="addMediaForm" style="display: none;">
                 <input
                     type="file"
@@ -360,7 +363,10 @@
             <div class="referencedPost">
 
             </div>
-            <textarea name="body" id="newRepostBody" placeholder="Enter your thoughts here..."></textarea>
+            <div class="bodyInput">
+                <textarea name="body" id="newRepostBody" placeholder="Enter your thoughts here..."></textarea>
+                <h5>300</h5>
+            </div>
             <form enctype="multipart/form-data" id="addRepostMediaForm" style="display: none;">
                 <input
                     type="file"
@@ -528,8 +534,8 @@
                 <h4></h4>
                 <button class="follow">Follow</button>
                 <div class="followStats">
-                    <h5>12312 followers</h5>
-                    <h5>1231 followed</h5>
+                    <h5 class="followersDisplay"></h5>
+                    <h5 class="followedDisplay"></h5>
                 </div>
             </div>
             <separator></separator>

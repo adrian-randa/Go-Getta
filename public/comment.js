@@ -1,5 +1,3 @@
-const COMMENT_CHARACTER_LIMIT = 250;
-
 async function submitComment() {
     const body = document.querySelector("#newCommentBody").value;
     if (body.length > POST_CHARACTER_LIMIT) {

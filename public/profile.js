@@ -42,4 +42,11 @@ async function initProfilePage(username) {
             }
         }
     }
+
+    const followStats = heading.querySelector(".followStats");
+    const followerCount = followStats.querySelector(".followersDisplay");
+    const followedCount = followStats.querySelector(".followedDisplay");
+
+    followerCount.textContent = `${userData.followers} followers`;
+    followedCount.textContent = `${userData.followed} followed`;
 }

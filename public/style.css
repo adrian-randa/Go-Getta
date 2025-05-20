@@ -1038,6 +1038,23 @@ button {
     align-items: center;
     gap: 1rem;
 
+    .bodyInput {
+        width: 100%;
+
+        position: relative;
+
+        h5 {
+            position: absolute;
+
+            bottom: .5rem;
+            right: 1rem;
+
+            font-size: 1rem;
+
+            color: var(--gray);
+        }
+    }
+
     textarea {
         width: calc(100% - 2rem);
         min-height: 8rem;
