@@ -12,7 +12,7 @@ async function initPersonalProfilePage() {
 
     const currentUsername = window.localStorage.getItem("currentUsername");
 
-    let userDataResponse = await fetch(`/api/get_user_data/${currentUsername}`);
+    let userDataResponse = await baseErrorHandler.guard(fetch(`/api/get_user_data/${currentUsername}`));
     let userData = await userDataResponse.json();
 
     profilePicture.style.backgroundImage = `url(/storage/profile_picture/${currentUsername})`;
@@ -190,14 +190,9 @@ async function updateProfilePicture(input) {
 
     formData.append("profile_picture", input.files[0]);
 
-    let response = await fetch("/api/update_profile_picture", {
+    let response = await fileUploadErrorHandler.guard(fetch("/api/update_profile_picture", {
         method: "POST", body: formData
-    });
-
-    if (!response.ok) {
-        alert(await response.text());
-        return;
-    }
+    }));
 
     window.location.reload();
 }
@@ -207,13 +202,13 @@ async function setNewPublicName(newPublicName) {
         "new_public_name": newPublicName
     };
 
-    let response = await fetch("/api/update_public_name", {
+    let response = await baseErrorHandler.guard(fetch("/api/update_public_name", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
         },
         body: JSON.stringify(payload)
-    });
+    }));
 
     if (response.ok) window.location.reload();
     else alert(await response.text());
@@ -224,16 +219,15 @@ async function updateBiography(newBiography) {
         "new_biography": newBiography
     };
 
-    let response = await fetch("/api/update_biography", {
+    let response = await baseErrorHandler.guard(fetch("/api/update_biography", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
         },
         body: JSON.stringify(payload)
-    });
+    }));
 
-    if (response.ok) window.location.reload();
-    else alert(await response.text());
+    window.location.reload();
 }
 
 
@@ -241,12 +235,7 @@ function initBookmarkedPaginator(handler) {
     var counter = 0;
 
     return async () => {
-        let response = await fetch(`/api/fetch_bookmarked_posts?page=${counter++}`);
-
-        if (!response.ok) {
-            response.text().then(alert);
-            return;
-        }
+        let response = await baseErrorHandler.guard(fetch(`/api/fetch_bookmarked_posts?page=${counter++}`));
 
         response.json().then(handler);
     }
@@ -257,12 +246,7 @@ function initFollowerPaginator(handler) {
     var counter = 0;
 
     return async () => {
-        let response = await fetch(`/api/fetch_followers?page=${counter++}`);
-
-        if (!response.ok) {
-            response.text().then(alert);
-            return;
-        }
+        let response = await baseErrorHandler.guard(fetch(`/api/fetch_followers?page=${counter++}`));
 
         response.json().then(handler);
     }
@@ -273,16 +257,12 @@ function initFollowedPaginator(handler) {
     var counter = 0;
 
     return async () => {
-        let response = await fetch(`/api/fetch_followed?page=${counter++}`);
-
-        if (!response.ok) {
-            response.text().then(alert);
-            return;
-        }
+        let response = await baseErrorHandler.guard(fetch(`/api/fetch_followed?page=${counter++}`));
 
         response.json().then(handler);
     }
 }
+
 function mountFollowers(screen) {
     console.log(manageFollowModal);
     const followerTemplate = manageFollowModal.querySelector(".followerTemplate");

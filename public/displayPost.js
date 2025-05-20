@@ -281,23 +281,18 @@ async function makeChildPostNode(post) {
 function generateRatingEventHandler(post) {
     return (targetValue) => {
         return async (event) => {
-            let payload = `{
-                "post_id": "${post.id}",
-                "new_rating": "${targetValue}"
-            }`;
+            let payload = {
+                "post_id": post.id,
+                "new_rating": targetValue,
+            };
 
-            let response = await fetch("/api/set_rating_state", {
+            let response = await baseErrorHandler.guard(fetch("/api/set_rating_state", { 
                 method: "POST",
-                body: payload,
                 headers: {
                     "Content-Type": "application/json"
-                }
-            });
-
-            if (!response.ok) {
-                alert(await response.text());
-                return;
-            }
+                },
+                body: JSON.stringify(payload)
+            }));
     
             let refreshedPost = await response.json();
     

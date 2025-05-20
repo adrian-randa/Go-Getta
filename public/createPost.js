@@ -17,11 +17,7 @@ async function submitPost() {
             fileUploadFormData.append(`media_${i}`, file);
         });
 
-        const response = await fetch("/api/file_upload", {method: "POST", body: fileUploadFormData});
-
-        if (!response.ok) {
-            alert(await response.text());
-        }
+        const response = await fileUploadErrorHandler.guard(fetch("/api/file_upload", {method: "POST", body: fileUploadFormData}));
 
         let responseObj = await response.json();
         appendageID = responseObj.appendage_id;
@@ -37,30 +33,17 @@ async function submitPost() {
         "child": null,
     }
 
-    const req = new XMLHttpRequest();
+    let response = await createPostErrorHandler.guard(fetch("/api/create_post", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+    }));
 
-    req.open("POST", "/api/create_post");
+    let { post_id } = await response.json();
 
-    req.setRequestHeader("Content-Type", "application/json; charset=UTF-8");
-
-    req.addEventListener("error", (event) => {
-        event.preventDefault();
-
-        alert(req.responseText);
-    })
-
-    req.onreadystatechange = () => {
-        if (req.readyState === XMLHttpRequest.DONE) {
-            if (req.status === 200) {
-                let response = JSON.parse(req.responseText);
-                window.location.href = `${window.location.origin}?view=post&id=${response.post_id}`;
-            } else {
-                alert(req.responseText);
-            }
-        }
-      };
-
-    req.send(JSON.stringify(payload));
+    window.location.href = `${window.location.origin}?view=post&id=${post_id}`;
 }
 
 function browseNewPostFiles() {

@@ -459,11 +459,8 @@ function showManageRoomUsersModal(roomID) {
 function initJoinedUsersPaginator(roomID, handler) {
     var counter = 0;
     return async () => {
-        let response = await fetch(`/api/fetch_joined_users/${roomID}?page=${counter++}`);
-        if (!response.ok) {
-            response.text().then(alert);
-            return;
-        }
+        let response = await baseErrorHandler.guard(fetch(`/api/fetch_joined_users/${roomID}?page=${counter++}`));
+
         response.json().then(handler);
     }
 }
@@ -471,11 +468,8 @@ function initJoinedUsersPaginator(roomID, handler) {
 function initBannedUsersPaginator(roomID, handler) {
     var counter = 0;
     return async () => {
-        let response = await fetch(`/api/fetch_banned_users/${roomID}?page=${counter++}`);
-        if (!response.ok) {
-            response.text().then(alert);
-            return;
-        }
+        let response = await baseErrorHandler.guard(fetch(`/api/fetch_banned_users/${roomID}?page=${counter++}`));
+        
         response.json().then(handler);
     }
 }
@@ -603,12 +597,7 @@ function mountBannedUsers(roomID, screen) {
 }
 
 async function joinRoom(roomID) {
-    let response = await fetch(`/api/join_room/${roomID}`, {method: "POST"});
-
-    if (!response.ok) {
-        response.text().then(alert);
-        return;
-    }
+    let response = await baseErrorHandler.guard(fetch(`/api/join_room/${roomID}`, {method: "POST"}));
 
     window.location.reload();
 }

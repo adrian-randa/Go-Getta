@@ -6,7 +6,7 @@ class UserDataStore {
         let cached = this.cache.get(username);
         if (cached) return cached;
 
-        let response = await fetch(`/api/get_user_data/${username}`);
+        let response = await baseErrorHandler.guard(fetch(`/api/get_user_data/${username}`));
         let userData = await response.json();
 
         this.cache.set(username, userData);

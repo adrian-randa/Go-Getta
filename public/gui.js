@@ -49,14 +49,10 @@ let joinedRooms = new Promise((resolve, reject) => {
 
 
 async function logout() {
-    let response = await fetch("/logout", {method: "DELETE"});
+    let response = await baseErrorHandler.guard(fetch("/logout", {method: "DELETE"}));
 
-    if (!response.ok) {
-        alert(await response.text());
-    } else {
-        document.cookie = "session_id= ;";
-        window.location.reload();
-    }
+    document.cookie = "session_id= ;";
+    window.location.reload();
 }
 
 const mainContent = document.querySelector("#mainContent");
@@ -94,14 +90,10 @@ function showPostCreationScreen() {
 
 const referencedPostContainer = repostCreationScreen.querySelector(".referencedPost");
 async function showRepostCreationScreen(childPostID) {
-    let response = await fetch(`/api/get_post/${childPostID}`);
-    if (!response.ok) {
-        response.text().then(alert);
-        return;
-    }
+    let response = await baseErrorHandler.guard(fetch(`/api/get_post/${childPostID}`));
+    
     let referencedPostData = await response.json();
     
-    console.log(referencedPostData);
     referencedPostContainer.innerHTML = "";
     referencedPostContainer.appendChild(await makePostNode(referencedPostData));
 
@@ -237,7 +229,7 @@ async function showPostThreadScreen(postID) {
     postThreadCommentSection.innerHTML = "";
     postThreadFocusedSlot.innerHTML = "";
 
-    let parentThreadResponse = await fetch(`/api/get_thread/${postID}`);
+    let parentThreadResponse = await baseErrorHandler.guard(fetch(`/api/get_thread/${postID}`));
     let parentThread = await parentThreadResponse.json();
 
     for (let i = 0; i < parentThread.length - 1; i++) {
@@ -313,18 +305,13 @@ class NotificationStore {
     static async dispatchDelete() {
         let ids = this.notifications.map((n) => {return n.id});
 
-        let response = await fetch(`/api/delete_notifications`, {
+        let response = await baseErrorHandler.guard(fetch(`/api/delete_notifications`, {
             method: "DELETE",
             body: JSON.stringify({
                 "ids": ids
             }),
             headers: { "Content-Type": "application/json" },
-        });
-
-        if (!response.ok) {
-            response.text().then(alert);
-            return;
-        }
+        }));
 
         notificationsScreen.querySelectorAll(".notification").forEach((node) => {
             node.remove();
@@ -350,18 +337,13 @@ function mountNotifications(screen) {
             let element = node.querySelector(".notification");
 
             node.querySelector(".delete").addEventListener("click", async () => {
-                let response = await fetch(`/api/delete_notifications`, {
+                let response = await baseErrorHandler.guard(fetch(`/api/delete_notifications`, {
                     method: "DELETE",
                     body: JSON.stringify({
                         "ids": [notifications[i].id]
                     }),
                     headers: { "Content-Type": "application/json" },
-                });
-
-                if (!response.ok) {
-                    response.text().then(alert);
-                    return;
-                }
+                }));
 
                 element.style.display = "none";
             })
@@ -376,12 +358,7 @@ function initNotificationsPaginator(handler) {
     var counter = 0;
 
     return async () => {
-        let response = await fetch(`/api/fetch_notifications?page=${counter++}`);
-
-        if (!response.ok) {
-            response.text().then(alert);
-            return;
-        }
+        let response = await baseErrorHandler.guard(fetch(`/api/fetch_notifications?page=${counter++}`));
 
         response.json().then(handler);
     }

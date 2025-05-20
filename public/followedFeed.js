@@ -3,12 +3,7 @@ function initFollowedFeedPaginator(handler) {
     var counter = 0;
     
     return async () => {
-        let response = await fetch(`/api/fetch_followed_feed?page=${counter++}`);
-
-        if (!response.ok) {
-            response.text().then(alert);
-            return;
-        }
+        let response = await baseErrorHandler.guard(fetch(`/api/fetch_followed_feed?page=${counter++}`));
 
         response.json().then(handler);
     }

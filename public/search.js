@@ -73,12 +73,7 @@ function initSearchResultPaginator(searchTerm, handler) {
     var counter = 0;
     
     return async () => {
-        let response = await fetch(`/api/search/${searchCategory}/?query=${searchTerm}&page=${counter++}`);
-
-        if (!response.ok) {
-            response.text().then(alert);
-            return;
-        }
+        let response = await baseErrorHandler.guard(fetch(`/api/search/${searchCategory}/?query=${searchTerm}&page=${counter++}`));
 
         response.json().then(handler);
     }
@@ -131,7 +126,6 @@ function makeRoomNode(data) {
     let joinButton = node.querySelector(".join");
     if (!joined) {
         joinButton.addEventListener("click", () => {
-            //TODO: Implement this
             joinRoom(room.id);
         });
     } else {

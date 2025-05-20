@@ -50,16 +50,11 @@ async function openNewRoom() {
         "is_private": newRoomIsPrivate,
     };
 
-    let response = await fetch("/api/create_room", {
+    let response = await baseErrorHandler.guard(fetch("/api/create_room", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify(payload)
-    });
-
-    if (!response.ok) {
-        alert(await response.text());
-        return;
-    }
+    }));
 
     let { room_id } = await response.json();
 
@@ -74,14 +69,9 @@ async function setRoomBanner(roomID, fileInput) {
     
         formData.append("banner", fileInput.files[0]);
         
-        let response = await fetch(`/api/update_room_banner/${roomID}`, {
+        let response = await fileUploadErrorHandler.guard(fetch(`/api/update_room_banner/${roomID}`, {
             method: "POST",
             body: formData
-        });
-
-        if (!response.ok) {
-            alert(await response.text());
-            return;
-        }
+        }));
     }
 }

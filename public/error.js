@@ -53,14 +53,39 @@ class ErrorHandler {
         })
     }
 
+    clone() {
+        return Object.assign(Object.create(Object.getPrototypeOf(this)), this);
+    }
+
 }
 
+const baseErrorHandler = new ErrorHandler()
+    .map("InternalServerError", "Internal Server Error", "The server ran into an error while processing your request. Please try again.")
+    .map("InvalidSessionError", "Session Expired", "You have been inactive for too long. Please refresh the page to log back in.")
+    .map("RoomDoesNotExistError", "Room Doesn't Exist", "This room does not exist.")
+    .map("RoomBoundaryViolationError", "Room Boundary Violation", "You violated the bounds of a private room")
+    ;
 
-const loginErrorHandler = new ErrorHandler()
+const loginErrorHandler = baseErrorHandler.clone()
     .map("InvalidPasswordError", "Invalid Password", "The password you entered was incorrect. Try again.")
     ;
 
-const createAccountErrorHandler = new ErrorHandler()
+const createAccountErrorHandler = baseErrorHandler.clone()
     .map("InvalidKeyError", "Invalid Key", "The account creation key you tried to use was invalid. If you believe this key should be valid, please contact the administrator.")
     .map("UserAlreadyExistsError", "User Already Exists", "This username is already taken. Please use another.")
+    ;
+
+const createPostErrorHandler = baseErrorHandler.clone()
+    .map("EmptyContentError", "Empty Post", "Your post has no content.")
+    .map("ContentTooLargeError", "Post Too Long", "Your post contains too many characters. Please be concise.")
+    .map("PostDoesNotExistError", "Referenced Post Unavailable", "The post you were trying to reference does not exist. This can happen when the referenced post is deleted while you're commenting or reposting it.")
+    .map("RoomDoesNotExistError", "Room Doesn't Exist", "The room you tried to post in doesn't exist.")
+    .map("RoomBoundaryViolationError", "Room Boundary Violation", "You tried to reference a post outside of the private rooms' boundary.")
+    ;
+
+const fileUploadErrorHandler = baseErrorHandler.clone()
+    .map("InvalidFileError", "Unsupported File Type", "The type of file you tried to upload is not supported.")
+    .map("EmptyContentError", "Empty File", "The file(s) you uploaded are empty.")
+    .map("RoomDoesNotExistError", "Room Doesn't Exist", "This room does not exist.")
+    .map("InsufficientPermissionsError", "No Permission", "You do not have the permissions for this operation.")
     ;
