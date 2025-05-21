@@ -427,6 +427,10 @@ impl Notification {
 
     pub async fn push_unchecked(notification_type: String, emitter: &User, username: String, message: String, href: String, connection: DBConnection) -> Result<(), warp::Rejection> {
 
+        //TODO: FIX NOTIFICATIONS
+        return Ok(());
+
+
         let timestamp = time::UNIX_EPOCH.elapsed().unwrap().as_secs().try_into().unwrap();
 
         let timeout_query = notification_timeouts::table
