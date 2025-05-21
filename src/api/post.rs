@@ -115,7 +115,7 @@ pub async fn create_post(headers: warp::http::HeaderMap, connection: DBConnectio
         let _: Result<Post, _> = child_post.save_changes(connection.lock().await.deref_mut());
     }
 
-    tokio::spawn(post_creation_notification_rollout(user, new_post, connection));
+    post_creation_notification_rollout(user, new_post, connection.clone()).await;
 
     Ok(warp::reply::json(&PostCreationResponse {
         post_id

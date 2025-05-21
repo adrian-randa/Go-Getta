@@ -429,9 +429,11 @@ impl Notification {
 
         let timestamp = time::UNIX_EPOCH.elapsed().unwrap().as_secs().try_into().unwrap();
 
-        match notification_timeouts::table
+        let timeout_query = notification_timeouts::table
             .find((&notification_type, emitter.borrow_username(), &username))
-            .first::<NotificationTimeout>(connection.lock().await.deref_mut()) {
+            .first::<NotificationTimeout>(connection.lock().await.deref_mut());
+
+        match timeout_query {
                 Ok(mut t) => {
                     if timestamp - t.timestamp_emitted < 3600 {
                         Err(CooldownActiveError)?;
