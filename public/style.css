@@ -750,19 +750,21 @@ button {
         white-space: pre-line;
         
         color: var(--white);
+
+        a {
+            text-decoration: underline;
+            color: var(--green);
+        }
     }
 
     .appendages {
         padding: .25rem;
 
         width: calc(100% - .5rem);
-        max-height: 20rem;
 
         display: flex;
         flex-wrap: wrap;
         gap: 1rem;
-
-        overflow-x: scroll;
 
         >* {
             max-height: 20rem;

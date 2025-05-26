@@ -1,9 +1,9 @@
 use std::{collections::HashMap, ops::DerefMut};
 
-use diesel::{result::Error::NotFound, ExpressionMethods, QueryDsl, RunQueryDsl, SaveChangesDsl};
+use diesel::{result::Error::NotFound, BoolExpressionMethods, ExpressionMethods, QueryDsl, RunQueryDsl, SaveChangesDsl, SelectableHelper};
 use serde::{Serialize, Deserialize};
 
-use crate::{db::DBConnection, error::{InternalServerError, InvalidBiographyError, InvalidPublicNameError, InvalidQueryError, InvalidSessionError, UserDoesNotExistError}, models::{Following, Post, User}, schema::{follows, posts::{self, creator, timestamp}, users}, validate_session_from_headers};
+use crate::{db::DBConnection, error::{InternalServerError, InvalidBiographyError, InvalidPublicNameError, InvalidQueryError, InvalidSessionError, UserDoesNotExistError}, models::{Following, Post, Room, User}, schema::{follows, memberships, posts::{self, creator, timestamp}, rooms, users}, validate_session_from_headers};
 
 use super::PostQueryResponse;
 
@@ -37,8 +37,8 @@ pub async fn get_user_data(headers: warp::http::HeaderMap, connection: DBConnect
         public_name: queried_user.get_public_name(),
         biography: queried_user.get_biography(),
         is_followed,
-        followers: user.get_follower_count(),
-        followed: user.get_followed_count(),
+        followers: queried_user.get_follower_count(),
+        followed: queried_user.get_followed_count(),
     }))
 }
 
@@ -48,8 +48,16 @@ pub async fn users_posts_query(headers: warp::http::HeaderMap, connection: DBCon
 
     let page = query.get("page").ok_or(InvalidQueryError)?.parse::<i64>().map_err(|_| InvalidQueryError)?;
 
+    let joined_rooms: Vec<String> = memberships::table
+        .filter(memberships::user.eq(user.borrow_username()))
+        .inner_join(rooms::table)
+        .select(memberships::room)
+        .load(connection.lock().await.deref_mut())
+        .map_err(|_| InternalServerError)?;
+
     let posts: Vec<Post> = posts::table
         .filter(creator.eq(username))
+        .filter(posts::room.is_null().or(posts::room.eq_any(joined_rooms)))
         .order(timestamp.desc())
         .offset(page * 20)
         .limit(20)

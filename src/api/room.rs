@@ -50,10 +50,8 @@ pub async fn get_joined_rooms(headers: warp::http::HeaderMap, connection: DBConn
 
     let member_user = validate_session_from_headers(&headers, connection.clone()).await.ok_or(InvalidSessionError)?;
 
-    let member_username = member_user.get_username();
-
     let membership_associations: Vec<Room> = memberships::table
-        .filter(user.eq(member_username))
+        .filter(user.eq(member_user.borrow_username()))
         .inner_join(rooms::table)
         .select(Room::as_select())
         .load(connection.lock().await.deref_mut())
@@ -73,9 +71,10 @@ pub async fn room_posts_query(headers: warp::http::HeaderMap, connection: DBConn
 
     let page = query.get("page").ok_or(InvalidQueryError)?.parse::<i64>().map_err(|_| InvalidQueryError)?;
 
-    use posts::room;
+    use posts::{room, parent};
     let posts: Vec<Post> = posts::table
         .filter(room.eq(&room_id))
+        .filter(parent.is_null())
         .order(timestamp.desc())
         .offset(page * 20)
         .limit(20)
