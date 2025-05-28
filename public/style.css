@@ -20,6 +20,8 @@
     --red-50: #E94F3780;
     --red-25: #E94F3740;
 
+    color-scheme: dark;
+
     font-size: 14px;
     font-family: 'Roboto';
     color: var(--white);
@@ -71,6 +73,54 @@ button {
     padding: .2rem 2rem .2rem 2rem;
 
     color: var(--white);
+}
+
+.myRooms {
+    flex: 1;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    padding: 1rem 0 1rem 0;
+    gap: 1rem;
+
+    overflow-y: scroll;
+
+    strip {
+        width: .2rem;
+        height: 2.2rem;
+
+        background-color: var(--room-color);
+    }
+
+    a {
+        padding: 0;
+        width: calc(100% - 2rem);
+
+        flex-shrink: 0;
+
+        display: flex;
+        align-items: center;
+        gap: .5rem;
+
+        overflow: hidden;
+
+        background-color: var(--gray-25);
+        border-radius: .5rem;
+        color: var(--room-color);
+        
+        svg {
+            height: 1.2rem;
+        }
+
+        span {
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            max-width: 80%;
+        }
+    }
 }
 
 .sidebar {
@@ -147,54 +197,6 @@ button {
 
         button[selected] {
             color: var(--green);
-        }
-    }
-
-    .myRooms {
-        flex: 1;
-
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-
-        padding: 1rem 0 1rem 0;
-        gap: 1rem;
-
-        overflow-y: scroll;
-
-        strip {
-            width: .2rem;
-            height: 2.2rem;
-
-            background-color: var(--room-color);
-        }
-
-        a {
-            padding: 0;
-            width: calc(100% - 2rem);
-
-            flex-shrink: 0;
-
-            display: flex;
-            align-items: center;
-            gap: .5rem;
-
-            overflow: hidden;
-
-            background-color: var(--gray-25);
-            border-radius: .5rem;
-            color: var(--room-color);
-            
-            svg {
-                height: 1.2rem;
-            }
-
-            span {
-                white-space: nowrap;
-                text-overflow: ellipsis;
-                overflow: hidden;
-                max-width: 80%;
-            }
         }
     }
 
@@ -747,7 +749,7 @@ button {
     .content {
         padding: .25rem;
         width: calc(100% - .5rem);
-        white-space: pre-line;
+        white-space: pre-wrap;
         
         color: var(--white);
 
@@ -972,6 +974,8 @@ button {
         position: relative;
         filter: saturate(.25) brightness(1.2);
 
+        max-height: 2rem;
+
         font-family: "Roboto";
         font-weight: 400;
         font-size: 1rem;
@@ -994,6 +998,9 @@ button {
 
         align-items: center;
         gap: 1rem;
+
+        white-space: nowrap;
+        overflow-x: scroll;
 
         .updateColorContainer {
             padding: 1rem;
@@ -1446,6 +1453,8 @@ button {
             
             background-color: var(--gray-25);
             border-radius: 1rem;
+
+            font-size: 1rem;
 
             resize: vertical;
 

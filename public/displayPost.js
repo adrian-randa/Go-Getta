@@ -41,7 +41,7 @@ async function applyPostDataToNode(data, node, showDeleteButton = false) {
         threadInfo.setAttribute("href", `?view=post&id=${post.parent}`);
     }
 
-    let timestamp = new Date(post.timestamp * 1000);
+    let timestamp = new Date(post.timestamp * 1000 - new Date().getTimezoneOffset() * 60000);
     let [date, fullTime] = timestamp.toISOString().split("T");
     let [hour, minute] = fullTime.split(":");
 

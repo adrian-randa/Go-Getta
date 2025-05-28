@@ -1,0 +1,189 @@
+.bottomBar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+
+    width: 100vw;
+    height: 4rem;
+
+    display: flex;
+
+    >[selected] {
+        path {
+            stroke: var(--green)
+        }
+    }
+
+    >button, >div, >a {
+        margin: 0;
+        padding: 0;
+
+        position: relative;
+        
+        flex: 1;
+        height: 100%;
+
+        background-color: transparent !important;
+        border-radius: 0;
+        border: none;
+        outline: none;
+
+        display: grid;
+        place-items: center;
+
+        #mobileAddButton {
+            margin: 0;
+            padding: 0;
+
+            width: min(20vw, 4rem);
+            height: min(20vw, 4rem);
+
+            background-color: var(--green);
+            clip-path: var(--hexagon-path);
+
+            transform: translateY(-25%);
+
+            display: grid;
+            place-items: center;
+
+            svg {
+                width: 30%;
+            }
+        }
+    }
+
+    >button, >a {
+        display: grid;
+        place-items: center;
+
+        svg {
+            height: 50%;
+        }
+
+        .profilePicture {
+            aspect-ratio: 1 / 1;
+            
+            height: 50%;
+
+            background-color: var(--white);
+            background-size: cover;
+            clip-path: var(--hexagon-path);
+        }
+    }
+
+    background-color: var(--black-50);
+    backdrop-filter: blur(.5rem);
+}
+
+#mobileFeedSelector {
+    z-index: 10;
+
+    padding: .2rem 0;
+    width: 80%;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+    gap: 1rem;
+
+    position: fixed;
+
+    top: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+
+    background-color: var(--black-50);
+    backdrop-filter: blur(.2rem);
+
+    button {
+        margin: 0;
+        padding: 0;
+    }
+
+    button[selected] {
+        color: var(--green);
+        text-decoration: underline;
+    }
+}
+
+#mobileMyRooms {
+    z-index: 100;
+
+    position: fixed;
+    top: 0;
+    left: 0;
+
+    width: 100vw;
+    height: 100vh;
+    flex: unset;
+
+    display: flex;
+    flex-direction: column;
+
+    background-color: var(--black);
+}
+
+@media only screen and (min-width: calc(36rem + 700px)) {
+    .mobile {
+        display: none !important;
+    }
+}
+
+
+@media only screen and (max-width: calc(36rem + 700px)) {
+    :root {
+        font-size: .75rem;
+    }
+
+    .notMobile {
+        display: none !important;
+    }
+
+    #mainContent {
+        padding-top: 8rem;
+
+        width: calc(100vw - 2rem);
+    }
+
+    .childPosts {
+        width: 100% !important;
+    }
+
+    .roomHeading {
+
+        margin-bottom: 5rem;
+
+        .roomNameContainer, .roomDescriptionContainer {
+            button {
+                width: 2rem;
+                height: 2rem;
+        
+                svg {
+                    height: 1rem;
+                }
+            }
+        }
+        
+
+        .bottomButtons {
+
+            button {
+                padding: .2rem .4rem !important;
+            }
+
+            .updateColorContainer {
+                padding: .4rem;
+
+                input {
+                    height: 1rem;
+                    width: 2rem;
+                    border-radius: .5rem;
+
+                    outline: none;
+                    border: none;
+                }
+            }
+
+        }
+    }
+}

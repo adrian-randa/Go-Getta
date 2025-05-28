@@ -24,7 +24,7 @@ struct PostCreationResponse {
 pub async fn create_post(headers: warp::http::HeaderMap, connection: DBConnection, mut post_data: PostCreationData) -> Result<impl warp::Reply, warp::Rejection> {
     let user = validate_session_from_headers(&headers, connection.clone()).await.ok_or(InvalidSessionError)?;
 
-    if post_data.body.split_ascii_whitespace().next().is_none() {
+    if post_data.body.split_ascii_whitespace().next().is_none() && post_data.appendage_id.is_none() {
         Err(EmptyContentError)?;
     }
     if post_data.body.len() > 300 {

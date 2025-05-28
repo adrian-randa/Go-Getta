@@ -85,7 +85,7 @@ const createPostErrorHandler = baseErrorHandler.clone()
 
 const fileUploadErrorHandler = baseErrorHandler.clone()
     .map("InvalidFileError", "Unsupported File Type", "The type of file you tried to upload is not supported.")
-    .map("EmptyContentError", "Empty File", "The file(s) you uploaded are empty.")
+    .map("EmptyContentError", "Empty", "The file or post you tried to upload is empty.")
     .map("RoomDoesNotExistError", "Room Doesn't Exist", "This room does not exist.")
     .map("InsufficientPermissionsError", "No Permission", "You do not have the permissions for this operation.")
     ;

@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="mobile.css">
     <script defer src="error.js"></script>
 
     <script src="userData.js"></script>
@@ -27,7 +28,7 @@
     <title>Go Getta</title>
 </head>
 <body>
-    <div class="sidebar left">
+    <div class="sidebar left notMobile">
         <div class="logoContainer">
             <svg viewBox="0 0 53 52" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M26.2727 2L2.27273 15.0909V26V36.9091M26.2727 2L50.2727 15.0909V26V36.9091M26.2727 2V26M2.27273 36.9091L26.2727 50L50.2727 36.9091M2.27273 36.9091L26.2727 26M50.2727 36.9091L26.2727 26" stroke="var(--gray)" stroke-width="4" stroke-linejoin="round"/>
@@ -73,7 +74,7 @@
         </div>
     </div>
 
-    <div class="sidebar right">
+    <div class="sidebar right notMobile">
         <div class="currentUser" id="currentUser">
             <button id="logoutButton" onclick="logout()">
                 <svg viewBox="0 0 16 13" fill="transparent" xmlns="http://www.w3.org/2000/svg">
@@ -147,7 +148,7 @@
                         <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M1 4.5V9.75L2.75 10.625L1 15L6.25 12.375L8 13.25L15 9.75V4.5L8 1L1 4.5Z" stroke="var(--gray)" stroke-linejoin="round"/>
                         </svg>
-                        Response
+                        <span class="notMobile">Response</span>
                     </a>
                     <spacer></spacer>
                     <div class="timestamp">
@@ -409,6 +410,11 @@
                 </div>
             </div>
         </screen>
+
+        <div class="mobile" id="mobileFeedSelector">
+            <button id="mobilePublicSpaceSelectorButton" onclick="showPublicSpaceScreen()">Public Space</button>
+            <button id="mobileFollowingSelectorButton" onclick="showFollowingScreen()">Following</button>
+        </div>
 
         <screen id="postScreen">
             
@@ -692,6 +698,45 @@
                 <p>Longer, more detailed error explaination. Lorem ipsum, dolor sit amet consectetur adipisicing elit. Ipsam cupiditate harum sequi blanditiis dicta culpa quibusdam unde maxime sunt quo.</p>
             </div>
         </template>
+    </div>
+
+    <screen class="mobile myRooms" id="mobileMyRooms" style="display: none;">
+
+    </screen>
+
+
+    <div class="mobile bottomBar">
+        <button id="mobileFeedButton" onclick="showPublicSpaceScreen()">
+            <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M15 15H1V9.16667H15V15Z" stroke="var(--gray)" stroke-linejoin="round"/>
+                <path d="M1 1H15V6.83333H1V1Z" stroke="var(--gray)" stroke-linejoin="round"/>
+            </svg>
+        </button>
+
+        <button id="mobileRoomsButton" onclick="showMobileRoomSelector()">
+            <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M1 11.5L8 15L15 11.5V4.5L8 1L1 4.5V11.5Z" stroke="var(--gray)" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M1 11.5L8 8M8 8L15 11.5M8 8V1" stroke="var(--gray)" stroke-opacity="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </button>
+        
+        <div>
+            <button id="mobileAddButton">
+                <svg viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M5 1V5M5 9V5M5 5H1M5 5H9" stroke="var(--white)" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </button>
+        </div>
+
+        <button id="mobileNotificationsButton">
+            <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M6.25 13.25V14.125L8 15L9.75 14.125V13.25M8 1L2.75 4.5L1 11.5H8H15L13.25 4.5L8 1Z" stroke="var(--gray)" stroke-linejoin="round"/>
+            </svg>
+        </button>
+        
+        <a id="mobilePersonalProfileButton" href="?view=me">
+            <div class="profilePicture" id="mobileCurrentUserProfilePicture"></div>    
+        </a>
     </div>
 </body>
 </html>

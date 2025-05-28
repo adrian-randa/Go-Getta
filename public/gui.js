@@ -2,10 +2,12 @@ let whoAmI = new Promise((resolve, reject) => {
     fetch("api/who_am_i").then((response) => {
         response.json().then((json) => {
             let currentUser = document.querySelector("#currentUser");
-    
+            let mobileCurrentUser = document.querySelector("#mobilePersonalProfileButton");
     
             currentUser.querySelector(".username").textContent = json.public_name;
             currentUser.querySelector(".profilePicture").setAttribute("style", `background-image: url('storage/profile_picture/${json.username}')`);
+
+            mobileCurrentUser.querySelector(".profilePicture").setAttribute("style", `background-image: url('storage/profile_picture/${json.username}')`);
     
             window.localStorage.setItem("currentUsername", json.username);
             window.localStorage.setItem("currentPublicName", json.public_name);
@@ -17,7 +19,9 @@ let whoAmI = new Promise((resolve, reject) => {
 
 const roomButtonTamplate = document.querySelector("#roomButtonTemplate");
 const roomButtonContainer = document.querySelector("#myRooms");
+const mobileRoomButtonContainer = document.querySelector("#mobileMyRooms");
 const newPostRoomSelector = document.querySelector("#newPostRoom");
+const mobileRoomsButton = document.querySelector("#mobileRoomsButton");
 let joinedRooms = new Promise((resolve, reject) => {
     fetch("api/get_joined_rooms").then((response) => {
         if (!response.ok) {
@@ -35,7 +39,8 @@ let joinedRooms = new Promise((resolve, reject) => {
 
                 node.querySelector("span").textContent = room.name;
 
-                roomButtonContainer.appendChild(node);
+                roomButtonContainer.appendChild(node.cloneNode(true));
+                mobileRoomButtonContainer.appendChild(node);
 
                 let option = document.createElement("option")
                 option.setAttribute("value", room.id);
@@ -46,6 +51,10 @@ let joinedRooms = new Promise((resolve, reject) => {
         });
     });
 });
+
+function showMobileRoomSelector() {
+    mobileRoomButtonContainer.style.display = "flex";
+}
 
 
 async function logout() {
@@ -68,7 +77,13 @@ const profileScreen = document.querySelector("#profile");
 const roomCreationScreen = document.querySelector("#roomCreation");
 const searchScreen = document.querySelector("#search");
 
+const mobileBottomBar = document.querySelector(".bottomBar");
+const mobileFeedSelector = document.querySelector("#mobileFeedSelector");
+
 const showPublicSpaceButton = document.querySelector("#showPublicSpaceButton");
+const mobileShowFeedButton = document.querySelector("#mobileFeedButton");
+const mobileShowPublicSpaceButton = document.querySelector("#mobilePublicSpaceSelectorButton");
+const mobileShowFollowingButton = document.querySelector("#mobileFollowingSelectorButton");
 const showFollowingFeedButton = document.querySelector("#showFollowingFeedButton");
 
 const noPaginator = () => {};
@@ -90,6 +105,15 @@ const updateNewPostRemainingCharactersDisplay = (event) => {
 document.querySelector("#newPostBody").addEventListener("input", updateNewPostRemainingCharactersDisplay);
 
 function showPostCreationScreen() {
+
+    let params = new URL(window.location.href).searchParams;
+
+    if (params.get("view") == "room") {
+        let roomID = params.get("id");
+        
+        if (roomID) document.querySelector("#newPostRoom").value = roomID;
+    } 
+
     postScreen.style.display = "none";
     postCreationScreen.style.display = "flex";
     repostCreationScreen.style.display = "none";
@@ -168,6 +192,8 @@ document.querySelector("#newRepostBody").addEventListener("input", updateNewRepo
 function showPostScreen() {
     postScreen.innerHTML = "";
 
+    
+    mobileFeedSelector.style.display = "flex";
     postScreen.style.display = "flex";
     postCreationScreen.style.display = "none";
     repostCreationScreen.style.display = "none";
@@ -179,6 +205,7 @@ function showPostScreen() {
 }
 
 function showRoomCreationScreen() {
+    mobileFeedSelector.style.display = "none";
     postScreen.style.display = "none";
     postCreationScreen.style.display = "none";
     repostCreationScreen.style.display = "none";
@@ -197,6 +224,9 @@ function showPublicSpaceScreen() {
     showPublicSpaceButton.setAttribute("selected", "");
     showFollowingFeedButton.removeAttribute("selected")
 
+    mobileShowFeedButton.setAttribute("selected", "");
+    mobileShowPublicSpaceButton.setAttribute("selected", "");
+    mobileShowFollowingButton.removeAttribute("selected");
 
     showPostScreen();
     currentPaginator = initPublicSpacePaginator(mountPosts(postScreen));
@@ -208,12 +238,19 @@ function showFollowingScreen() {
     showFollowingFeedButton.setAttribute("selected", "");
     showPublicSpaceButton.removeAttribute("selected");
 
+    mobileShowFeedButton.setAttribute("selected", "");
+    mobileShowFollowingButton.setAttribute("selected", "");
+    mobileShowPublicSpaceButton.removeAttribute("selected");
+
     showPostScreen();
     currentPaginator = initFollowedFeedPaginator(mountPosts(postScreen));
     currentPaginator();
 }
 
 function showBookmarkedScreen() {
+    mobileFeedSelector.style.display = "none";
+    mobileShowFeedButton.setAttribute("selected", "");
+
     showPostScreen();
 
     currentPaginator = initBookmarkedPaginator(mountPosts(postScreen));
@@ -221,6 +258,7 @@ function showBookmarkedScreen() {
 }
 
 function showPersonalProfileScreen() {
+    mobileFeedSelector.style.display = "none";
     postScreen.style.display = "none";
     postCreationScreen.style.display = "none";
     repostCreationScreen.style.display = "none";
@@ -230,6 +268,8 @@ function showPersonalProfileScreen() {
     roomCreationScreen.style.display = "none";
     searchScreen.style.display = "none";
 
+    mobileShowFeedButton.removeAttribute("selected");
+
     const currentUsername = window.localStorage.getItem("currentUsername");
     const postsContainer = personalProfileScreen.querySelector(".posts");
 
@@ -238,6 +278,7 @@ function showPersonalProfileScreen() {
 }
 
 function showProfileScreen(username) {
+    mobileFeedSelector.style.display = "none";
     postScreen.style.display = "none";
     postCreationScreen.style.display = "none";
     repostCreationScreen.style.display = "none";
@@ -246,6 +287,8 @@ function showProfileScreen(username) {
     profileScreen.style.display = "flex";
     roomCreationScreen.style.display = "none";
     searchScreen.style.display = "none";
+
+    mobileShowFeedButton.removeAttribute("selected");
 
     const postsContainer = profileScreen.querySelector(".posts");
 
@@ -270,7 +313,7 @@ async function showPostThreadScreen(postID) {
     currentPaginator = initCommentPaginator(postID, mountPosts(postThreadCommentSection));
     currentPaginator();
     
-
+    mobileFeedSelector.style.display = "none";
     postScreen.style.display = "none";
     postCreationScreen.style.display = "none";
     repostCreationScreen.style.display = "none";
@@ -287,6 +330,7 @@ const searchBarLarge = document.querySelector("#searchBarLarge");
 const searchResultContent = searchScreen.querySelector(".content");
 
 function showSearchScreen(initialTerm) {
+    mobileFeedSelector.style.display = "none";
     postScreen.style.display = "none";
     postCreationScreen.style.display = "none";
     repostCreationScreen.style.display = "none";
@@ -295,6 +339,8 @@ function showSearchScreen(initialTerm) {
     profileScreen.style.display = "none";
     roomCreationScreen.style.display = "none";
     searchScreen.style.display = "flex";
+
+    mobileShowFeedButton.removeAttribute("selected");
 
     searchBarLarge.value = initialTerm;
 
@@ -353,7 +399,7 @@ function mountNotifications(screen) {
         for (let i = 0; i < notifications.length; i++) {
             let node = notificationTemplate.content.cloneNode(true);
 
-            let timestamp = new Date(notifications[i].timestamp * 1000);
+            let timestamp = new Date(notifications[i].timestamp * 1000 - new Date().getTimezoneOffset() * 60000);
             let [date, fullTime] = timestamp.toISOString().split("T");
             let [hour, minute] = fullTime.split(":");
 
