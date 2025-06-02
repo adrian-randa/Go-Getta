@@ -53,7 +53,26 @@ let joinedRooms = new Promise((resolve, reject) => {
 });
 
 function showMobileRoomSelector() {
+    hideMobileAddMenu();
+
     mobileRoomButtonContainer.style.display = "flex";
+    window.history.pushState({}, "", window.location.origin);
+}
+function hideMobileRoomSelector() {
+    mobileRoomButtonContainer.style.display = "none";
+}
+
+const mobileAddMenu = document.querySelector("#mobileAddMenu");
+function showMobileAddMenu() {
+    hideMobileRoomSelector();
+
+    mobileAddMenu.style.display = "flex";
+    window.history.pushState({}, "", window.location.origin);
+}
+
+
+function hideMobileAddMenu() {
+    mobileAddMenu.style.display = "none";
 }
 
 
@@ -79,6 +98,9 @@ const searchScreen = document.querySelector("#search");
 
 const mobileBottomBar = document.querySelector(".bottomBar");
 const mobileFeedSelector = document.querySelector("#mobileFeedSelector");
+function hideMobileFeedSelector() {
+    mobileFeedSelector.style.display = "none";
+}
 
 const showPublicSpaceButton = document.querySelector("#showPublicSpaceButton");
 const mobileShowFeedButton = document.querySelector("#mobileFeedButton");
@@ -190,6 +212,9 @@ const updateNewRepostRemainingCharactersDisplay = (event) => {
 document.querySelector("#newRepostBody").addEventListener("input", updateNewRepostRemainingCharactersDisplay);
 
 function showPostScreen() {
+    hideMobileRoomSelector();
+    hideMobileAddMenu();
+
     postScreen.innerHTML = "";
 
     

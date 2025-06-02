@@ -704,6 +704,23 @@
 
     </screen>
 
+    <screen class="mobile addMenu" id="mobileAddMenu" style="display: none;">
+        <button class="newRoom" onclick="showRoomCreationScreen(); hideMobileAddMenu()">
+            <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M1 11.5L8 15L15 11.5V4.5L8 1L1 4.5V11.5Z" stroke="#FCF7F8" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M1 11.5L8 8M8 8L15 11.5M8 8V1" stroke="#FCF7F8" stroke-opacity="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            New Room            
+        </button>
+    
+        <button class="newPost" onclick="showPostCreationScreen(); hideMobileAddMenu()">
+            <svg viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M5 1V5M5 9V5M5 5H1M5 5H9" stroke="var(--white)" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            New Post            
+        </button>
+    </screen>
+
 
     <div class="mobile bottomBar">
         <button id="mobileFeedButton" onclick="showPublicSpaceScreen()">
@@ -713,7 +730,7 @@
             </svg>
         </button>
 
-        <button id="mobileRoomsButton" onclick="showMobileRoomSelector()">
+        <button id="mobileRoomsButton" onclick="showMobileRoomSelector(); hideMobileFeedSelector()">
             <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M1 11.5L8 15L15 11.5V4.5L8 1L1 4.5V11.5Z" stroke="var(--gray)" stroke-linecap="round" stroke-linejoin="round"/>
                 <path d="M1 11.5L8 8M8 8L15 11.5M8 8V1" stroke="var(--gray)" stroke-opacity="0.25" stroke-linecap="round" stroke-linejoin="round"/>
@@ -721,7 +738,7 @@
         </button>
         
         <div>
-            <button id="mobileAddButton">
+            <button id="mobileAddButton" onclick="showMobileAddMenu(); hideMobileFeedSelector()">
                 <svg viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M5 1V5M5 9V5M5 5H1M5 5H9" stroke="var(--white)" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>

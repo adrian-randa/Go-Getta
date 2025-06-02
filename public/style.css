@@ -1047,6 +1047,8 @@ button {
     align-items: center;
     gap: 1rem;
 
+    background-color: var(--black);
+
     .bodyInput {
         width: 100%;
 
