@@ -2,6 +2,7 @@ use std::{collections::HashMap, ops::DerefMut};
 
 use diesel::{result::Error::NotFound, BoolExpressionMethods, ExpressionMethods, QueryDsl, RunQueryDsl, SaveChangesDsl, SelectableHelper};
 use serde::{Serialize, Deserialize};
+use urlencoding::decode_binary;
 
 use crate::{db::DBConnection, error::{InternalServerError, InvalidBiographyError, InvalidPublicNameError, InvalidQueryError, InvalidSessionError, UserDoesNotExistError}, models::{Following, Post, Room, User}, schema::{follows, memberships, posts::{self, creator, timestamp}, rooms, users}, validate_session_from_headers};
 
@@ -20,6 +21,9 @@ struct GetUserDataResponse {
 pub async fn get_user_data(headers: warp::http::HeaderMap, connection: DBConnection, username: String) -> Result<impl warp::Reply, warp::Rejection> {
     
     let user = validate_session_from_headers(&headers, connection.clone()).await.ok_or(InvalidSessionError)?;
+
+    let binary = decode_binary(&username.as_bytes());
+    let username = String::from_utf8_lossy(&binary).into_owned();
 
     let queried_user: User = users::table
         .find(&username)
@@ -45,6 +49,9 @@ pub async fn get_user_data(headers: warp::http::HeaderMap, connection: DBConnect
 pub async fn users_posts_query(headers: warp::http::HeaderMap, connection: DBConnection, query: HashMap<String, String>, username: String) -> Result<impl warp::Reply, warp::Rejection> {
 
     let user = validate_session_from_headers(&headers, connection.clone()).await.ok_or(InvalidSessionError)?;
+
+    let binary = decode_binary(&username.as_bytes());
+    let username = String::from_utf8_lossy(&binary).into_owned();
 
     let page = query.get("page").ok_or(InvalidQueryError)?.parse::<i64>().map_err(|_| InvalidQueryError)?;
 

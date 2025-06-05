@@ -2,6 +2,7 @@ use std::{collections::HashMap, ops::{Deref, DerefMut}};
 
 use diesel::{AsChangeset, BoolExpressionMethods, ExpressionMethods, QueryDsl, QueryResult, RunQueryDsl, SaveChangesDsl, SelectableHelper, TextExpressionMethods};
 use serde::{Deserialize, Serialize};
+use urlencoding::decode_binary;
 use warp::filters::multipart::FormData;
 
 use crate::{api::PostQueryResponse, db::DBConnection, error::{ContentTooLargeError, EmptyContentError, InsufficientPermissionsError, InternalServerError, InvalidQueryError, InvalidSessionError, RoomBoundaryViolationError, RoomDoesNotExistError, UserDoesNotExistError, UserIsBannedError}, models::{Ban, Membership, Post, Room, User}, schema::{bans, memberships::{self}, posts::{self, timestamp}, rooms, users}, validate_session_from_headers};
@@ -297,6 +298,9 @@ pub async fn kick_user_from_room(headers: warp::http::HeaderMap, connection: DBC
 
     let user = validate_session_from_headers(&headers, connection.clone()).await.ok_or(InvalidSessionError)?;
 
+    let binary = decode_binary(&username.as_bytes());
+    let username = String::from_utf8_lossy(&binary).into_owned();
+
     if user.get_username() == username {
         Err(InvalidQueryError)?;
     }
@@ -320,6 +324,9 @@ pub async fn kick_user_from_room(headers: warp::http::HeaderMap, connection: DBC
 pub async fn ban_user_from_room(headers: warp::http::HeaderMap, connection: DBConnection, room_id: String, username: String) -> Result<impl warp::Reply, warp::Rejection> {
 
     let user = validate_session_from_headers(&headers, connection.clone()).await.ok_or(InvalidSessionError)?;
+
+    let binary = decode_binary(&username.as_bytes());
+    let username = String::from_utf8_lossy(&binary).into_owned();
 
     if user.get_username() == username {
         Err(InvalidQueryError)?;
@@ -354,6 +361,9 @@ pub async fn unban_user_from_room(headers: warp::http::HeaderMap, connection: DB
 
     let user = validate_session_from_headers(&headers, connection.clone()).await.ok_or(InvalidSessionError)?;
 
+    let binary = decode_binary(&username.as_bytes());
+    let username = String::from_utf8_lossy(&binary).into_owned();
+    
     let room: Room = rooms::table
         .find(&room_id)
         .first(connection.lock().await.deref_mut())

@@ -2,6 +2,8 @@ use std::{collections::HashMap, ops::DerefMut};
 
 use crate::{db::{with_db_connection, DBConnection}, error::{InternalServerError, InvalidQueryError, InvalidSessionError, UserDoesNotExistError, UserIsAlreadyFollowedError}, models::{Following, Notification, Post, User}, schema::{follows::{self, followed, follower}, memberships, posts::{self, creator, timestamp}, rooms, users}, validate_session_from_headers};
 
+use urlencoding::decode_binary;
+
 use diesel::{result::Error::NotFound, BoolExpressionMethods, ExpressionMethods, QueryDsl, RunQueryDsl, SaveChangesDsl, SelectableHelper};
 use serde::Serialize;
 
@@ -11,6 +13,9 @@ use super::{PostQueryResponse, UserQueryResponse};
 pub async fn follow(headers: warp::http::HeaderMap, connection: DBConnection, username: String) -> Result<impl warp::Reply, warp::Rejection> {
 
     let mut user = validate_session_from_headers(&headers, connection.clone()).await.ok_or(InvalidSessionError)?;
+
+    let binary = decode_binary(&username.as_bytes());
+    let username = String::from_utf8_lossy(&binary).into_owned();
 
     let mut user_to_follow: User = users::table
         .find(username)
@@ -61,6 +66,9 @@ pub async fn unfollow(headers: warp::http::HeaderMap, connection: DBConnection, 
 
     let mut user = validate_session_from_headers(&headers, connection.clone()).await.ok_or(InvalidSessionError)?;
 
+    let binary = decode_binary(&username.as_bytes());
+    let username = String::from_utf8_lossy(&binary).into_owned();
+
     let mut user_to_unfollow: User = users::table
         .find(username)
         .first(connection.lock().await.deref_mut())
@@ -95,6 +103,9 @@ pub async fn is_following(headers: warp::http::HeaderMap, connection: DBConnecti
 
     let user = validate_session_from_headers(&headers, connection.clone()).await.ok_or(InvalidSessionError)?;
 
+    let binary = decode_binary(&username.as_bytes());
+    let username = String::from_utf8_lossy(&binary).into_owned();
+    
     let is_following = match follows::table
         .find((user.borrow_username(), username))
         .first::<Following>(connection.lock().await.deref_mut()) {
