@@ -71,7 +71,7 @@ async function applyPostDataToNode(data, node, showDeleteButton = false) {
     content.textContent = post.body;
 
     const urlRegex = /([(http(s)?):\/\/(www\.)?a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*))/ig
-    const userReferenceRegex = /@(\w+)/
+    const userReferenceRegex = /@(\w+)/u
 
     content.innerHTML = content.innerHTML.replace(urlRegex, (match) => {
         let href = match;
