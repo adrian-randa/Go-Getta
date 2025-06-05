@@ -71,12 +71,17 @@ async function applyPostDataToNode(data, node, showDeleteButton = false) {
     content.textContent = post.body;
 
     const urlRegex = /([(http(s)?):\/\/(www\.)?a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*))/ig
-
+    const userReferenceRegex = /@(\w+)/
 
     content.innerHTML = content.innerHTML.replace(urlRegex, (match) => {
         let href = match;
         if (!match.startsWith("http")) href = `http://${match}`
         return `<a rel="external" href="${href}">${match}</a>`;
+    });
+
+    content.innerHTML = content.innerHTML.replace(userReferenceRegex, (match) => {
+        let username = match;
+        return `<a href="?view=profile&id=${username.substring(1)}">${username}</a>`;
     });
     
     let body = node.querySelector(".body");

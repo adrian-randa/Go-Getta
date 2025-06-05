@@ -20,7 +20,7 @@ struct CreateAccountResponse {
 
 pub async fn create_account(credentials: AccountCreationCredentials, connection: DBConnection) -> Result<impl warp::Reply, warp::Rejection> {
 
-    if credentials.username.contains(['/', '\\', ' ']) {
+    if credentials.username.contains(['/', '\\', ' ', '@']) {
         Err(InvalidUsernameError)?;
     }
 
