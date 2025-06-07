@@ -23,7 +23,7 @@ async function makePostNode(post, showDeleteButton = false, showNsfw = false) {
 
 async function applyPostDataToNode(data, node, showDeleteButton = false, showNsfw = false) {
 
-    const { post, interaction, child } = data;
+    const { post, room, interaction, child } = data;
 
     if (node instanceof DocumentFragment) node.querySelector(".post").setAttribute("id", `post-${post.id}`);
 
@@ -39,6 +39,14 @@ async function applyPostDataToNode(data, node, showDeleteButton = false, showNsf
     if (!post.parent) threadInfo.style.display = "none";
     else {
         threadInfo.setAttribute("href", `?view=post&id=${post.parent}`);
+    }
+
+    let roomInfo = node.querySelector(".roomInfoContainer");
+    if (!room) roomInfo.style.display = "none";
+    else {
+        roomInfo.setAttribute("href", `?view=room&id=${post.room}`);
+        roomInfo.setAttribute("style", `--room-color: #${room.color}`);
+        roomInfo.querySelector("span").innerText = room.name;
     }
 
     let timestamp = new Date(post.timestamp * 1000 - new Date().getTimezoneOffset() * 60000);
@@ -241,11 +249,11 @@ async function applyPostDataToNode(data, node, showDeleteButton = false, showNsf
     if (post.creator !== window.localStorage.getItem("currentUsername") && !showDeleteButton) deleteButton.style.display = "none";
     else {
         let deleteHandler = async () => {
-            let response = await fetch(`/api/delete_post/${post.id}`, {
+            let response = await baseErrorHandler.guard(fetch(`/api/delete_post/${post.id}`, {
                 method: "DELETE"
-            });
-            if (response.ok) window.location.href = window.location;
-            else alert(await response.text());
+            }));
+            
+            window.location.href = window.origin;
         };
 
         deleteButton.addEventListener("click", () => {showModal({
@@ -282,6 +290,8 @@ async function makeChildPostNode(post) {
     else {
         threadInfo.setAttribute("href", `?view=post&id=${post.parent}`);
     }
+
+    node.querySelector(".roomInfoContainer").style.display = "none";
 
     let timestamp = new Date(post.timestamp * 1000);
     let [date, fullTime] = timestamp.toISOString().split("T");

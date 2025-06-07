@@ -150,6 +150,13 @@
                         </svg>
                         <span class="notMobile">Response</span>
                     </a>
+                    <a class="roomInfoContainer">
+                        <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M1 11.5L8 15L15 11.5V4.5L8 1L1 4.5V11.5Z" stroke="#FCF7F8" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M1 11.5L8 8M8 8L15 11.5M8 8V1" stroke="#FCF7F8" stroke-opacity="0.25" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        <span>Room Name</span>
+                    </a>
                     <spacer></spacer>
                     <div class="timestamp">
                         <h5>1900/01/01</h5>
@@ -517,10 +524,10 @@
                         View my bookmarked posts                        
                     </button>
                     <button class="viewFollowers">
-                        16 followers
+                        
                     </button>
                     <button class="viewFollowed">
-                        214 followed
+                        
                     </button>
                 </div>
             </div>
@@ -615,6 +622,7 @@
     </div>
 
     <screen id="manageFollowsModal" style="display: none;">
+        <div class="backdrop"></div>
         <div class="modalWindow">
             <button class="close">Close</button>
             <h1>Followers</h1>

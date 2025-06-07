@@ -1,10 +1,10 @@
 use std::{collections::HashMap, ops::DerefMut};
 
-use crate::{db::{with_db_connection, DBConnection}, error::{InternalServerError, InvalidQueryError, InvalidSessionError, UserDoesNotExistError, UserIsAlreadyFollowedError}, models::{Following, Notification, Post, User}, schema::{follows::{self, followed, follower}, memberships, posts::{self, creator, timestamp}, rooms, users}, validate_session_from_headers};
+use crate::{db::{with_db_connection, DBConnection}, error::{InternalServerError, InvalidQueryError, InvalidSessionError, UserDoesNotExistError, UserIsAlreadyFollowedError}, models::{Following, Notification, Post, User}, schema::{bans, follows::{self, followed, follower}, memberships, posts::{self, creator, timestamp}, rooms, users}, validate_session_from_headers};
 
 use urlencoding::decode_binary;
 
-use diesel::{result::Error::NotFound, BoolExpressionMethods, ExpressionMethods, QueryDsl, RunQueryDsl, SaveChangesDsl, SelectableHelper};
+use diesel::{dsl::not, result::Error::NotFound, BoolExpressionMethods, ExpressionMethods, QueryDsl, RunQueryDsl, SaveChangesDsl, SelectableHelper};
 use serde::Serialize;
 
 use super::{PostQueryResponse, UserQueryResponse};
@@ -130,9 +130,15 @@ pub async fn fetch_followed_feed(headers: warp::http::HeaderMap, connection: DBC
         .load(connection.lock().await.deref_mut())
         .map_err(|_| InternalServerError)?;
 
+    let banned_rooms_subquery: Vec<String> = bans::table
+        .filter(bans::user.eq(user.borrow_username()))
+        .select(bans::room)
+        .load(connection.lock().await.deref_mut()).map_err(|_| InternalServerError)?;
+
     let available_rooms: Vec<String> = memberships::table
         .inner_join(rooms::table)
         .filter(memberships::user.eq(user.borrow_username()).or(rooms::is_private.eq(false)))
+        .filter(not(rooms::id.eq_any(banned_rooms_subquery)))
         .select(memberships::room)
         .load(connection.lock().await.deref_mut())
         .map_err(|_| InternalServerError)?;

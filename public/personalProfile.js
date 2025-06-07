@@ -124,7 +124,7 @@ async function initPersonalProfilePage() {
     const viewFollowedButton = personalProfileScreen.querySelector(".viewFollowed");
     const manageFollowUsersContainer = manageFollowModal.querySelector(".usersContainer");
 
-    viewFollowersButton.textContent = `${userData.followers} followers`;
+    viewFollowersButton.textContent = `View ${userData.followers} followers`;
     viewFollowersButton.onclick = () => {
         manageFollowModal.querySelector("h1").textContent = "Followers";
 
@@ -136,7 +136,7 @@ async function initPersonalProfilePage() {
         manageFollowModal.style.display = "grid";
     }
 
-    viewFollowedButton.textContent = `${userData.followed} followed`;
+    viewFollowedButton.textContent = `View ${userData.followed} followed`;
     viewFollowedButton.onclick = () => {
         manageFollowModal.querySelector("h1").textContent = "Followed";
 
@@ -312,5 +312,9 @@ function mountFollowed(screen) {
 }
 
 document.querySelector("#manageFollowsModal").querySelector(".close").addEventListener("click", () => {
+    document.querySelector("#manageFollowsModal").style.display = "none";
+});
+
+document.querySelector("#manageFollowsModal").querySelector(".backdrop").addEventListener("click", () => {
     document.querySelector("#manageFollowsModal").style.display = "none";
 });

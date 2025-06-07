@@ -80,13 +80,12 @@
 #mobileFeedSelector {
     z-index: 10;
 
-    padding: .2rem 0;
-    width: 80%;
+    padding: 1rem;
 
     display: flex;
     align-items: center;
     justify-content: space-evenly;
-    gap: 1rem;
+    gap: 4rem;
 
     position: fixed;
 
@@ -95,11 +94,14 @@
     transform: translateX(-50%);
 
     background-color: var(--black-50);
-    backdrop-filter: blur(.2rem);
+    backdrop-filter: blur(.4rem) brightness(50%);
+    border-radius: .5rem;
 
     button {
         margin: 0;
         padding: 0;
+
+        white-space: nowrap;
     }
 
     button[selected] {
@@ -233,6 +235,35 @@
 
         >div {
             gap: .25rem;
+        }
+    }
+
+    .modalWindow {
+        padding: 0 !important;
+        width: calc(100% - 4rem);
+        max-width: unset !important;
+    }
+
+    #modal, #manageRoomUsersModal, #manageFollowsModal {
+        z-index: 10000;
+    }
+
+    #manageRoomUsersModal, #manageFollowsModal {
+        .modalWindow {
+            width: calc(100vw - 2rem);
+            height: calc(100% - 16rem);
+            max-width: unset !important;
+
+            .usersContainer {
+                max-height: 50vh !important;
+
+                min-width: unset !important;
+                width: 100%;
+            }
+
+            .user {
+    
+            }
         }
     }
 }

@@ -216,7 +216,6 @@ function showPostScreen() {
     hideMobileAddMenu();
 
     postScreen.innerHTML = "";
-
     
     mobileFeedSelector.style.display = "flex";
     postScreen.style.display = "flex";
@@ -253,6 +252,8 @@ function showPublicSpaceScreen() {
     mobileShowPublicSpaceButton.setAttribute("selected", "");
     mobileShowFollowingButton.removeAttribute("selected");
 
+    document.querySelector("#mobileRoomsButton").removeAttribute("selected");
+
     showPostScreen();
     currentPaginator = initPublicSpacePaginator(mountPosts(postScreen));
     currentPaginator();
@@ -266,6 +267,8 @@ function showFollowingScreen() {
     mobileShowFeedButton.setAttribute("selected", "");
     mobileShowFollowingButton.setAttribute("selected", "");
     mobileShowPublicSpaceButton.removeAttribute("selected");
+
+    document.querySelector("#mobileRoomsButton").removeAttribute("selected");
 
     showPostScreen();
     currentPaginator = initFollowedFeedPaginator(mountPosts(postScreen));
@@ -528,7 +531,33 @@ switch (params.get("view")) {
     case "room": {
         const id = params.get("id");
         joinedRooms.then((rooms) => {
-            showRoomScreen(rooms.find((r) => r.id == id));
+            let r = rooms.find((r) => r.id == id);
+            if (r) {
+                showRoomScreen(r);
+                document.querySelector("#mobileRoomsButton").setAttribute("selected", "");
+            }
+            else {
+                showModal({
+                    title: "Not a member",
+                    body: "You are not a member of this room yet. Do you want to join it?",
+                    inputFields: [],
+                    choices: [
+                        {
+                            label: "Yes",
+                            class: "good",
+                            onclick: () => {
+                                joinRoom(id);
+                            }
+                        },
+                        {
+                            label: "Cancel",
+                            onclick: () => {
+                                window.location.href = window.location.origin;
+                            }
+                        }
+                    ]
+                })
+            }
         });
         break;
     }

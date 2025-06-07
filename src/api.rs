@@ -4,7 +4,7 @@ use diesel::{result::Error::NotFound, QueryDsl, RunQueryDsl};
 use serde::{Deserialize, Serialize};
 use warp::Filter;
 
-use crate::{db::{with_db_connection, DBConnection}, error::{InternalServerError, InvalidSessionError, PostDoesNotExistError}, models::{Bookmark, Membership, Post, Rating, Room, User}, schema::{bookmarks, memberships, posts, ratings}, validate_session_from_headers};
+use crate::{db::{with_db_connection, DBConnection}, error::{InternalServerError, InvalidSessionError, PostDoesNotExistError}, models::{Bookmark, Membership, Post, Rating, Room, User}, schema::{bookmarks, memberships, posts, ratings, rooms}, validate_session_from_headers};
 
 pub mod post;
 pub mod public_space;
@@ -48,6 +48,7 @@ pub async fn who_am_i(headers: warp::http::HeaderMap, connection: DBConnection) 
 #[derive(Debug, Serialize)]
 pub struct PostQueryResponse {
     post: Post,
+    room: Option<Room>,
     interaction: PostInteraction,
     child: Option<Post>,
 }
@@ -57,6 +58,14 @@ impl PostQueryResponse {
 
         let username = user.get_username();
         let post_id = post.get_id();
+
+        let room: Option<Room> = match post.get_room() {
+            Some(r) => rooms::table
+                .find(r)
+                .first(connection.lock().await.deref_mut())
+                .ok(),
+            None => None,
+        };
 
         let rating: RatingInteraction = ratings::table
             .find((&username, &post_id))
@@ -81,6 +90,7 @@ impl PostQueryResponse {
 
         Ok(Self {
             post,
+            room,
             interaction: PostInteraction {
                 rating,
                 bookmarked

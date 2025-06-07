@@ -1,6 +1,6 @@
 use std::{collections::HashMap, ops::{Deref, DerefMut}};
 
-use diesel::{AsChangeset, BoolExpressionMethods, ExpressionMethods, QueryDsl, QueryResult, RunQueryDsl, SaveChangesDsl, SelectableHelper, TextExpressionMethods};
+use diesel::{result::Error::NotFound, AsChangeset, BoolExpressionMethods, ExpressionMethods, QueryDsl, QueryResult, RunQueryDsl, SaveChangesDsl, SelectableHelper, TextExpressionMethods};
 use serde::{Deserialize, Serialize};
 use urlencoding::decode_binary;
 use warp::filters::multipart::FormData;
@@ -488,13 +488,19 @@ pub async fn join_room(headers: warp::http::HeaderMap, connection: DBConnection,
     let user = validate_session_from_headers(&headers, connection.clone()).await.ok_or(InvalidSessionError)?;
 
     let room: Room = rooms::table
-        .find(room_id)
+        .find(&room_id)
         .first(connection.lock().await.deref_mut())
         .map_err(|_| RoomDoesNotExistError)?;
 
     if room.is_private() {
         Err(InsufficientPermissionsError)?;
     }
+
+    match bans::table.find((user.borrow_username(), &room_id)).first::<Ban>(connection.lock().await.deref_mut()) {
+        Ok(_) => Err(UserIsBannedError)?,
+        Err(NotFound) => {},
+        Err(_) => Err(InternalServerError)?,
+    };
 
     let membership = Membership::new(&user, &room);
 

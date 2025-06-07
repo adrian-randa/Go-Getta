@@ -64,6 +64,7 @@ const baseErrorHandler = new ErrorHandler()
     .map("InvalidSessionError", "Session Expired", "You have been inactive for too long. Please refresh the page to log back in.")
     .map("RoomDoesNotExistError", "Room Doesn't Exist", "This room does not exist.")
     .map("RoomBoundaryViolationError", "Room Boundary Violation", "You violated the bounds of a private room")
+    .map("UserIsBannedError", "Banned", "Sorry, you have been banned from this room.")
     ;
 
 const loginErrorHandler = baseErrorHandler.clone()

@@ -121,7 +121,7 @@ async fn main() {
         .and(warp::path::end())
         .and(warp::header::headers_cloned())
         .and(with_db_connection(connection.clone()))
-        .and(warp::multipart::form().max_length(5_000_000))
+        .and(warp::multipart::form().max_length(50_000_000))
         .and_then(file_upload);
 
     let update_profile_picture_route = warp::post()
@@ -130,7 +130,7 @@ async fn main() {
         .and(warp::path::end())
         .and(warp::header::headers_cloned())
         .and(with_db_connection(connection.clone()))
-        .and(warp::multipart::form().max_length(2_000_000))
+        .and(warp::multipart::form().max_length(8_000_000))
         .and_then(update_profile_picture);
 
     let users_posts_query = warp::get()
