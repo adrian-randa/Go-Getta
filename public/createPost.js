@@ -27,13 +27,17 @@ async function submitPost() {
 
     let roomID = document.querySelector("#newPostRoom").value || null;
 
+    const isNsfwToggle = document.querySelector("#newPostIsNSFW");
+    let isNsfw = isNsfwToggle.checked;
+
     let payload = {
         "body": body,
         "appendage_id": appendageID,
         "room": roomID,
         "parent": null,
         "child": null,
-    }
+        "is_nsfw": isNsfw,
+    };
 
     let response = await createPostErrorHandler.guard(fetch("/api/create_post", {
         method: "POST",

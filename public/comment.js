@@ -24,12 +24,16 @@ async function submitComment() {
         appendageID = responseObj.appendage_id;
     }
 
+    const isNsfwToggle = document.querySelector("#newCommentIsNSFW");
+    let isNsfw = isNsfwToggle.checked;
+
     let payload = {
         "body": body,
         "appendage_id": appendageID,
         "room": null,
         "parent": parentID,
-        "child": null
+        "child": null,
+        "is_nsfw": isNsfw,
     }
 
     let response = await createPostErrorHandler.guard(fetch("/api/create_post", {

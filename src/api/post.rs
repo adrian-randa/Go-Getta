@@ -13,7 +13,10 @@ pub struct PostCreationData {
     appendage_id: Option<String>,
     room: Option<String>,
     parent: Option<String>,
-    child: Option<String>
+    child: Option<String>,
+
+    #[serde(default)]
+    is_nsfw: bool,
 }
 
 #[derive(Debug, Serialize)]
@@ -86,7 +89,8 @@ pub async fn create_post(headers: warp::http::HeaderMap, connection: DBConnectio
         post_data.appendage_id,
         contained_room.as_ref(),
         parent_post.as_ref(),
-        child_post.as_ref()
+        child_post.as_ref(),
+        post_data.is_nsfw,
     );
     let post_id = new_post.get_id();
 

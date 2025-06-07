@@ -158,7 +158,6 @@
                 </div>
                 <a class="body">
                     <div class="content">
-                        Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
                     </div>
                     <div class="appendages">
                     </div>
@@ -308,6 +307,13 @@
                         </button>
                     </div>
                 </div>
+                <div class="isNsfwToggleContainer">
+                    <div></div>
+                    <div>
+                        <input type="checkbox" name="is_nsfw" id="newPostIsNSFW">
+                        is NSFW
+                    </div>
+                </div>
                 <spacer></spacer>
                 <div class="postButton">
                     Post
@@ -454,6 +460,13 @@
                     <button id="commentRemoveMediaButton" onclick="removeNewCommentFiles()">
                         Remove Media
                     </button>
+                    <div class="isNsfwToggleContainer">
+                        <div></div>
+                        <div>
+                            <input type="checkbox" name="is_nsfw" id="newCommentIsNSFW">
+                            is NSFW
+                        </div>
+                    </div>
                     <spacer></spacer>
                     <button id="submitCommentButton" onclick="submitComment()">
                         <svg viewBox="0 0 18 12" fill="none" xmlns="http://www.w3.org/2000/svg">

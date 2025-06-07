@@ -13,15 +13,15 @@ const mediaTypeLookup = {
     "Audio": "audio",
 }
 
-async function makePostNode(post, showDeleteButton = false) {
+async function makePostNode(post, showDeleteButton = false, showNsfw = false) {
     let node = postTemplate.content.cloneNode(true);
 
-    await applyPostDataToNode(post, node, showDeleteButton);
+    await applyPostDataToNode(post, node, showDeleteButton, showNsfw);
 
     return node;
 }
 
-async function applyPostDataToNode(data, node, showDeleteButton = false) {
+async function applyPostDataToNode(data, node, showDeleteButton = false, showNsfw = false) {
 
     const { post, interaction, child } = data;
 
@@ -50,51 +50,75 @@ async function applyPostDataToNode(data, node, showDeleteButton = false) {
     dateDisplay.textContent = date;
     timeDisplay.textContent = `${hour}:${minute}`;
 
-    if (post.appendage_id) {
-        let appendageResponse = await fetch(`/storage/appendage/${post.appendage_id}`);
-        if (appendageResponse.ok) {
-            let appendage = await appendageResponse.json();
-    
-            const mediaContainer = node.querySelector(".appendages");
-            
-            appendage.files.forEach((file) => {
-                let mediaType = mediaTypeLookup[file.file_type];
-                let mediaNode = document.createElement(mediaType);
-                mediaNode.setAttribute("src", `/storage/appendage/file/${file.file_id}`);
-                if (mediaType == "video") mediaNode.setAttribute("controls", "");
-                mediaContainer.appendChild(mediaNode);
-            })
+    if (!post.is_nsfw || showNsfw) {
+        if (post.appendage_id) {
+            let appendageResponse = await fetch(`/storage/appendage/${post.appendage_id}`);
+            if (appendageResponse.ok) {
+                let appendage = await appendageResponse.json();
+        
+                const mediaContainer = node.querySelector(".appendages");
+                
+                appendage.files.forEach((file) => {
+                    let mediaType = mediaTypeLookup[file.file_type];
+                    let mediaNode = document.createElement(mediaType);
+                    mediaNode.setAttribute("src", `/storage/appendage/file/${file.file_id}`);
+                    if (mediaType == "video") mediaNode.setAttribute("controls", "");
+                    mediaContainer.appendChild(mediaNode);
+                })
+            }
         }
+
+        let content = node.querySelector(".content");
+        content.textContent = post.body;
+    
+        const urlRegex = /([(http(s)?):\/\/(www\.)?a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*))/ig
+        const userReferenceRegex = /@([\wöäüß]+)/u
+    
+        content.innerHTML = content.innerHTML.replace(urlRegex, (match) => {
+            let href = match;
+            if (!match.startsWith("http")) href = `http://${match}`
+            return `<a rel="external" href="${href}">${match}</a>`;
+        });
+    
+        content.innerHTML = content.innerHTML.replace(userReferenceRegex, (match) => {
+            let username = match;
+            return `<a href="?view=profile&id=${username.substring(1)}">${username}</a>`;
+        });
+        
+        let body = node.querySelector(".body");
+        body.setAttribute("href", `?view=post&id=${post.id}`);
+
+        const referencedPost = node.querySelector(".referencedPost");
+        if (post.child) {
+            if (child) {
+                referencedPost.appendChild(await makeChildPostNode(child));
+                referencedPost.setAttribute("href", `?view=post&id=${child.id}`);
+            }
+            else referencedPost.innerText = "The referenced post has been deleted.";
+        } else referencedPost.style.display = "none";
+    } else {
+        let body = node.querySelector(".body");
+
+        node.querySelector(".referencedPost").remove();
+
+        body.setAttribute("style", "display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1rem;")
+
+        body.innerHTML = `
+            <p>This post is marked as <span>NSFW</span>, which means that it contains content targetet at mature audiences.</p>
+
+            <button>Show anyways</button>
+        `
+
+        body.querySelector("span").style.color = "var(--red)";
+
+        let button = body.querySelector("button");
+
+        button.style.backgroundColor = "var(--red-25)";
+        
+        button.addEventListener("click", async () => {
+            document.querySelector(`#post-${post.id}`).replaceWith(await makePostNode(data, showDeleteButton, true))
+        });
     }
-
-    let content = node.querySelector(".content");
-    content.textContent = post.body;
-
-    const urlRegex = /([(http(s)?):\/\/(www\.)?a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*))/ig
-    const userReferenceRegex = /@([\wöäüß]+)/u
-
-    content.innerHTML = content.innerHTML.replace(urlRegex, (match) => {
-        let href = match;
-        if (!match.startsWith("http")) href = `http://${match}`
-        return `<a rel="external" href="${href}">${match}</a>`;
-    });
-
-    content.innerHTML = content.innerHTML.replace(userReferenceRegex, (match) => {
-        let username = match;
-        return `<a href="?view=profile&id=${username.substring(1)}">${username}</a>`;
-    });
-    
-    let body = node.querySelector(".body");
-    body.setAttribute("href", `?view=post&id=${post.id}`);
-
-    const referencedPost = node.querySelector(".referencedPost");
-    if (post.child) {
-        if (child) {
-            referencedPost.appendChild(await makeChildPostNode(child));
-            referencedPost.setAttribute("href", `?view=post&id=${child.id}`);
-        }
-        else referencedPost.innerText = "The referenced post has been deleted.";
-    } else referencedPost.style.display = "none";
 
     let ratingDisplay = node.querySelector(".rating");
     let ratingDisplayNumber = ratingDisplay.querySelector("h5");

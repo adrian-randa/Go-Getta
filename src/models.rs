@@ -149,10 +149,11 @@ pub struct Post {
     reposts: i32,
     bookmarks: i32,
     child: Option<String>,
+    is_nsfw: bool,
 }
 
 impl Post {
-    pub fn new(creator: &User, body: String, appendage_id: Option<String>, room: Option<&Room>, parent: Option<&Post>, child: Option<&Post>) -> Self {
+    pub fn new(creator: &User, body: String, appendage_id: Option<String>, room: Option<&Room>, parent: Option<&Post>, child: Option<&Post>, is_nsfw: bool) -> Self {
         Post {
             id: Uuid::new_v4().to_string(), 
             creator: creator.get_username(), 
@@ -164,6 +165,7 @@ impl Post {
             parent: parent.map(|p| p.get_id()),
             comments: 0, shares: 0, reposts: 0, bookmarks: 0,
             child: child.map(|p| p.get_id()),
+            is_nsfw
         }
     }
 
@@ -239,6 +241,10 @@ impl Post {
 
     pub fn get_bookmarks(&self) -> i32 {
         self.bookmarks
+    }
+
+    pub fn is_nsfw(&self) -> bool {
+        self.is_nsfw
     }
 }
 

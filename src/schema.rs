@@ -70,6 +70,7 @@ diesel::table! {
         reposts -> Integer,
         bookmarks -> Integer,
         child -> Nullable<Text>,
+        is_nsfw -> Bool,
     }
 }
 
