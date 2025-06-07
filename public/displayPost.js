@@ -292,24 +292,32 @@ async function makeChildPostNode(post) {
     dateDisplay.textContent = date;
     timeDisplay.textContent = `${hour}:${minute}`;
 
-    if (post.appendage_id) {
-        let appendageResponse = await fetch(`/storage/appendage/${post.appendage_id}`);
-        if (appendageResponse.ok) {
-            let appendage = await appendageResponse.json();
-    
-            const mediaContainer = node.querySelector(".appendages");
-            
-            appendage.files.forEach((file) => {
-                let mediaType = mediaTypeLookup[file.file_type];
-                let mediaNode = document.createElement(mediaType);
-                mediaNode.setAttribute("src", `/storage/appendage/file/${file.file_id}`);
-                if (mediaType == "video") mediaNode.setAttribute("controls", "");
-                mediaContainer.appendChild(mediaNode);
-            })
+    if (!post.is_nsfw) {
+        if (post.appendage_id) {
+            let appendageResponse = await fetch(`/storage/appendage/${post.appendage_id}`);
+            if (appendageResponse.ok) {
+                let appendage = await appendageResponse.json();
+        
+                const mediaContainer = node.querySelector(".appendages");
+                
+                appendage.files.forEach((file) => {
+                    let mediaType = mediaTypeLookup[file.file_type];
+                    let mediaNode = document.createElement(mediaType);
+                    mediaNode.setAttribute("src", `/storage/appendage/file/${file.file_id}`);
+                    if (mediaType == "video") mediaNode.setAttribute("controls", "");
+                    mediaContainer.appendChild(mediaNode);
+                })
+            }
         }
+    
+        node.querySelector(".content").textContent = post.body;
+    } else {
+        let content = node.querySelector(".content");
+        
+        content.innerHTML = "This post is marked as <span>NSFW</span>";
+        content.querySelector("span").style.color = "var(--red)";
     }
 
-    node.querySelector(".content").textContent = post.body;
     node.querySelector(".interactionBar").remove();
     node.querySelector(".referencedPostContainer").remove();
 
