@@ -19,6 +19,7 @@ pub mod create_account;
 
 pub mod api;
 
+pub mod admin;
 
 pub async fn validate_session_from_headers(headers: &warp::http::HeaderMap, connection: DBConnection) -> Option<User> {
     let cookie_jar = headers.get("cookie")?.to_str().ok()?.to_string();
