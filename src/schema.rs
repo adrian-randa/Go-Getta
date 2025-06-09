@@ -37,15 +37,6 @@ diesel::table! {
 }
 
 diesel::table! {
-    notification_timeouts (notification_type, emitter, receiver) {
-        notification_type -> Text,
-        emitter -> Text,
-        receiver -> Text,
-        timestamp_emitted -> BigInt,
-    }
-}
-
-diesel::table! {
     notifications (id, user) {
         id -> Text,
         user -> Text,
@@ -133,7 +124,6 @@ diesel::allow_tables_to_appear_in_same_query!(
     bookmarks,
     follows,
     memberships,
-    notification_timeouts,
     notifications,
     posts,
     ratings,

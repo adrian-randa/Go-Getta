@@ -116,10 +116,14 @@ pub async fn create_post(headers: warp::http::HeaderMap, connection: DBConnectio
             child_post.get_reposts_amount() + 1
         );
 
+        if user.borrow_username() != &child_post.get_creator() {
+            tokio::spawn(repost_creation_notification_rollout(user.clone(), new_post.clone(), child_post.clone(), connection.clone()));
+        }
+
         let _: Result<Post, _> = child_post.save_changes(connection.lock().await.deref_mut());
     }
 
-    post_creation_notification_rollout(user, new_post, connection.clone()).await;
+    tokio::spawn(post_creation_notification_rollout(user, new_post, connection.clone()));
 
     Ok(warp::reply::json(&PostCreationResponse {
         post_id
@@ -156,6 +160,23 @@ async fn post_creation_notification_rollout(user: User, created_post: Post, conn
             connection.clone()
         ).await;
     }
+
+    let mut room = None;
+
+    if let Some(room_id) = created_post.get_room() {
+        room = rooms::table.find(room_id).first::<Room>(connection.lock().await.deref_mut()).ok();
+    }
+
+    if let Some(room) = room {
+        let _ = Notification::push_unchecked(
+            "CreatePost".into(),
+            &user,
+            room.get_owner(),
+            format!("Someone posted in {}!", room.get_name()),
+            format!("?view=room&id={}", room.get_id()),
+            connection.clone()
+        ).await;
+    }
         
 }
 
@@ -165,6 +186,17 @@ async fn comment_creation_notification_rollout(user: User, created_post: Post, c
         &user, 
         created_post.get_creator(), 
         format!("{} commented on your post(s)!", user.get_public_name()), 
+        format!("?view=post&id={}", created_post.get_id()),
+        connection.clone()
+    ).await;
+}
+
+async fn repost_creation_notification_rollout(user: User, created_post: Post, referenced_post: Post, connection: DBConnection) {
+    let _ = Notification::push_unchecked(
+        "Comment".into(), 
+        &user, 
+        referenced_post.get_creator(), 
+        format!("{} reposted your post(s)!", user.get_public_name()), 
         format!("?view=post&id={}", created_post.get_id()),
         connection.clone()
     ).await;

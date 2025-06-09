@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 use urlencoding::decode_binary;
 use warp::filters::multipart::FormData;
 
-use crate::{api::PostQueryResponse, db::DBConnection, error::{ContentTooLargeError, EmptyContentError, InsufficientPermissionsError, InternalServerError, InvalidQueryError, InvalidSessionError, RoomBoundaryViolationError, RoomDoesNotExistError, UserDoesNotExistError, UserIsBannedError}, models::{Ban, Membership, Post, Room, User}, schema::{bans, memberships::{self}, posts::{self, timestamp}, rooms, users}, validate_session_from_headers};
+use crate::{api::PostQueryResponse, db::DBConnection, error::{ContentTooLargeError, EmptyContentError, InsufficientPermissionsError, InternalServerError, InvalidQueryError, InvalidSessionError, RoomBoundaryViolationError, RoomDoesNotExistError, UserDoesNotExistError, UserIsBannedError}, models::{Ban, Membership, Notification, Post, Room, User}, schema::{bans, memberships::{self}, posts::{self, timestamp}, rooms, users}, validate_session_from_headers};
 
 use super::UserQueryResponse;
 
@@ -347,14 +347,27 @@ pub async fn ban_user_from_room(headers: warp::http::HeaderMap, connection: DBCo
         .map_err(|_| UserDoesNotExistError)?;
 
     diesel::delete(
-        memberships::table.find((username, room_id))
+        memberships::table.find((&username, room_id))
     ).execute(connection.lock().await.deref_mut()).map_err(|_| InternalServerError)?;
 
     diesel::replace_into(bans::table).values(
         Ban::new(&banned_user, &room)
     ).execute(connection.lock().await.deref_mut()).map_err(|_| InternalServerError)?;
 
+    tokio::spawn(ban_notification_rollout(username, user, room, connection));
+
     Ok(warp::reply())
+}
+
+async fn ban_notification_rollout(username: String, emitter: User, room: Room, connection: DBConnection) {
+    let _ = Notification::push_unchecked(
+        "Ban".into(), 
+        &emitter, 
+        username, 
+        format!("You were banned from {}!", room.get_name()), 
+        "".into(),
+        connection.clone()
+    ).await;
 }
 
 pub async fn unban_user_from_room(headers: warp::http::HeaderMap, connection: DBConnection, room_id: String, username: String) -> Result<impl warp::Reply, warp::Rejection> {
@@ -509,5 +522,18 @@ pub async fn join_room(headers: warp::http::HeaderMap, connection: DBConnection,
         .execute(connection.lock().await.deref_mut())
         .map_err(|_| InternalServerError)?;
 
+    tokio::spawn(room_join_notification_rollout(user, room, connection));
+
     Ok(warp::reply())
+}
+
+async fn room_join_notification_rollout(user: User, room: Room, connection: DBConnection) {
+    let _ = Notification::push_unchecked(
+        "Join".into(), 
+        &user, 
+        room.get_owner(), 
+        format!("{} joined {}", user.get_public_name(), room.get_name()), 
+        format!("?view=profile&id={}", user.borrow_username()),
+        connection.clone()
+    ).await;
 }

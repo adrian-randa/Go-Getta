@@ -106,6 +106,7 @@ const showPublicSpaceButton = document.querySelector("#showPublicSpaceButton");
 const mobileShowFeedButton = document.querySelector("#mobileFeedButton");
 const mobileShowPublicSpaceButton = document.querySelector("#mobilePublicSpaceSelectorButton");
 const mobileShowFollowingButton = document.querySelector("#mobileFollowingSelectorButton");
+const mobileShowNotificationsButton = document.querySelector("#mobileNotificationsButton");
 const showFollowingFeedButton = document.querySelector("#showFollowingFeedButton");
 
 const noPaginator = () => {};
@@ -226,6 +227,7 @@ function showPostScreen() {
     profileScreen.style.display = "none";
     roomCreationScreen.style.display = "none";
     searchScreen.style.display = "none";
+    mobileNotificationsScreen.style.display = "none";
 }
 
 function showRoomCreationScreen() {
@@ -238,6 +240,8 @@ function showRoomCreationScreen() {
     profileScreen.style.display = "none";
     roomCreationScreen.style.display = "flex";
     searchScreen.style.display = "none";
+    mobileNotificationsScreen.style.display = "none";
+
 
     currentPaginator = noPaginator;
 }
@@ -251,6 +255,7 @@ function showPublicSpaceScreen() {
     mobileShowFeedButton.setAttribute("selected", "");
     mobileShowPublicSpaceButton.setAttribute("selected", "");
     mobileShowFollowingButton.removeAttribute("selected");
+    mobileShowNotificationsButton.removeAttribute("selected");
 
     document.querySelector("#mobileRoomsButton").removeAttribute("selected");
 
@@ -267,6 +272,7 @@ function showFollowingScreen() {
     mobileShowFeedButton.setAttribute("selected", "");
     mobileShowFollowingButton.setAttribute("selected", "");
     mobileShowPublicSpaceButton.removeAttribute("selected");
+    mobileShowNotificationsButton.removeAttribute("selected");
 
     document.querySelector("#mobileRoomsButton").removeAttribute("selected");
 
@@ -278,6 +284,7 @@ function showFollowingScreen() {
 function showBookmarkedScreen() {
     mobileFeedSelector.style.display = "none";
     mobileShowFeedButton.setAttribute("selected", "");
+    mobileShowNotificationsButton.removeAttribute("selected");
 
     showPostScreen();
 
@@ -295,8 +302,11 @@ function showPersonalProfileScreen() {
     profileScreen.style.display = "none";
     roomCreationScreen.style.display = "none";
     searchScreen.style.display = "none";
+    mobileNotificationsScreen.style.display = "none";
 
     mobileShowFeedButton.removeAttribute("selected");
+    mobileRoomsButton.removeAttribute("selected");
+    mobileShowNotificationsButton.removeAttribute("selected");
 
     const currentUsername = window.localStorage.getItem("currentUsername");
     const postsContainer = personalProfileScreen.querySelector(".posts");
@@ -315,8 +325,11 @@ function showProfileScreen(username) {
     profileScreen.style.display = "flex";
     roomCreationScreen.style.display = "none";
     searchScreen.style.display = "none";
+    mobileNotificationsScreen.style.display = "none";
 
     mobileShowFeedButton.removeAttribute("selected");
+    mobileRoomsButton.removeAttribute("selected");
+    mobileShowNotificationsButton.removeAttribute("selected");
 
     const postsContainer = profileScreen.querySelector(".posts");
 
@@ -350,6 +363,7 @@ async function showPostThreadScreen(postID) {
     profileScreen.style.display = "none";
     roomCreationScreen.style.display = "none";
     searchScreen.style.display = "none";
+    mobileNotificationsScreen.style.display = "none";
 }
 
 
@@ -367,6 +381,7 @@ function showSearchScreen(initialTerm) {
     profileScreen.style.display = "none";
     roomCreationScreen.style.display = "none";
     searchScreen.style.display = "flex";
+    mobileNotificationsScreen.style.display = "none";
 
     mobileShowFeedButton.removeAttribute("selected");
 
@@ -392,8 +407,32 @@ async function showRoomScreen(roomData) {
 }
 
 
+const mobileNotificationsScreen = document.querySelector("#mobileNotificationsScreen");
 const notificationsScreen = document.querySelector(".notifications");
 const notificationTemplate = document.querySelector("#notificationTemplate");
+
+function showMobileNotificationsScreen() {
+    mobileNotificationsScreen.innerHTML = "";
+
+    mobileFeedSelector.style.display = "none";
+    postScreen.style.display = "none";
+    postCreationScreen.style.display = "none";
+    repostCreationScreen.style.display = "none";
+    postThreadScreen.style.display = "none";
+    personalProfileScreen.style.display = "none";
+    profileScreen.style.display = "none";
+    roomCreationScreen.style.display = "none";
+    searchScreen.style.display = "none";
+    mobileNotificationsScreen.style.display = "flex";
+
+    currentPaginator = initNotificationsPaginator(storeNotifications(mountNotifications(mobileNotificationsScreen)));
+    currentPaginator();
+
+    mobileShowNotificationsButton.setAttribute("selected", "");
+    mobileShowFeedButton.removeAttribute("selected");
+    mobileRoomsButton.removeAttribute("selected");
+}
+
 let notificationsPaginator = initNotificationsPaginator(storeNotifications(mountNotifications(notificationsScreen)));
 notificationsPaginator();
 
@@ -401,8 +440,18 @@ class NotificationStore {
     
     static notifications = [];
 
+    static empty = true;
+
     static append(notifications) {
+        if (notifications.length == 0) return;
+
         this.notifications = this.notifications.concat(notifications);
+
+        if (this.empty) {
+            this.empty = false;
+
+            document.querySelector("#mobileNotificationsButton").setAttribute("blink", "");
+        }
     }
 
     static async dispatchDelete() {
@@ -448,7 +497,11 @@ function mountNotifications(screen) {
                     headers: { "Content-Type": "application/json" },
                 }));
 
-                element.style.display = "none";
+                element.remove();
+
+                if (mobileNotificationsScreen.children.length == 0) {
+                    document.querySelector("#mobileNotificationsButton").removeAttribute("blink");
+                }
             })
 
             screen.appendChild(node);

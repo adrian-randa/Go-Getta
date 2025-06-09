@@ -4,7 +4,7 @@ use diesel::{prelude::*, sqlite};
 use serde::{Serialize, Deserialize};
 use uuid::Uuid;
 
-use crate::{api::room::RoomCreationData, db::DBConnection, error::{ContentTooLargeError, InternalServerError, CooldownActiveError}, schema::{notifications, posts, notification_timeouts}};
+use crate::{api::room::RoomCreationData, db::DBConnection, error::{ContentTooLargeError, InternalServerError, CooldownActiveError}, schema::{notifications, posts}};
 
 #[derive(Debug, Queryable, Selectable, Insertable)]
 #[diesel(table_name = crate::schema::account_keys)]
@@ -433,41 +433,14 @@ impl Notification {
 
     pub async fn push_unchecked(notification_type: String, emitter: &User, username: String, message: String, href: String, connection: DBConnection) -> Result<(), warp::Rejection> {
 
-        //TODO: FIX NOTIFICATIONS
-        return Ok(());
-
-
-        let timestamp = time::UNIX_EPOCH.elapsed().unwrap().as_secs().try_into().unwrap();
-
-        let timeout_query = notification_timeouts::table
-            .find((&notification_type, emitter.borrow_username(), &username))
-            .first::<NotificationTimeout>(connection.lock().await.deref_mut());
-
-        match timeout_query {
-                Ok(mut t) => {
-                    if timestamp - t.timestamp_emitted < 3600 {
-                        Err(CooldownActiveError)?;
-                    } else {
-                        t.renew(timestamp);
-                        let _: Result<NotificationTimeout, _> = t.save_changes(connection.lock().await.deref_mut());
-                    }
-                },
-                Err(diesel::NotFound) => {
-                    
-                },
-                Err(_) => {
-                    Err(InternalServerError)?;
-                },
+        if notifications::table
+            .filter(notifications::user.eq(&username))
+            .filter(notifications::message.eq(&message))
+            .first::<Notification>(connection.lock().await.deref_mut()).is_ok() {
+                return Ok(())
             }
 
-        let _ = diesel::replace_into(notification_timeouts::table)
-            .values(NotificationTimeout {
-                notification_type,
-                emitter: emitter.get_username(),
-                receiver: username.clone(),
-                timestamp_emitted: timestamp
-            })
-            .execute(connection.lock().await.deref_mut());
+        let timestamp = time::UNIX_EPOCH.elapsed().unwrap().as_secs().try_into().unwrap();
 
         let id = Uuid::new_v4().into();
         
@@ -486,23 +459,4 @@ impl Notification {
         
         Ok(())
     }
-}
-
-
-#[derive(Debug, Queryable, Insertable, Selectable, Identifiable, Serialize, AsChangeset)]
-#[diesel(primary_key(notification_type, emitter, receiver))]
-#[diesel(table_name = crate::schema::notification_timeouts)]
-pub struct NotificationTimeout {
-    notification_type: String,
-    emitter: String,
-    receiver: String,
-    timestamp_emitted: i64,
-}
-
-impl NotificationTimeout {
-
-    pub fn renew(&mut self, new_timestamp: i64) {
-        self.timestamp_emitted = new_timestamp;
-    }
-
 }

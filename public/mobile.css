@@ -166,6 +166,63 @@
     }
 }
 
+#mobileNotificationsScreen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+
+    .notification {
+
+        margin: .5rem;
+
+        padding-bottom: 1rem;
+
+        width: calc(100% - 1rem);
+
+        display: flex;
+        flex-direction: column;
+
+        align-items: center;
+        gap: .5rem;
+
+        border-bottom: 1px solid var(--gray-25);
+
+        .topBar {
+            
+            width: 100%;
+
+            display: flex;
+            justify-content: space-between;
+            
+            h6 {
+                font-weight: 400;
+                font-size: .75rem;
+
+                color: var(--gray);
+            }
+
+            svg {
+                height: .75rem;
+
+                background-color: transparent;
+
+                cursor: pointer;
+            }       
+        }
+
+        a {
+            text-align: center;
+            color: var(--white);
+        }
+
+        button {
+            background-color: var(--gray-125);
+            border-radius: .25rem;
+        }
+    }
+}
+
 @media only screen and (min-width: calc(36rem + 700px)) {
     .mobile {
         display: none !important;
@@ -265,5 +322,29 @@
     
             }
         }
+    }
+
+    @keyframes bellBlink {
+        1% {
+            stroke: var(--green);
+            transform: translateY(-.1rem);
+        }
+        5% {
+            stroke: var(--gray);
+            transform: translateY(0);
+        }
+        6% {
+            stroke: var(--green);
+            transform: translateY(-.1rem);
+
+        }
+        10% {
+            stroke: gray;
+            transform: translateY(0);
+        }
+    }
+
+    #mobileNotificationsButton:not([selected])[blink] path {
+        animation: bellBlink 5s linear infinite both;
     }
 }

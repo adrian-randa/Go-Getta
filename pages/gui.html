@@ -619,6 +619,10 @@
             <div class="content">
             </div>
         </screen>
+
+        <screen class="mobile notificationsScreen" id="mobileNotificationsScreen" style="display: none;">
+            
+        </screen>
     </div>
 
     <screen id="manageFollowsModal" style="display: none;">
@@ -742,7 +746,6 @@
         </button>
     </screen>
 
-
     <div class="mobile bottomBar">
         <button id="mobileFeedButton" onclick="showPublicSpaceScreen()">
             <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -766,7 +769,7 @@
             </button>
         </div>
 
-        <button id="mobileNotificationsButton">
+        <button id="mobileNotificationsButton" onclick="showMobileNotificationsScreen()">
             <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M6.25 13.25V14.125L8 15L9.75 14.125V13.25M8 1L2.75 4.5L1 11.5H8H15L13.25 4.5L8 1Z" stroke="var(--gray)" stroke-linejoin="round"/>
             </svg>
