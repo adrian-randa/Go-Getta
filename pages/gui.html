@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="mobile.css">
     <script defer src="error.js"></script>
+    <script src="screen.js"></script>
 
     <script src="userData.js"></script>
     <script src="followedFeed.js"></script>
@@ -116,7 +117,7 @@
 
         </div>
 
-        <button class="newRoom" onclick="showRoomCreationScreen()">
+        <button class="newRoom" onclick="mainContentScreenSwitch.showScreen('roomCreation')">
             <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M1 11.5L8 15L15 11.5V4.5L8 1L1 4.5V11.5Z" stroke="#FCF7F8" stroke-linecap="round" stroke-linejoin="round"/>
                 <path d="M1 11.5L8 8M8 8L15 11.5M8 8V1" stroke="#FCF7F8" stroke-opacity="0.25" stroke-linecap="round" stroke-linejoin="round"/>
@@ -124,7 +125,7 @@
             New Room            
         </button>
     
-        <button class="newPost" onclick="showPostCreationScreen()">
+        <button class="newPost" onclick="mainContentScreenSwitch.showScreen('postCreation')">
             <svg viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M5 1V5M5 9V5M5 5H1M5 5H9" stroke="var(--white)" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
@@ -277,7 +278,7 @@
             </div>
         </template>
 
-        <screen id="postCreation" style="display: none;">
+        <screen id="postCreation">
             <h1>New Post</h1>
             <div class="bodyInput">
                 <textarea name="body" id="newPostBody" placeholder="Enter your thoughts here..." maxlength="300"></textarea>
@@ -333,7 +334,7 @@
             </div>
         </screen>
 
-        <screen id="roomCreation" style="display: none;">
+        <screen id="roomCreation">
             <h1>New Room</h1>
             <div id="newRoomSettings" class="roomSettings">
                 <div class="left">
@@ -372,7 +373,7 @@
             </div>
         </screen>
 
-        <screen id="repostCreation" style="display: none;">
+        <screen id="repostCreation">
             <h1>Repost</h1>
             <div class="referencedPost">
 
@@ -433,7 +434,7 @@
             
         </screen>
 
-        <screen id="postThread" style="display: none;">
+        <screen id="postThread">
             <div class="parentPosts">
                 <div class="threadLineContainer">
                     <div class="threadLine"></div>
@@ -487,7 +488,7 @@
             </div>
         </screen>
 
-        <screen id="personalProfile" style="display: none;">
+        <screen id="personalProfile">
             <div class="heading">
                 <div class="profilePictureContainer">
                     <div class="profilePicture"></div>
@@ -549,7 +550,7 @@
             </div>
         </screen>
 
-        <screen id="profile" style="display: none;">
+        <screen id="profile">
             <div class="heading">
                 <div class="profilePictureContainer">
                     <div class="profilePicture"></div>
@@ -574,7 +575,7 @@
             </div>
         </screen>
 
-        <screen id="search" style="display: none;">
+        <screen id="search">
             <div class="searchBar">
                 <svg viewBox="0 0 15 18" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M1 17L6.20984 9.70622M6.20984 9.70622C6.99614 10.2689 7.9594 10.6 9 10.6C11.651 10.6 13.8 8.45097 13.8 5.8C13.8 3.14903 11.651 1 9 1C6.34903 1 4.2 3.14903 4.2 5.8C4.2 7.41037 4.99302 8.83551 6.20984 9.70622Z" stroke="var(--gray)" stroke-linecap="round" stroke-linejoin="round"/>

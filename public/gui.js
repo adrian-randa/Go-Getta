@@ -19,7 +19,9 @@ let whoAmI = new Promise((resolve, reject) => {
 
 const roomButtonTamplate = document.querySelector("#roomButtonTemplate");
 const roomButtonContainer = document.querySelector("#myRooms");
-const mobileRoomButtonContainer = document.querySelector("#mobileMyRooms");
+
+const mobileRoomSelectorScreen = Screen.fromElementId("mobileMyRooms", null, null);
+
 const newPostRoomSelector = document.querySelector("#newPostRoom");
 const mobileRoomsButton = document.querySelector("#mobileRoomsButton");
 let joinedRooms = new Promise((resolve, reject) => {
@@ -40,7 +42,7 @@ let joinedRooms = new Promise((resolve, reject) => {
                 node.querySelector("span").textContent = room.name;
 
                 roomButtonContainer.appendChild(node.cloneNode(true));
-                mobileRoomButtonContainer.appendChild(node);
+                mobileRoomSelectorScreen.domNode.appendChild(node);
 
                 let option = document.createElement("option")
                 option.setAttribute("value", room.id);
@@ -52,29 +54,7 @@ let joinedRooms = new Promise((resolve, reject) => {
     });
 });
 
-function showMobileRoomSelector() {
-    hideMobileAddMenu();
-
-    mobileRoomButtonContainer.style.display = "flex";
-    window.history.pushState({}, "", window.location.origin);
-}
-function hideMobileRoomSelector() {
-    mobileRoomButtonContainer.style.display = "none";
-}
-
-const mobileAddMenu = document.querySelector("#mobileAddMenu");
-function showMobileAddMenu() {
-    hideMobileRoomSelector();
-
-    mobileAddMenu.style.display = "flex";
-    window.history.pushState({}, "", window.location.origin);
-}
-
-
-function hideMobileAddMenu() {
-    mobileAddMenu.style.display = "none";
-}
-
+const mobileAddScreen = Screen.fromElementId("mobileAddMenu", null, null);
 
 async function logout() {
     let response = await baseErrorHandler.guard(fetch("/logout", {method: "DELETE"}));
@@ -84,17 +64,17 @@ async function logout() {
 }
 
 const mainContent = document.querySelector("#mainContent");
-const postScreen = document.querySelector("#postScreen");
-const postCreationScreen = document.querySelector("#postCreation");
-const repostCreationScreen = document.querySelector("#repostCreation");
-const postThreadScreen = document.querySelector("#postThread");
+const postScreen = Screen.fromElementId("postScreen", showPostScreen, null);
+const postCreationScreen = Screen.fromElementId("postCreation", showPostCreationScreen, null);
+const repostCreationScreen = Screen.fromElementId("repostCreation", showRepostCreationScreen, null);
+const postThreadScreen = Screen.fromElementId("postThread", showPostThreadScreen, null);
 const postThreadParentsSection = postThreadScreen.querySelector(".parentPostsContainer");
 const postThreadFocusedSlot = postThreadScreen.querySelector(".focusedPost");
 const postThreadCommentSection = postThreadScreen.querySelector(".childPosts");
-const personalProfileScreen = document.querySelector("#personalProfile");
-const profileScreen = document.querySelector("#profile");
-const roomCreationScreen = document.querySelector("#roomCreation");
-const searchScreen = document.querySelector("#search");
+const personalProfileScreen = Screen.fromElementId("personalProfile", showPersonalProfileScreen, null);
+const profileScreen = Screen.fromElementId("profile", showProfileScreen, null);
+const roomCreationScreen = Screen.fromElementId("roomCreation", showRoomCreationScreen, null);
+const searchScreen = Screen.fromElementId("search", null, null);
 
 const mobileBottomBar = document.querySelector(".bottomBar");
 const mobileFeedSelector = document.querySelector("#mobileFeedSelector");
@@ -135,16 +115,7 @@ function showPostCreationScreen() {
         let roomID = params.get("id");
         
         if (roomID) document.querySelector("#newPostRoom").value = roomID;
-    } 
-
-    postScreen.style.display = "none";
-    postCreationScreen.style.display = "flex";
-    repostCreationScreen.style.display = "none";
-    postThreadScreen.style.display = "none";
-    personalProfileScreen.style.display = "none";
-    profileScreen.style.display = "none";
-    roomCreationScreen.style.display = "none";
-    searchScreen.style.display = "none";
+    }
 
     updateNewPostRemainingCharactersDisplay();
 
@@ -186,16 +157,6 @@ async function showRepostCreationScreen(childPostID) {
         }
     }
 
-
-    postScreen.style.display = "none";
-    postCreationScreen.style.display = "none";
-    repostCreationScreen.style.display = "flex";
-    postThreadScreen.style.display = "none";
-    personalProfileScreen.style.display = "none";
-    profileScreen.style.display = "none";
-    roomCreationScreen.style.display = "none";
-    searchScreen.style.display = "none";
-
     currentPaginator = noPaginator;
 }
 
@@ -213,36 +174,10 @@ const updateNewRepostRemainingCharactersDisplay = (event) => {
 document.querySelector("#newRepostBody").addEventListener("input", updateNewRepostRemainingCharactersDisplay);
 
 function showPostScreen() {
-    hideMobileRoomSelector();
-    hideMobileAddMenu();
-
-    postScreen.innerHTML = "";
-    
-    mobileFeedSelector.style.display = "flex";
-    postScreen.style.display = "flex";
-    postCreationScreen.style.display = "none";
-    repostCreationScreen.style.display = "none";
-    postThreadScreen.style.display = "none";
-    personalProfileScreen.style.display = "none";
-    profileScreen.style.display = "none";
-    roomCreationScreen.style.display = "none";
-    searchScreen.style.display = "none";
-    mobileNotificationsScreen.style.display = "none";
+    postScreen.domNode.innerHTML = "";
 }
 
 function showRoomCreationScreen() {
-    mobileFeedSelector.style.display = "none";
-    postScreen.style.display = "none";
-    postCreationScreen.style.display = "none";
-    repostCreationScreen.style.display = "none";
-    postThreadScreen.style.display = "none";
-    personalProfileScreen.style.display = "none";
-    profileScreen.style.display = "none";
-    roomCreationScreen.style.display = "flex";
-    searchScreen.style.display = "none";
-    mobileNotificationsScreen.style.display = "none";
-
-
     currentPaginator = noPaginator;
 }
 
@@ -259,7 +194,7 @@ function showPublicSpaceScreen() {
 
     document.querySelector("#mobileRoomsButton").removeAttribute("selected");
 
-    showPostScreen();
+    mainContentScreenSwitch.showScreen("postScreen");
     currentPaginator = initPublicSpacePaginator(mountPosts(postScreen));
     currentPaginator();
 }
@@ -276,7 +211,7 @@ function showFollowingScreen() {
 
     document.querySelector("#mobileRoomsButton").removeAttribute("selected");
 
-    showPostScreen();
+    mainContentScreenSwitch.showScreen("postScreen");
     currentPaginator = initFollowedFeedPaginator(mountPosts(postScreen));
     currentPaginator();
 }
@@ -286,24 +221,13 @@ function showBookmarkedScreen() {
     mobileShowFeedButton.setAttribute("selected", "");
     mobileShowNotificationsButton.removeAttribute("selected");
 
-    showPostScreen();
+    mainContentScreenSwitch.showScreen("postScreen");
 
     currentPaginator = initBookmarkedPaginator(mountPosts(postScreen));
     currentPaginator();
 }
 
 function showPersonalProfileScreen() {
-    mobileFeedSelector.style.display = "none";
-    postScreen.style.display = "none";
-    postCreationScreen.style.display = "none";
-    repostCreationScreen.style.display = "none";
-    postThreadScreen.style.display = "none";
-    personalProfileScreen.style.display = "flex";
-    profileScreen.style.display = "none";
-    roomCreationScreen.style.display = "none";
-    searchScreen.style.display = "none";
-    mobileNotificationsScreen.style.display = "none";
-
     mobileShowFeedButton.removeAttribute("selected");
     mobileRoomsButton.removeAttribute("selected");
     mobileShowNotificationsButton.removeAttribute("selected");
@@ -316,17 +240,6 @@ function showPersonalProfileScreen() {
 }
 
 function showProfileScreen(username) {
-    mobileFeedSelector.style.display = "none";
-    postScreen.style.display = "none";
-    postCreationScreen.style.display = "none";
-    repostCreationScreen.style.display = "none";
-    postThreadScreen.style.display = "none";
-    personalProfileScreen.style.display = "none";
-    profileScreen.style.display = "flex";
-    roomCreationScreen.style.display = "none";
-    searchScreen.style.display = "none";
-    mobileNotificationsScreen.style.display = "none";
-
     mobileShowFeedButton.removeAttribute("selected");
     mobileRoomsButton.removeAttribute("selected");
     mobileShowNotificationsButton.removeAttribute("selected");
@@ -353,17 +266,6 @@ async function showPostThreadScreen(postID) {
 
     currentPaginator = initCommentPaginator(postID, mountPosts(postThreadCommentSection));
     currentPaginator();
-    
-    mobileFeedSelector.style.display = "none";
-    postScreen.style.display = "none";
-    postCreationScreen.style.display = "none";
-    repostCreationScreen.style.display = "none";
-    postThreadScreen.style.display = "flex";
-    personalProfileScreen.style.display = "none";
-    profileScreen.style.display = "none";
-    roomCreationScreen.style.display = "none";
-    searchScreen.style.display = "none";
-    mobileNotificationsScreen.style.display = "none";
 }
 
 
@@ -372,16 +274,7 @@ const searchBarLarge = document.querySelector("#searchBarLarge");
 const searchResultContent = searchScreen.querySelector(".content");
 
 function showSearchScreen(initialTerm) {
-    mobileFeedSelector.style.display = "none";
-    postScreen.style.display = "none";
-    postCreationScreen.style.display = "none";
-    repostCreationScreen.style.display = "none";
-    postThreadScreen.style.display = "none";
-    personalProfileScreen.style.display = "none";
-    profileScreen.style.display = "none";
-    roomCreationScreen.style.display = "none";
-    searchScreen.style.display = "flex";
-    mobileNotificationsScreen.style.display = "none";
+    mainContentScreenSwitch.showScreen("search");
 
     mobileShowFeedButton.removeAttribute("selected");
 
@@ -392,7 +285,9 @@ function showSearchScreen(initialTerm) {
 
 const roomHeadingTemplate = document.querySelector("#roomHeadingTemplate");
 async function showRoomScreen(roomData) {
-    showPostScreen();
+    
+    mainContentScreenSwitch.showScreen("postScreen");
+
     await whoAmI;
 
     let roomHeading = createRoomHeadingNode(roomData);
@@ -401,29 +296,17 @@ async function showRoomScreen(roomData) {
     postScreen.setAttribute("style", `--room-color: #${roomData.color}`);
 
 
-
     currentPaginator = initRoomPostPaginator(roomData.id, mountPosts(postScreen, window.localStorage.getItem("currentUsername") == roomData.owner));
     currentPaginator();
 }
 
 
-const mobileNotificationsScreen = document.querySelector("#mobileNotificationsScreen");
+const mobileNotificationsScreen = Screen.fromElementId("mobileNotificationsScreen", showMobileNotificationsScreen, null);
 const notificationsScreen = document.querySelector(".notifications");
 const notificationTemplate = document.querySelector("#notificationTemplate");
 
 function showMobileNotificationsScreen() {
     mobileNotificationsScreen.innerHTML = "";
-
-    mobileFeedSelector.style.display = "none";
-    postScreen.style.display = "none";
-    postCreationScreen.style.display = "none";
-    repostCreationScreen.style.display = "none";
-    postThreadScreen.style.display = "none";
-    personalProfileScreen.style.display = "none";
-    profileScreen.style.display = "none";
-    roomCreationScreen.style.display = "none";
-    searchScreen.style.display = "none";
-    mobileNotificationsScreen.style.display = "flex";
 
     currentPaginator = initNotificationsPaginator(storeNotifications(mountNotifications(mobileNotificationsScreen)));
     currentPaginator();
@@ -540,6 +423,18 @@ notificationsScreen.addEventListener("scrollend", (event) => {
     }
 })
 
+const mainContentScreenSwitch = new ScreenSwitch()
+    .withDefaultScreen(postScreen)
+    .withScreen(profileScreen)
+    .withScreen(mobileAddScreen)
+    .withScreen(postThreadScreen)
+    .withScreen(postCreationScreen)
+    .withScreen(roomCreationScreen)
+    .withScreen(repostCreationScreen)
+    .withScreen(personalProfileScreen)
+    .withScreen(mobileRoomSelectorScreen)
+    .withScreen(mobileNotificationsScreen)
+    .withScreen(searchScreen);
 
 
 // Scroll to bottom event
@@ -564,20 +459,20 @@ const debugPassthrough = (handler) => {
 const params = new URL(window.location.href).searchParams;
 switch (params.get("view")) {
     case "post": {
-        showPostThreadScreen(params.get("id"));
+        mainContentScreenSwitch.showScreen("postThread", params.get("id"));
         break;
     }
 
     case "me": {
         initPersonalProfilePage();
-        showPersonalProfileScreen();
+        mainContentScreenSwitch.showScreen("personalProfile");
         break;
     }
 
     case "profile": {
         const username = params.get("id");
         initProfilePage(username);
-        showProfileScreen(username);
+        mainContentScreenSwitch.showScreen("profile", username);
         break;
     }
 
